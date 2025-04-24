@@ -1,18 +1,17 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Modal,
-  FlatList,
-  StyleProp,
-  ViewStyle,
-  TextStyle,
-} from 'react-native';
-import { ChevronDown, X, Check } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
+import { Check, ChevronDown, X } from 'lucide-react-native';
+import React, { useState } from 'react';
+import {
+  FlatList,
+  Modal,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native';
 import Button from './Button';
 
 type SelectOption = {
@@ -49,8 +48,8 @@ const Select: React.FC<SelectProps> = ({
   disabled = false,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  
-  const selectedOption = options.find(option => option.value === value);
+
+  const selectedOption = options.find((option) => option.value === value);
   const hasError = !!error;
 
   const openModal = () => {
@@ -70,13 +69,15 @@ const Select: React.FC<SelectProps> = ({
 
   const renderItem = ({ item }: { item: SelectOption }) => {
     const isSelected = item.value === value;
-    
+
     return (
       <TouchableOpacity
         style={[styles.optionItem, isSelected && styles.selectedOptionItem]}
         onPress={() => handleSelect(item)}
       >
-        <Text style={[styles.optionText, isSelected && styles.selectedOptionText]}>
+        <Text
+          style={[styles.optionText, isSelected && styles.selectedOptionText]}
+        >
           {item.label}
         </Text>
         {isSelected && <Check size={20} color={Colors.light.primary} />}
@@ -87,7 +88,7 @@ const Select: React.FC<SelectProps> = ({
   return (
     <View style={[styles.container, containerStyle]}>
       {label && <Text style={styles.label}>{label}</Text>}
-      
+
       <TouchableOpacity
         style={[
           styles.selectContainer,
@@ -108,15 +109,18 @@ const Select: React.FC<SelectProps> = ({
         >
           {selectedOption ? selectedOption.label : placeholder}
         </Text>
-        <ChevronDown size={20} color={disabled ? Colors.light.subtext : Colors.light.text} />
+        <ChevronDown
+          size={20}
+          color={disabled ? Colors.light.subtext : Colors.light.text}
+        />
       </TouchableOpacity>
-      
+
       {(error || helper) && (
         <Text style={[styles.helperText, hasError && styles.errorText]}>
           {error || helper}
         </Text>
       )}
-      
+
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
@@ -126,15 +130,15 @@ const Select: React.FC<SelectProps> = ({
                 <X size={24} color={Colors.light.text} />
               </TouchableOpacity>
             </View>
-            
+
             <FlatList
               data={options}
               renderItem={renderItem}
-              keyExtractor={item => item.value}
+              keyExtractor={(item) => item.value}
               contentContainerStyle={styles.optionsList}
               showsVerticalScrollIndicator={false}
             />
-            
+
             <View style={styles.modalFooter}>
               <Button
                 title="Close"

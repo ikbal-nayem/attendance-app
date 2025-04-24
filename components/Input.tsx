@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  StyleProp,
-  ViewStyle,
-  TextStyle,
-  TextInputProps,
-} from 'react-native';
-import { Eye, EyeOff } from 'lucide-react-native';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
+import { Eye, EyeOff } from 'lucide-react-native';
+import React, { useState } from 'react';
+import {
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextInput,
+  TextInputProps,
+  TextStyle,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native';
 
 type InputProps = TextInputProps & {
   label?: string;
@@ -47,7 +47,7 @@ const Input: React.FC<InputProps> = ({
   ...rest
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  
+
   const togglePasswordVisibility = () => {
     setIsPasswordVisible(!isPasswordVisible);
   };
@@ -57,7 +57,7 @@ const Input: React.FC<InputProps> = ({
   return (
     <View style={[styles.container, containerStyle]}>
       {label && <Text style={[styles.label, labelStyle]}>{label}</Text>}
-      
+
       <View
         style={[
           styles.inputContainer,
@@ -74,19 +74,21 @@ const Input: React.FC<InputProps> = ({
             {leftIcon}
           </TouchableOpacity>
         )}
-        
+
         <TextInput
           style={[
             styles.input,
-            leftIcon && styles.inputWithLeftIcon,
-            (rightIcon || showPasswordToggle) && styles.inputWithRightIcon,
+            !!leftIcon && styles.inputWithLeftIcon,
+            !!(rightIcon || showPasswordToggle) && styles.inputWithRightIcon,
             inputStyle,
           ]}
           placeholderTextColor={Colors.light.subtext}
-          secureTextEntry={showPasswordToggle ? !isPasswordVisible : secureTextEntry}
+          secureTextEntry={
+            showPasswordToggle ? !isPasswordVisible : secureTextEntry
+          }
           {...rest}
         />
-        
+
         {showPasswordToggle && (
           <TouchableOpacity
             style={styles.rightIcon}
@@ -99,7 +101,7 @@ const Input: React.FC<InputProps> = ({
             )}
           </TouchableOpacity>
         )}
-        
+
         {rightIcon && !showPasswordToggle && (
           <TouchableOpacity
             style={styles.rightIcon}
@@ -110,7 +112,7 @@ const Input: React.FC<InputProps> = ({
           </TouchableOpacity>
         )}
       </View>
-      
+
       {(error || helper) && (
         <Text style={[styles.helperText, hasError && styles.errorText]}>
           {error || helper}

@@ -1,22 +1,22 @@
+import Button from '@/components/Button';
+import Card from '@/components/Card';
+import Input from '@/components/Input';
+import Colors from '@/constants/Colors';
+import Layout from '@/constants/Layout';
+import { useAuth } from '@/context/AuthContext';
+import { router } from 'expo-router';
+import { Lock, CircleUser as UserCircle } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { router } from 'expo-router';
-import { Mail, Lock, CircleUser as UserCircle } from 'lucide-react-native';
-import { useAuth } from '@/context/AuthContext';
-import Colors from '@/constants/Colors';
-import Layout from '@/constants/Layout';
-import Input from '@/components/Input';
-import Button from '@/components/Button';
-import Card from '@/components/Card';
 
 export default function LoginScreen() {
   const { login, isLoading } = useAuth();
@@ -61,7 +61,9 @@ export default function LoginScreen() {
       >
         <View style={styles.logoContainer}>
           <Image
-            source={{ uri: 'https://www.shutterstock.com/image-vector/colorful-icon-absentees-600nw-1239609166.jpg' }}
+            source={{
+              uri: 'https://www.shutterstock.com/image-vector/colorful-icon-absentees-600nw-1239609166.jpg',
+            }}
             style={styles.logoImage}
           />
           <Text style={styles.logoText}>ATTENDANCE APP</Text>
@@ -75,7 +77,7 @@ export default function LoginScreen() {
 
           <Input
             label="Staff ID or Email"
-            placeholder="Enter your Staff ID or Email"
+            placeholder="Staff ID or Email"
             value={identifier}
             onChangeText={setIdentifier}
             keyboardType="email-address"
@@ -85,7 +87,7 @@ export default function LoginScreen() {
 
           <Input
             label="Password"
-            placeholder="Enter your password"
+            placeholder="Password"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -93,13 +95,14 @@ export default function LoginScreen() {
             leftIcon={<Lock size={20} color={Colors.light.subtext} />}
           />
 
-          <TouchableOpacity style={styles.forgotPassword}>
+          {/* <TouchableOpacity style={styles.forgotPassword}>
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <Button
             title="Sign In"
             onPress={handleLogin}
+            size='small'
             loading={isLoading}
             fullWidth
             style={styles.button}
