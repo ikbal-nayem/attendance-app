@@ -244,6 +244,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Layout.spacing.l,
     paddingTop: Layout.spacing.l,
+    paddingBottom: Layout.spacing.m,
   },
   headerLeft: {},
   greeting: {
