@@ -79,7 +79,7 @@ const Input: React.FC<InputProps> = ({
           style={[
             styles.input,
             !!leftIcon && styles.inputWithLeftIcon,
-            !!(rightIcon || showPasswordToggle) && styles.inputWithRightIcon,
+            !!(rightIcon || showPasswordToggle) && { paddingRight: 40 },
             inputStyle,
           ]}
           placeholderTextColor={Colors.light.subtext}
@@ -162,7 +162,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Layout.spacing.m,
   },
   rightIcon: {
-    paddingHorizontal: Layout.spacing.m,
+    position: 'absolute',
+    right: Layout.spacing.m,
   },
   helperText: {
     fontFamily: 'Inter-Regular',

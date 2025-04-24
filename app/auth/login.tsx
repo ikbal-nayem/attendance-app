@@ -6,7 +6,8 @@ import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
 import { router } from 'expo-router';
 import { Lock, CircleUser as UserCircle } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import {
   Image,
   KeyboardAvoidingView,
@@ -18,30 +19,35 @@ import {
   View,
 } from 'react-native';
 
+type FormData = {
+  identifier: string;
+  password: string;
+};
+
+type FieldProps = {
+  onChange: (value: string) => void;
+  onBlur: () => void;
+  value: string;
+};
+
 export default function LoginScreen() {
   const { login, isLoading } = useAuth();
-  const [identifier, setIdentifier] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    setError: setFormError,
+  } = useForm<FormData>();
 
-  const handleLogin = async () => {
-    if (!identifier) {
-      setError('Please enter your Staff ID or Email');
-      return;
-    }
-
-    if (!password) {
-      setError('Please enter your password');
-      return;
-    }
-
-    setError('');
-    const success = await login(identifier, password);
-
-    if (success) {
-      router.replace('/(tabs)');
+  const onSubmit = async (data: FormData) => {
+    const success = await login(data.identifier, data.password);
+    if (!success) {
+      setFormError('root', {
+        type: 'manual',
+        message: 'Invalid credentials. Please try again.',
+      });
     } else {
-      setError('Invalid credentials. Please try again.');
+      router.replace('/(tabs)');
     }
   };
 
@@ -73,26 +79,56 @@ export default function LoginScreen() {
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Sign in to your account</Text>
 
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          {errors.root && (
+            <Text style={styles.errorText}>{errors.root.message}</Text>
+          )}
 
-          <Input
-            label="Staff ID or Email"
-            placeholder="Staff ID or Email"
-            value={identifier}
-            onChangeText={setIdentifier}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            leftIcon={<UserCircle size={20} color={Colors.light.subtext} />}
+          <Controller
+            control={control}
+            rules={{
+              required: 'Staff ID or Email is required',
+            }}
+            render={({ field: { onChange, onBlur, value } }: { field: FieldProps }) => (
+              <Input
+                label="Staff ID or Email"
+                placeholder="Staff ID or Email"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                leftIcon={<UserCircle size={20} color={Colors.light.subtext} />}
+                error={errors.identifier?.message}
+              />
+            )}
+            name="identifier"
+            defaultValue=""
           />
 
-          <Input
-            label="Password"
-            placeholder="Password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            showPasswordToggle
-            leftIcon={<Lock size={20} color={Colors.light.subtext} />}
+          <Controller
+            control={control}
+            rules={{
+              required: 'Password is required',
+              minLength: {
+                value: 6,
+                message: 'Password must be at least 6 characters',
+              },
+            }}
+            render={({ field: { onChange, onBlur, value } }: { field: FieldProps }) => (
+              <Input
+                label="Password"
+                placeholder="Password"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                secureTextEntry
+                showPasswordToggle
+                leftIcon={<Lock size={20} color={Colors.light.subtext} />}
+                error={errors.password?.message}
+              />
+            )}
+            name="password"
+            defaultValue=""
           />
 
           {/* <TouchableOpacity style={styles.forgotPassword}>
@@ -101,7 +137,7 @@ export default function LoginScreen() {
 
           <Button
             title="Sign In"
-            onPress={handleLogin}
+            onPress={handleSubmit(onSubmit)}
             size='small'
             loading={isLoading}
             fullWidth
@@ -124,6 +160,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.light.background,
+    paddingHorizontal: Layout.spacing.l,
   },
   scrollContent: {
     flexGrow: 1,
@@ -148,6 +185,12 @@ const styles = StyleSheet.create({
   },
   card: {
     padding: Layout.spacing.xl,
+    borderRadius: Layout.borderRadius.large,
+    shadowColor: Colors.light.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
   },
   title: {
     fontFamily: 'Inter-SemiBold',

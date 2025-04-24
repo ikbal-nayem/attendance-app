@@ -1,25 +1,35 @@
-import React, { useState } from 'react';
+import Button from '@/components/Button';
+import Card from '@/components/Card';
+import Input from '@/components/Input';
+import Select from '@/components/Select';
+import Colors from '@/constants/Colors';
+import Layout from '@/constants/Layout';
+import { useAuth } from '@/context/AuthContext';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as ImagePicker from 'expo-image-picker';
+import { router } from 'expo-router';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
+  Briefcase,
+  Image as ImageIcon,
+  Lock,
+  Mail,
+  Phone,
+  User,
+} from 'lucide-react-native';
+import React from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import {
+  Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert,
-  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { router } from 'expo-router';
-import { Mail, Phone, User, Image as ImageIcon, Briefcase } from 'lucide-react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { useAuth } from '@/context/AuthContext';
-import Colors from '@/constants/Colors';
-import Layout from '@/constants/Layout';
-import Input from '@/components/Input';
-import Button from '@/components/Button';
-import Card from '@/components/Card';
-import Select from '@/components/Select';
+import { z } from 'zod';
 
 const titleOptions = [
   { label: 'Mr.', value: 'Mr.' },
@@ -28,139 +38,160 @@ const titleOptions = [
   { label: 'Dr.', value: 'Dr.' },
 ];
 
+const registerSchema = z
+  .object({
+    title: z.string().min(1, 'Title is required'),
+    name: z.string().min(1, 'Name is required'),
+    staffId: z.string().min(1, 'Staff ID is required'),
+    mobile: z
+      .string()
+      .min(10, 'Mobile number must be at least 10 digits')
+      .max(15, 'Mobile number cannot exceed 15 digits')
+      .regex(/^[0-9]+$/, 'Mobile number must contain only digits'),
+    email: z
+      .string()
+      .min(1, 'Email is required')
+      .email('Please enter a valid email'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password'),
+    photo: z.string().optional(),
+    isCompanyDevice: z.boolean(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
+
+type FormData = z.infer<typeof registerSchema>;
+
+type FieldProps = {
+  onChange: (value: string) => void;
+  onBlur: () => void;
+  value: string;
+};
+
 export default function RegisterScreen() {
   const { register, isLoading } = useAuth();
-  const [formData, setFormData] = useState({
-    title: '',
-    name: '',
-    staffId: '',
-    mobile: '',
-    email: '',
-    photo: '',
-    isCompanyDevice: false,
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    setValue,
+    setError: setFormError,
+  } = useForm<FormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      isCompanyDevice: false,
+    },
   });
-  const [error, setError] = useState('');
 
-  const updateFormData = (key: string, value: string | boolean) => {
-    setFormData({
-      ...formData,
-      [key]: value,
+  const photo = watch('photo');
+  const isCompanyDevice = watch('isCompanyDevice');
+
+  const onSubmitHandler = async (data: FormData) => {
+    try {
+      const success = await register(data);
+      if (!success) {
+        setFormError('root', {
+          type: 'manual',
+          message: 'Registration failed. Please try again.',
+        });
+      } else {
+        router.push('/auth/verify-otp');
+      }
+    } catch (error) {
+      setFormError('root', {
+        type: 'manual',
+        message: 'An error occurred. Please try again later.',
+      });
+    }
+  };
+
+  const pickImage = async (): Promise<string | undefined> => {
+    const result = await new Promise<string | undefined>((resolve) => {
+      Alert.alert(
+        'Select Photo',
+        'Choose an option',
+        [
+          {
+            text: 'Take Photo',
+            onPress: async () => {
+              const uri = await takePhoto();
+              resolve(uri);
+            },
+          },
+          {
+            text: 'Choose from Gallery',
+            onPress: async () => {
+              const uri = await chooseFromGallery();
+              resolve(uri);
+            },
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+            onPress: () => resolve(undefined),
+          },
+        ],
+        { cancelable: true }
+      );
     });
+    return result;
   };
 
-  const validateForm = () => {
-    if (!formData.title) {
-      setError('Please select a title');
-      return false;
-    }
-    if (!formData.name) {
-      setError('Please enter your name');
-      return false;
-    }
-    if (!formData.staffId) {
-      setError('Please enter your staff ID');
-      return false;
-    }
-    if (!formData.mobile) {
-      setError('Please enter your mobile number');
-      return false;
-    }
-    if (!formData.email) {
-      setError('Please enter your email address');
-      return false;
-    }
-    if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)) {
-      setError('Please enter a valid email address');
-      return false;
-    }
-
-    return true;
-  };
-
-  const handleRegister = async () => {
-    if (!validateForm()) {
-      return;
-    }
-
-    setError('');
-    const success = await register(formData);
-
-    if (success) {
-      router.push('/auth/verify-otp');
-    } else {
-      setError('Registration failed. Please try again.');
-    }
-  };
-
-  const pickImage = async () => {
-    Alert.alert(
-      'Select Photo',
-      'Choose an option',
-      [
-        {
-          text: 'Take Photo',
-          onPress: takePhoto,
-        },
-        {
-          text: 'Choose from Gallery',
-          onPress: chooseFromGallery,
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-      ],
-      { cancelable: true }
-    );
-  };
-
-  const takePhoto = async () => {
+  const takePhoto = async (): Promise<string | undefined> => {
     try {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      
+
       if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Camera permission is required to take photos');
-        return;
+        Alert.alert(
+          'Permission Denied',
+          'Camera permission is required to take photos'
+        );
+        return undefined;
       }
-      
+
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.7,
       });
-      
-      if (!result.canceled) {
-        updateFormData('photo', result.assets[0].uri);
-      }
+
+      return result.canceled ? undefined : result.assets[0].uri;
     } catch (error) {
       console.error('Error taking photo:', error);
       Alert.alert('Error', 'Failed to take photo');
+      return undefined;
     }
   };
 
-  const chooseFromGallery = async () => {
+  const chooseFromGallery = async (): Promise<string | undefined> => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
       if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Media library permission is required to select photos');
-        return;
+        Alert.alert(
+          'Permission Denied',
+          'Media library permission is required to select photos'
+        );
+        return undefined;
       }
-      
+
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.7,
       });
-      
-      if (!result.canceled) {
-        updateFormData('photo', result.assets[0].uri);
-      }
+
+      return result.canceled ? undefined : result.assets[0].uri;
     } catch (error) {
       console.error('Error selecting photo:', error);
       Alert.alert('Error', 'Failed to select photo');
+      return undefined;
     }
   };
 
@@ -182,61 +213,181 @@ export default function RegisterScreen() {
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Register to get started</Text>
 
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          {errors.root && (
+            <Text style={styles.errorText}>{errors.root.message}</Text>
+          )}
 
-          <Select
-            label="Title"
-            options={titleOptions}
-            value={formData.title}
-            onChange={(value) => updateFormData('title', value)}
-            placeholder="Select your title"
+          <Controller
+            control={control}
+            name="title"
+            rules={{}}
+            render={({ field: { onChange, value } }) => (
+              <Select
+                label="Title"
+                options={titleOptions}
+                value={value}
+                onChange={onChange}
+                placeholder="Select your title"
+                error={errors.title?.message}
+              />
+            )}
           />
 
-          <Input
-            label="Name"
-            placeholder="Enter your full name"
-            value={formData.name}
-            onChangeText={(value) => updateFormData('name', value)}
-            leftIcon={<User size={20} color={Colors.light.subtext} />}
+          <Controller
+            control={control}
+            name="name"
+            rules={{}}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label="Name"
+                placeholder="Enter your full name"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                leftIcon={<User size={20} color={Colors.light.subtext} />}
+                error={errors.name?.message}
+              />
+            )}
           />
 
-          <Input
-            label="Staff ID"
-            placeholder="Enter your staff ID"
-            value={formData.staffId}
-            onChangeText={(value) => updateFormData('staffId', value)}
-            leftIcon={<Briefcase size={20} color={Colors.light.subtext} />}
+          <Controller
+            control={control}
+            name="staffId"
+            rules={{}}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label="Staff ID"
+                placeholder="Enter your staff ID"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                leftIcon={<Briefcase size={20} color={Colors.light.subtext} />}
+                error={errors.staffId?.message}
+              />
+            )}
           />
 
-          <Input
-            label="Mobile Number"
-            placeholder="Enter your mobile number"
-            value={formData.mobile}
-            onChangeText={(value) => updateFormData('mobile', value)}
-            keyboardType="phone-pad"
-            leftIcon={<Phone size={20} color={Colors.light.subtext} />}
+          <Controller
+            control={control}
+            name="mobile"
+            rules={{
+              required: 'Mobile number is required',
+              pattern: {
+                value: /^[0-9]{10,15}$/,
+                message: 'Please enter a valid mobile number',
+              },
+            }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label="Mobile Number"
+                placeholder="Enter your mobile number"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                keyboardType="phone-pad"
+                leftIcon={<Phone size={20} color={Colors.light.subtext} />}
+                error={errors.mobile?.message}
+              />
+            )}
           />
 
-          <Input
-            label="Email Address"
-            placeholder="Enter your email address"
-            value={formData.email}
-            onChangeText={(value) => updateFormData('email', value)}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            leftIcon={<Mail size={20} color={Colors.light.subtext} />}
+          <Controller
+            control={control}
+            name="email"
+            rules={{
+              required: 'Email is required',
+              pattern: {
+                value: /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+                message: 'Please enter a valid email',
+              },
+            }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label="Email Address"
+                placeholder="Enter your email address"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                leftIcon={<Mail size={20} color={Colors.light.subtext} />}
+                error={errors.email?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="password"
+            rules={{
+              required: 'Password is required',
+              minLength: {
+                value: 8,
+                message: 'Password must be at least 8 characters',
+              },
+            }}
+            render={({
+              field: { onChange, onBlur, value },
+            }: {
+              field: FieldProps;
+            }) => (
+              <Input
+                label="Password"
+                placeholder="Enter password"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                secureTextEntry
+                showPasswordToggle
+                leftIcon={<Lock size={20} color={Colors.light.subtext} />}
+                error={errors.password?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="confirmPassword"
+            rules={{
+              required: 'Please confirm your password',
+              validate: (value) =>
+                value === watch('password') || 'Passwords do not match',
+            }}
+            render={({
+              field: { onChange, onBlur, value },
+            }: {
+              field: FieldProps;
+            }) => (
+              <Input
+                label="Confirm Password"
+                placeholder="Confirm password"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                secureTextEntry
+                leftIcon={<Lock size={20} color={Colors.light.subtext} />}
+                error={errors.confirmPassword?.message}
+              />
+            )}
           />
 
           <View style={styles.photoContainer}>
             <Text style={styles.photoLabel}>Photo</Text>
-            
+
             <TouchableOpacity
               style={styles.photoButton}
-              onPress={pickImage}
+              onPress={() =>
+                pickImage().then((uri) => {
+                  if (uri) setValue('photo', uri);
+                })
+              }
             >
-              {formData.photo ? (
+              {photo ? (
                 <View style={styles.photoPreviewContainer}>
-                  <Image source={{ uri: formData.photo }} style={styles.photoPreview} />
+                  <Image
+                    source={{ uri: watch('photo') }}
+                    style={styles.photoPreview}
+                  />
                 </View>
               ) : (
                 <View style={styles.photoPlaceholder}>
@@ -252,14 +403,14 @@ export default function RegisterScreen() {
             <TouchableOpacity
               style={[
                 styles.companyDeviceSwitch,
-                formData.isCompanyDevice && styles.companyDeviceSwitchActive,
+                isCompanyDevice && styles.companyDeviceSwitchActive,
               ]}
-              onPress={() => updateFormData('isCompanyDevice', !formData.isCompanyDevice)}
+              onPress={() => setValue('isCompanyDevice', !isCompanyDevice)}
             >
               <View
                 style={[
                   styles.companyDeviceSwitchThumb,
-                  formData.isCompanyDevice && styles.companyDeviceSwitchThumbActive,
+                  isCompanyDevice && styles.companyDeviceSwitchThumbActive,
                 ]}
               />
             </TouchableOpacity>
@@ -267,7 +418,7 @@ export default function RegisterScreen() {
 
           <Button
             title="Register"
-            onPress={handleRegister}
+            onPress={handleSubmit(onSubmitHandler)}
             loading={isLoading}
             fullWidth
             style={styles.button}
