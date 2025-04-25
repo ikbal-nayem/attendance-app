@@ -2,21 +2,15 @@ import AuthLayout from '@/components/AuthLayout'; // Import AuthLayout
 import Button from '@/components/Button';
 import Card from '@/components/Card';
 import Input from '@/components/Input';
-import Select from '@/components/Select';
+import Radio from '@/components/Radio';
+import Switch from '@/components/Switch';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
-import {
-  Briefcase,
-  Image as ImageIcon,
-  Lock,
-  Mail,
-  Phone,
-  User,
-} from 'lucide-react-native';
+import { Briefcase, Lock, Mail, Phone, User, User2 } from 'lucide-react-native';
 import { MotiView } from 'moti';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -80,6 +74,7 @@ export default function RegisterScreen() {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       isCompanyDevice: false,
+      title: titleOptions[0].value,
     },
   });
 
@@ -174,7 +169,7 @@ export default function RegisterScreen() {
   };
 
   const onSubmitHandler = async (data: FormData) => {
-    console.log(data)
+    console.log(data);
     try {
       const success = await register(data);
       if (!success) {
@@ -208,16 +203,43 @@ export default function RegisterScreen() {
             <Text style={styles.errorText}>{errors.root.message}</Text>
           )}
 
+          <MotiView
+            from={{ opacity: 0, translateY: 20 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: 'timing', duration: 500, delay: 200 }}
+            style={styles.photoContainer}
+          >
+            <TouchableOpacity
+              style={styles.photoButton}
+              onPress={() =>
+                pickImage().then((uri) => {
+                  if (uri) setValue('photo', uri);
+                })
+              }
+            >
+              {photo ? (
+                <Image
+                  source={{ uri: watch('photo') }}
+                  style={styles.photoPreview}
+                />
+              ) : (
+                <View style={styles.photoPlaceholder}>
+                  <User2 size={24} color={Colors.light.primary} />
+                  <Text style={styles.photoPlaceholderText}>Photo</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </MotiView>
+
           <Controller
             control={control}
             name="title"
             render={({ field: { onChange, value } }) => (
-              <Select
+              <Radio
                 label="Title"
                 options={titleOptions}
                 value={value}
                 onChange={onChange}
-                placeholder="Select your title"
                 error={errors.title?.message}
               />
             )}
@@ -312,59 +334,11 @@ export default function RegisterScreen() {
             )}
           />
 
-          {/* Keep commented out confirm password field */}
-          {/* <Controller ... /> */}
-
-          {/* Keep photo section */}
-          <View style={styles.photoContainer}>
-            <Text style={styles.photoLabel}>Photo</Text>
-            <TouchableOpacity
-              style={styles.photoButton}
-              onPress={() =>
-                pickImage().then((uri) => {
-                  if (uri) setValue('photo', uri);
-                })
-              }
-            >
-              {photo ? (
-                <View style={styles.photoPreviewContainer}>
-                  <Image
-                    source={{ uri: watch('photo') }}
-                    style={styles.photoPreview}
-                  />
-                </View>
-              ) : (
-                <View style={styles.photoPlaceholder}>
-                  <ImageIcon size={24} color={Colors.light.primary} />
-                  <Text style={styles.photoPlaceholderText}>Choose photo</Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          </View>
-
-          {/* Keep company device switch */}
-          <MotiView
-            from={{ opacity: 0, translateY: 20 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 500, delay: 200 }}
-            style={styles.companyDeviceContainer}
-          >
-            <Text style={styles.companyDeviceLabel}>Is Company Device</Text>
-            <TouchableOpacity
-              style={[
-                styles.companyDeviceSwitch,
-                isCompanyDevice && styles.companyDeviceSwitchActive,
-              ]}
-              onPress={() => setValue('isCompanyDevice', !isCompanyDevice)}
-            >
-              <View
-                style={[
-                  styles.companyDeviceSwitchThumb,
-                  isCompanyDevice && styles.companyDeviceSwitchThumbActive,
-                ]}
-              />
-            </TouchableOpacity>
-          </MotiView>
+          <Switch
+            value={isCompanyDevice}
+            onChange={(value) => setValue('isCompanyDevice', value)}
+            label="Is Company Device"
+          />
 
           <MotiView
             from={{ opacity: 0, translateY: 20 }}
@@ -401,6 +375,7 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   card: {
     padding: Layout.spacing.l,
+    marginTop: Layout.spacing.xl,
   },
   title: {
     fontFamily: 'Inter-SemiBold',
@@ -424,19 +399,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   photoContainer: {
+    alignSelf: 'center',
     marginBottom: Layout.spacing.m,
   },
-  photoLabel: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 14,
-    color: Colors.light.text,
-    marginBottom: Layout.spacing.xs,
-  },
   photoButton: {
-    height: 100,
+    width: 120,
+    height: 120,
     borderWidth: 1,
     borderColor: Colors.light.inputBorder,
-    borderRadius: Layout.borderRadius.medium,
+    borderRadius: 60,
     backgroundColor: Colors.light.inputBackground,
     justifyContent: 'center',
     alignItems: 'center',
@@ -453,45 +424,10 @@ const styles = StyleSheet.create({
     color: Colors.light.primary,
     marginLeft: Layout.spacing.s,
   },
-  photoPreviewContainer: {
-    width: '100%',
-    height: '100%',
-  },
   photoPreview: {
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
-  },
-  companyDeviceContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: Layout.spacing.l,
-  },
-  companyDeviceLabel: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 14,
-    color: Colors.light.text,
-  },
-  companyDeviceSwitch: {
-    width: 50,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: Colors.light.border,
-    padding: 2,
-  },
-  companyDeviceSwitchActive: {
-    backgroundColor: Colors.light.primary,
-  },
-  companyDeviceSwitchThumb: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: Colors.light.card,
-    ...Layout.shadow.light,
-  },
-  companyDeviceSwitchThumbActive: {
-    transform: [{ translateX: 20 }],
   },
   button: {
     marginBottom: Layout.spacing.l,
