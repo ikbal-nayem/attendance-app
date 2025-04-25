@@ -1,3 +1,4 @@
+import AuthLayout from '@/components/AuthLayout'; // Import AuthLayout
 import Button from '@/components/Button';
 import Card from '@/components/Card';
 import Input from '@/components/Input';
@@ -6,18 +7,10 @@ import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
 import { router } from 'expo-router';
 import { Lock, CircleUser as UserCircle } from 'lucide-react-native';
+import { MotiView } from 'moti'; // Import MotiView
 import React from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import {
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Controller, useForm } from 'react-hook-form';
+import { Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 type FormData = {
   identifier: string;
@@ -56,26 +49,25 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+    <AuthLayout>
+      <MotiView
+        style={styles.logoContainer}
+        from={{ opacity: 0, translateY: -50 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: 'timing', duration: 500 }}
       >
-        <View style={styles.logoContainer}>
-          <Image
-            source={{
-              uri: 'https://www.shutterstock.com/image-vector/colorful-icon-absentees-600nw-1239609166.jpg',
-            }}
-            style={styles.logoImage}
-          />
-          <Text style={styles.logoText}>ATTENDANCE APP</Text>
-        </View>
-
-        <Card variant="elevated" style={styles.card}>
+        <Image
+          source={require('../../assets/images/logo.png')}
+          style={styles.logoImage}
+        />
+        <Text style={styles.logoText}>Atendance System</Text>
+      </MotiView>
+      <MotiView
+        from={{ opacity: 0, translateY: 50 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: 'timing', duration: 500, delay: 100 }}
+      >
+        <Card style={styles.card}>
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Sign in to your account</Text>
 
@@ -88,7 +80,11 @@ export default function LoginScreen() {
             rules={{
               required: 'Staff ID or Email is required',
             }}
-            render={({ field: { onChange, onBlur, value } }: { field: FieldProps }) => (
+            render={({
+              field: { onChange, onBlur, value },
+            }: {
+              field: FieldProps;
+            }) => (
               <Input
                 label="Staff ID or Email"
                 placeholder="Staff ID or Email"
@@ -114,7 +110,11 @@ export default function LoginScreen() {
                 message: 'Password must be at least 6 characters',
               },
             }}
-            render={({ field: { onChange, onBlur, value } }: { field: FieldProps }) => (
+            render={({
+              field: { onChange, onBlur, value },
+            }: {
+              field: FieldProps;
+            }) => (
               <Input
                 label="Password"
                 placeholder="Password"
@@ -131,42 +131,34 @@ export default function LoginScreen() {
             defaultValue=""
           />
 
-          {/* <TouchableOpacity style={styles.forgotPassword}>
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity> */}
-
+          {/* Keep the button */}
           <Button
             title="Sign In"
             onPress={handleSubmit(onSubmit)}
-            size='small'
+            size="small"
             loading={isLoading}
             fullWidth
             style={styles.button}
           />
 
-          <View style={styles.registerContainer}>
+          <MotiView
+            from={{ opacity: 0, translateY: 20 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: 'timing', duration: 500, delay: 200 }}
+            style={styles.registerContainer}
+          >
             <Text style={styles.registerText}>Don't have an account? </Text>
             <TouchableOpacity onPress={navigateToRegister}>
               <Text style={styles.registerLink}>Register</Text>
             </TouchableOpacity>
-          </View>
+          </MotiView>
         </Card>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </MotiView>
+    </AuthLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.light.background,
-    paddingHorizontal: Layout.spacing.l,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: Layout.spacing.l,
-  },
   logoContainer: {
     alignItems: 'center',
     marginBottom: Layout.spacing.xl,
@@ -184,7 +176,7 @@ const styles = StyleSheet.create({
     marginTop: Layout.spacing.m,
   },
   card: {
-    padding: Layout.spacing.xl,
+    padding: Layout.spacing.l,
     borderRadius: Layout.borderRadius.large,
     shadowColor: Colors.light.primary,
     shadowOffset: { width: 0, height: 4 },
@@ -213,15 +205,16 @@ const styles = StyleSheet.create({
     marginBottom: Layout.spacing.m,
     textAlign: 'center',
   },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: Layout.spacing.l,
-  },
-  forgotPasswordText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 14,
-    color: Colors.light.primary,
-  },
+  // Removed forgotPassword styles as the element is commented out
+  // forgotPassword: {
+  //   alignSelf: 'flex-end',
+  //   marginBottom: Layout.spacing.l,
+  // },
+  // forgotPasswordText: { // Keep commented out if element is commented out
+  //   fontFamily: 'Inter-Medium',
+  //   fontSize: 14,
+  //   color: Colors.light.primary,
+  // }, // Add closing brace and comma if uncommented
   button: {
     marginBottom: Layout.spacing.l,
   },

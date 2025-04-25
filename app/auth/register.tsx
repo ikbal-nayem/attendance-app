@@ -1,3 +1,4 @@
+import AuthLayout from '@/components/AuthLayout'; // Import AuthLayout
 import Button from '@/components/Button';
 import Card from '@/components/Card';
 import Input from '@/components/Input';
@@ -16,14 +17,13 @@ import {
   Phone,
   User,
 } from 'lucide-react-native';
+import { MotiView } from 'moti';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   Alert,
   Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
+  // Remove KeyboardAvoidingView, Platform, ScrollView
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -33,34 +33,31 @@ import { z } from 'zod';
 
 const titleOptions = [
   { label: 'Mr.', value: 'Mr.' },
-  { label: 'Ms.', value: 'Ms.' },
   { label: 'Mrs.', value: 'Mrs.' },
-  { label: 'Dr.', value: 'Dr.' },
 ];
 
-const registerSchema = z
-  .object({
-    title: z.string().min(1, 'Title is required'),
-    name: z.string().min(1, 'Name is required'),
-    staffId: z.string().min(1, 'Staff ID is required'),
-    mobile: z
-      .string()
-      .min(10, 'Mobile number must be at least 10 digits')
-      .max(15, 'Mobile number cannot exceed 15 digits')
-      .regex(/^[0-9]+$/, 'Mobile number must contain only digits'),
-    email: z
-      .string()
-      .min(1, 'Email is required')
-      .email('Please enter a valid email'),
-    password: z.string().min(8, 'Password must be at least 8 characters'),
-    confirmPassword: z.string().min(1, 'Please confirm your password'),
-    photo: z.string().optional(),
-    isCompanyDevice: z.boolean(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  });
+const registerSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  name: z.string().min(1, 'Name is required'),
+  staffId: z.string().min(1, 'Staff ID is required'),
+  mobile: z
+    .string()
+    .min(10, 'Mobile number must be at least 10 digits')
+    .max(15, 'Mobile number cannot exceed 15 digits')
+    .regex(/^[0-9]+$/, 'Mobile number must contain only digits'),
+  email: z
+    .string()
+    .min(1, 'Email is required')
+    .email('Please enter a valid email'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  // confirmPassword: z.string().min(1, 'Please confirm your password'),
+  photo: z.string().optional(),
+  isCompanyDevice: z.boolean(),
+});
+// .refine((data) => data.password === data.confirmPassword, {
+//   message: "Passwords don't match",
+//   path: ['confirmPassword'],
+// });
 
 type FormData = z.infer<typeof registerSchema>;
 
@@ -88,25 +85,6 @@ export default function RegisterScreen() {
 
   const photo = watch('photo');
   const isCompanyDevice = watch('isCompanyDevice');
-
-  const onSubmitHandler = async (data: FormData) => {
-    try {
-      const success = await register(data);
-      if (!success) {
-        setFormError('root', {
-          type: 'manual',
-          message: 'Registration failed. Please try again.',
-        });
-      } else {
-        router.push('/auth/verify-otp');
-      }
-    } catch (error) {
-      setFormError('root', {
-        type: 'manual',
-        message: 'An error occurred. Please try again later.',
-      });
-    }
-  };
 
   const pickImage = async (): Promise<string | undefined> => {
     const result = await new Promise<string | undefined>((resolve) => {
@@ -195,21 +173,34 @@ export default function RegisterScreen() {
     }
   };
 
-  const navigateToLogin = () => {
-    router.back();
+  const onSubmitHandler = async (data: FormData) => {
+    console.log(data)
+    try {
+      const success = await register(data);
+      if (!success) {
+        setFormError('root', {
+          type: 'manual',
+          message: 'Registration failed. Please try again.',
+        });
+      } else {
+        router.push('/auth/verify-otp');
+      }
+    } catch (error) {
+      setFormError('root', {
+        type: 'manual',
+        message: 'An error occurred. Please try again later.',
+      });
+    }
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+    <AuthLayout>
+      <MotiView
+        from={{ opacity: 0, translateY: 50 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: 'timing', duration: 500, delay: 100 }}
       >
-        <Card variant="elevated" style={styles.card}>
+        <Card style={styles.card}>
           <Text style={styles.title}>Create Account</Text>
           <Text style={styles.subtitle}>Register to get started</Text>
 
@@ -220,7 +211,6 @@ export default function RegisterScreen() {
           <Controller
             control={control}
             name="title"
-            rules={{}}
             render={({ field: { onChange, value } }) => (
               <Select
                 label="Title"
@@ -236,7 +226,6 @@ export default function RegisterScreen() {
           <Controller
             control={control}
             name="name"
-            rules={{}}
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label="Name"
@@ -253,7 +242,6 @@ export default function RegisterScreen() {
           <Controller
             control={control}
             name="staffId"
-            rules={{}}
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label="Staff ID"
@@ -270,13 +258,6 @@ export default function RegisterScreen() {
           <Controller
             control={control}
             name="mobile"
-            rules={{
-              required: 'Mobile number is required',
-              pattern: {
-                value: /^[0-9]{10,15}$/,
-                message: 'Please enter a valid mobile number',
-              },
-            }}
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label="Mobile Number"
@@ -294,13 +275,6 @@ export default function RegisterScreen() {
           <Controller
             control={control}
             name="email"
-            rules={{
-              required: 'Email is required',
-              pattern: {
-                value: /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
-                message: 'Please enter a valid email',
-              },
-            }}
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label="Email Address"
@@ -319,13 +293,6 @@ export default function RegisterScreen() {
           <Controller
             control={control}
             name="password"
-            rules={{
-              required: 'Password is required',
-              minLength: {
-                value: 8,
-                message: 'Password must be at least 8 characters',
-              },
-            }}
             render={({
               field: { onChange, onBlur, value },
             }: {
@@ -345,35 +312,12 @@ export default function RegisterScreen() {
             )}
           />
 
-          <Controller
-            control={control}
-            name="confirmPassword"
-            rules={{
-              required: 'Please confirm your password',
-              validate: (value) =>
-                value === watch('password') || 'Passwords do not match',
-            }}
-            render={({
-              field: { onChange, onBlur, value },
-            }: {
-              field: FieldProps;
-            }) => (
-              <Input
-                label="Confirm Password"
-                placeholder="Confirm password"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                secureTextEntry
-                leftIcon={<Lock size={20} color={Colors.light.subtext} />}
-                error={errors.confirmPassword?.message}
-              />
-            )}
-          />
+          {/* Keep commented out confirm password field */}
+          {/* <Controller ... /> */}
 
+          {/* Keep photo section */}
           <View style={styles.photoContainer}>
             <Text style={styles.photoLabel}>Photo</Text>
-
             <TouchableOpacity
               style={styles.photoButton}
               onPress={() =>
@@ -398,7 +342,13 @@ export default function RegisterScreen() {
             </TouchableOpacity>
           </View>
 
-          <View style={styles.companyDeviceContainer}>
+          {/* Keep company device switch */}
+          <MotiView
+            from={{ opacity: 0, translateY: 20 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: 'timing', duration: 500, delay: 200 }}
+            style={styles.companyDeviceContainer}
+          >
             <Text style={styles.companyDeviceLabel}>Is Company Device</Text>
             <TouchableOpacity
               style={[
@@ -414,39 +364,43 @@ export default function RegisterScreen() {
                 ]}
               />
             </TouchableOpacity>
-          </View>
+          </MotiView>
 
-          <Button
-            title="Register"
-            onPress={handleSubmit(onSubmitHandler)}
-            loading={isLoading}
-            fullWidth
+          <MotiView
+            from={{ opacity: 0, translateY: 20 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: 'timing', duration: 500, delay: 400 }}
             style={styles.button}
-          />
+          >
+            <Button
+              title="Register"
+              onPress={handleSubmit(onSubmitHandler)}
+              loading={isLoading}
+              fullWidth
+              size="small"
+            />
+          </MotiView>
 
-          <View style={styles.loginContainer}>
+          <MotiView
+            from={{ opacity: 0, translateY: 20 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: 'timing', duration: 500, delay: 500 }}
+            style={styles.loginContainer}
+          >
             <Text style={styles.loginText}>Already have an account? </Text>
-            <TouchableOpacity onPress={navigateToLogin}>
+            <TouchableOpacity onPress={() => router.replace('/auth/login')}>
               <Text style={styles.loginLink}>Sign In</Text>
             </TouchableOpacity>
-          </View>
+          </MotiView>
         </Card>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </MotiView>
+    </AuthLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.light.background,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    padding: Layout.spacing.l,
-  },
   card: {
-    padding: Layout.spacing.xl,
+    padding: Layout.spacing.l,
   },
   title: {
     fontFamily: 'Inter-SemiBold',

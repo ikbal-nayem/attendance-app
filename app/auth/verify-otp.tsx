@@ -1,34 +1,56 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  TextInput,
-} from 'react-native';
-import { router } from 'expo-router';
-import { useAuth } from '@/context/AuthContext';
-import Colors from '@/constants/Colors';
-import Layout from '@/constants/Layout';
+import AuthLayout from '@/components/AuthLayout';
 import Button from '@/components/Button';
 import Card from '@/components/Card';
+import Colors from '@/constants/Colors';
+import Layout from '@/constants/Layout';
+import { useAuth } from '@/context/AuthContext';
+import { zodResolver } from '@hookform/resolvers/zod'; // Import zodResolver
+import { router } from 'expo-router';
+import { MotiView } from 'moti'; // Import MotiView
+import React, { useEffect, useRef, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form'; // Import react-hook-form
+import {
+  Keyboard,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { z } from 'zod';
 
 const OTP_LENGTH = 6;
 
+const otpSchema = z.object({
+  otp: z.string().length(OTP_LENGTH, `OTP must be ${OTP_LENGTH} digits`),
+});
+
+type FormData = z.infer<typeof otpSchema>;
+
 export default function VerifyOTPScreen() {
   const { verifyOtp, tempUserData, isLoading } = useAuth();
-  const [otp, setOtp] = useState('');
-  const [otpError, setOtpError] = useState('');
   const [remainingTime, setRemainingTime] = useState(60);
   const [canResend, setCanResend] = useState(false);
-  
+  const [apiError, setApiError] = useState(''); // For API errors
+
   const inputRef = useRef<TextInput>(null);
-  const otpInputRefs = useRef<Array<TextInput | null>>([]);
+
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors },
+    setError: setFormError, // Use setError from useForm
+    setValue,
+  } = useForm<FormData>({
+    resolver: zodResolver(otpSchema),
+    defaultValues: {
+      otp: '',
+    },
+  });
 
   useEffect(() => {
+    inputRef.current?.focus();
     const timer = setInterval(() => {
       setRemainingTime((prevTime) => {
         if (prevTime <= 1) {
@@ -46,23 +68,25 @@ export default function VerifyOTPScreen() {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, '0')}:${secs
+      .toString()
+      .padStart(2, '0')}`;
   };
 
-  const handleOtpChange = (text: string) => {
-    // Keep only digits and limit to OTP_LENGTH
-    const sanitizedText = text.replace(/[^0-9]/g, '').substring(0, OTP_LENGTH);
-    setOtp(sanitizedText);
-    setOtpError('');
-  };
+  // handleOtpChange is now managed by Controller's onChange
 
   const handleResendOtp = () => {
     if (!canResend) return;
-    
+
     setRemainingTime(60);
     setCanResend(false);
-    
-    // Reset timer
+    setApiError(''); // Clear API error on resend
+    setValue('otp', ''); // Clear OTP input on resend
+
+    // TODO: Add logic here to actually call the resend OTP API endpoint
+    console.log('Resend OTP requested');
+
+    // Reset timer logic remains the same
     const timer = setInterval(() => {
       setRemainingTime((prevTime) => {
         if (prevTime <= 1) {
@@ -75,18 +99,15 @@ export default function VerifyOTPScreen() {
     }, 1000);
   };
 
-  const handleVerify = async () => {
-    if (otp.length !== OTP_LENGTH) {
-      setOtpError(`Please enter all ${OTP_LENGTH} digits of the OTP`);
-      return;
-    }
-
-    const success = await verifyOtp(otp);
+  const onSubmit = async (data: FormData) => {
+    Keyboard.dismiss();
+    setApiError('');
+    const success = await verifyOtp(data.otp);
 
     if (success) {
       router.replace('/auth/login');
     } else {
-      setOtpError('Invalid OTP. Please try again.');
+      setApiError('Invalid OTP. Please try again.');
     }
   };
 
@@ -95,114 +116,146 @@ export default function VerifyOTPScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+    <AuthLayout>
+      <MotiView
+        from={{ opacity: 0, translateY: 50 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: 'timing', duration: 500, delay: 100 }}
       >
-        <Card variant="elevated" style={styles.card}>
+        <Card style={styles.card}>
           <Text style={styles.title}>Verify Your Email</Text>
-          <Text style={styles.subtitle}>Enter the OTP sent to your email</Text>
 
-          <View style={styles.userInfoContainer}>
-            <Text style={styles.userInfoLabel}>Name:</Text>
-            <Text style={styles.userInfoValue}>{tempUserData?.name || 'User'}</Text>
+          <View style={{ marginTop: Layout.spacing.xl }}>
+            <Text style={styles.subtitle}>
+              We have sent a verification code to the email address &nbsp;
+              <Text style={{ fontWeight: 'bold' }}>
+                '{tempUserData?.email}'
+              </Text>
+            </Text>
           </View>
 
-          <View style={styles.userInfoContainer}>
-            <Text style={styles.userInfoLabel}>Staff ID:</Text>
-            <Text style={styles.userInfoValue}>{tempUserData?.staffId || 'N/A'}</Text>
-          </View>
+          {/* OTP Input managed by Controller */}
+          <Controller
+            control={control}
+            name="otp"
+            render={({ field: { onChange, value } }) => (
+              <View style={styles.otpContainer}>
+                <TextInput
+                  ref={inputRef}
+                  style={styles.hiddenInput}
+                  value={value}
+                  onChangeText={(text) => {
+                    const sanitizedText = text
+                      .replace(/[^0-9]/g, '')
+                      .substring(0, OTP_LENGTH);
+                    onChange(sanitizedText);
+                  }}
+                  keyboardType="number-pad"
+                  maxLength={OTP_LENGTH}
+                  autoFocus
+                  onBlur={() => Keyboard.dismiss()}
+                />
 
-          <View style={styles.userInfoContainer}>
-            <Text style={styles.userInfoLabel}>Phone:</Text>
-            <Text style={styles.userInfoValue}>{tempUserData?.mobile || 'N/A'}</Text>
-          </View>
+                <View style={styles.otpBoxesContainer}>
+                  {Array(OTP_LENGTH)
+                    .fill(0)
+                    .map((_, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={[
+                          styles.otpBox,
+                          // Highlight based on current input length or focus state if needed
+                          value.length === index && styles.otpBoxActive, // Use value from Controller
+                          (!!errors.otp || !!apiError) && styles.otpBoxError,
+                        ]}
+                        onPress={() => inputRef.current?.focus()}
+                        activeOpacity={1}
+                      >
+                        <Text style={styles.otpBoxText}>
+                          {value[index] || ''}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                </View>
+              </View>
+            )}
+          />
 
-          <View style={styles.otpContainer}>
-            <TextInput
-              ref={inputRef}
-              style={styles.hiddenInput}
-              value={otp}
-              onChangeText={handleOtpChange}
-              keyboardType="number-pad"
-              maxLength={OTP_LENGTH}
-              autoFocus
-            />
-            
-            <View style={styles.otpBoxesContainer}>
-              {Array(OTP_LENGTH).fill(0).map((_, index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={[
-                    styles.otpBox,
-                    otp.length === index && styles.otpBoxActive,
-                  ]}
-                  onPress={() => inputRef.current?.focus()}
-                >
-                  <Text style={styles.otpBoxText}>
-                    {otp[index] || ''}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
+          {(errors.otp || apiError) && (
+            <Text style={styles.errorText}>
+              {errors.otp?.message || apiError}
+            </Text>
+          )}
 
-          {otpError ? <Text style={styles.errorText}>{otpError}</Text> : null}
-
-          <View style={styles.timerContainer}>
+          <MotiView
+            from={{ opacity: 0, translateY: 20 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: 'timing', duration: 500, delay: 200 }}
+            style={styles.timerContainer}
+          >
             <Text style={styles.timerText}>
-              {canResend ? 'You can resend the OTP now' : `Resend OTP in ${formatTime(remainingTime)}`}
+              {canResend
+                ? 'You can resend the OTP now'
+                : `Resend OTP in ${formatTime(remainingTime)}`}
             </Text>
             <TouchableOpacity
               onPress={handleResendOtp}
               disabled={!canResend}
-              style={[styles.resendButton, !canResend && styles.resendButtonDisabled]}
+              style={[
+                styles.resendButton,
+                !canResend && styles.resendButtonDisabled,
+              ]}
             >
               <Text
-                style={[styles.resendButtonText, !canResend && styles.resendButtonTextDisabled]}
+                style={[
+                  styles.resendButtonText,
+                  !canResend && styles.resendButtonTextDisabled,
+                ]}
               >
                 Resend OTP
               </Text>
             </TouchableOpacity>
-          </View>
+          </MotiView>
 
-          <Button
-            title="Verify"
-            onPress={handleVerify}
-            loading={isLoading}
-            fullWidth
+          <MotiView
+            from={{ opacity: 0, translateY: 20 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: 'timing', duration: 500, delay: 300 }}
             style={styles.button}
-          />
+          >
+            <Button
+              title="Verify"
+              size="small"
+              onPress={handleSubmit(onSubmit)}
+              loading={isLoading}
+              fullWidth
+              // disabled={otpValue.length !== OTP_LENGTH}
+            />
+          </MotiView>
 
-          <Button
-            title="Edit Details"
-            onPress={navigateBack}
-            variant="outline"
-            fullWidth
-          />
+          <MotiView
+            from={{ opacity: 0, translateY: 20 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: 'timing', duration: 500, delay: 400 }}
+          >
+            <Button
+              title="Go Back"
+              size="small"
+              onPress={navigateBack}
+              variant="outline"
+              fullWidth
+            />
+          </MotiView>
         </Card>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </MotiView>
+    </AuthLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.light.background,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: Layout.spacing.l,
-  },
   card: {
-    padding: Layout.spacing.xl,
+    padding: Layout.spacing.l,
+    marginTop: Layout.spacing.xl,
   },
   title: {
     fontFamily: 'Inter-SemiBold',
@@ -217,22 +270,6 @@ const styles = StyleSheet.create({
     color: Colors.light.subtext,
     marginBottom: Layout.spacing.l,
     textAlign: 'center',
-  },
-  userInfoContainer: {
-    flexDirection: 'row',
-    marginBottom: Layout.spacing.s,
-  },
-  userInfoLabel: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 14,
-    color: Colors.light.subtext,
-    width: 80,
-  },
-  userInfoValue: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 14,
-    color: Colors.light.text,
-    flex: 1,
   },
   otpContainer: {
     marginTop: Layout.spacing.m,
@@ -261,8 +298,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.card,
   },
   otpBoxActive: {
+    // Style for the currently focused box (optional)
     borderColor: Colors.light.primary,
     borderWidth: 2,
+  },
+  otpBoxError: {
+    // Style for boxes when there's an error
+    borderColor: Colors.light.error,
   },
   otpBoxText: {
     fontFamily: 'Inter-SemiBold',
