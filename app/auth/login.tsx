@@ -1,21 +1,25 @@
-import AuthLayout from '@/components/AuthLayout'; // Import AuthLayout
 import Button from '@/components/Button';
 import Card from '@/components/Card';
 import Input from '@/components/Input';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
+import AuthLayout from '@/layout/AuthLayout'; // Import AuthLayout
+import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
 import { Lock, CircleUser as UserCircle } from 'lucide-react-native';
 import { MotiView } from 'moti'; // Import MotiView
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { z } from 'zod';
 
-type FormData = {
-  identifier: string;
-  password: string;
-};
+const loginSchema = z.object({
+  identifier: z.string().min(1, 'Staff ID or Email is required'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+type FormData = z.infer<typeof loginSchema>;
 
 type FieldProps = {
   onChange: (value: string) => void;
@@ -30,7 +34,13 @@ export default function LoginScreen() {
     handleSubmit,
     formState: { errors },
     setError: setFormError,
-  } = useForm<FormData>();
+  } = useForm<FormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      identifier: '',
+      password: '',
+    },
+  });
 
   const onSubmit = async (data: FormData) => {
     const success = await login(data.identifier, data.password);
@@ -50,18 +60,7 @@ export default function LoginScreen() {
 
   return (
     <AuthLayout>
-      <MotiView
-        style={styles.logoContainer}
-        from={{ opacity: 0, translateY: -50 }}
-        animate={{ opacity: 1, translateY: 0 }}
-        transition={{ type: 'timing', duration: 500 }}
-      >
-        <Image
-          source={require('../../assets/images/logo.png')}
-          style={styles.logoImage}
-        />
-        <Text style={styles.logoText}>Atendance System</Text>
-      </MotiView>
+      {header()}
       <MotiView
         from={{ opacity: 0, translateY: 50 }}
         animate={{ opacity: 1, translateY: 0 }}
@@ -76,10 +75,8 @@ export default function LoginScreen() {
           )}
 
           <Controller
+            name="identifier"
             control={control}
-            rules={{
-              required: 'Staff ID or Email is required',
-            }}
             render={({
               field: { onChange, onBlur, value },
             }: {
@@ -97,19 +94,11 @@ export default function LoginScreen() {
                 error={errors.identifier?.message}
               />
             )}
-            name="identifier"
-            defaultValue=""
           />
 
           <Controller
+            name="password"
             control={control}
-            rules={{
-              required: 'Password is required',
-              minLength: {
-                value: 6,
-                message: 'Password must be at least 6 characters',
-              },
-            }}
             render={({
               field: { onChange, onBlur, value },
             }: {
@@ -127,15 +116,12 @@ export default function LoginScreen() {
                 error={errors.password?.message}
               />
             )}
-            name="password"
-            defaultValue=""
           />
 
           {/* Keep the button */}
           <Button
             title="Sign In"
             onPress={handleSubmit(onSubmit)}
-            size="small"
             loading={isLoading}
             fullWidth
             style={styles.button}
@@ -158,32 +144,44 @@ export default function LoginScreen() {
   );
 }
 
+const header = () => (
+  <MotiView
+    style={styles.logoContainer}
+    from={{ opacity: 0, translateY: -50 }}
+    animate={{ opacity: 1, translateY: 0 }}
+    transition={{ type: 'timing', duration: 500 }}
+  >
+    <Image
+      source={require('../../assets/images/logo.png')}
+      style={styles.logoImage}
+    />
+    <Text style={styles.logoText}>Supervisor/Manager Activity Tracking</Text>
+  </MotiView>
+);
+
 const styles = StyleSheet.create({
   logoContainer: {
+    backgroundColor: Colors.light.primary,
+    borderEndEndRadius: Layout.borderRadius.xl,
+    borderStartEndRadius: Layout.borderRadius.xl,
+    padding: Layout.spacing.m,
     alignItems: 'center',
     marginBottom: Layout.spacing.xl,
-    marginTop: Layout.spacing.xl,
   },
   logoImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 20,
-    resizeMode: 'cover',
+    width: '70%',
+    height: 90,
+    resizeMode: 'contain',
   },
   logoText: {
     fontFamily: 'Inter-SemiBold',
-    fontSize: 24,
-    color: Colors.light.primary,
+    fontSize: 22,
+    textAlign: 'center',
+    color: Colors.light.primaryLight,
     marginTop: Layout.spacing.m,
   },
   card: {
-    padding: Layout.spacing.l,
-    borderRadius: Layout.borderRadius.large,
-    shadowColor: Colors.light.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+    margin: Layout.spacing.m,
   },
   title: {
     fontFamily: 'Inter-SemiBold',
@@ -206,16 +204,6 @@ const styles = StyleSheet.create({
     marginBottom: Layout.spacing.m,
     textAlign: 'center',
   },
-  // Removed forgotPassword styles as the element is commented out
-  // forgotPassword: {
-  //   alignSelf: 'flex-end',
-  //   marginBottom: Layout.spacing.l,
-  // },
-  // forgotPasswordText: { // Keep commented out if element is commented out
-  //   fontFamily: 'Inter-Medium',
-  //   fontSize: 14,
-  //   color: Colors.light.primary,
-  // }, // Add closing brace and comma if uncommented
   button: {
     marginBottom: Layout.spacing.l,
   },

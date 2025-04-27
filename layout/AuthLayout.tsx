@@ -1,3 +1,4 @@
+import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import React from 'react';
@@ -6,11 +7,10 @@ import {
   Platform,
   SafeAreaView,
   ScrollView,
-  StatusBar,
+  StyleProp,
   StyleSheet,
   View,
   ViewStyle,
-  StyleProp,
 } from 'react-native';
 
 type AuthLayoutProps = {
@@ -21,7 +21,7 @@ type AuthLayoutProps = {
 const AuthLayout: React.FC<AuthLayoutProps> = ({ children, style }) => {
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.light.background} />
+      <AppStatusBar />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
@@ -48,7 +48,6 @@ const styles = StyleSheet.create({
   scrollViewContent: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: Layout.spacing.l,
   },
   container: {
     flex: 1,

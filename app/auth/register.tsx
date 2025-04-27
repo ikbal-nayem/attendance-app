@@ -1,4 +1,3 @@
-import AuthLayout from '@/components/AuthLayout'; // Import AuthLayout
 import Button from '@/components/Button';
 import Card from '@/components/Card';
 import Input from '@/components/Input';
@@ -7,6 +6,7 @@ import Switch from '@/components/Switch';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
+import AuthLayout from '@/layout/AuthLayout'; // Import AuthLayout
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
@@ -17,7 +17,6 @@ import { Controller, useForm } from 'react-hook-form';
 import {
   Alert,
   Image,
-  // Remove KeyboardAvoidingView, Platform, ScrollView
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -374,8 +373,7 @@ export default function RegisterScreen() {
 
 const styles = StyleSheet.create({
   card: {
-    padding: Layout.spacing.l,
-    marginTop: Layout.spacing.xl,
+    margin: Layout.spacing.m,
   },
   title: {
     fontFamily: 'Inter-SemiBold',

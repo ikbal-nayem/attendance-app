@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.light.inputBorder,
-    borderRadius: Layout.borderRadius.medium,
+    borderRadius: Layout.borderRadius.xl,
     backgroundColor: Colors.light.inputBackground,
     height: Layout.inputHeight,
   },

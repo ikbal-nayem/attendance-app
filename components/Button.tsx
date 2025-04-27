@@ -146,7 +146,7 @@ const Button: React.FC<ButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: Layout.borderRadius.medium,
+    borderRadius: Layout.borderRadius.xl,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',

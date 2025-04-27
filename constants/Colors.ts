@@ -5,9 +5,9 @@ const tintColorDark = '#0A84FF'; // Lighter Blue for Dark Mode
 
 export default {
   light: {
-    primary: '#007AFF', // Vibrant Blue
-    primaryLight: '#58AFFF', // Lighter shade for hover/active states if needed
-    primaryDark: '#0056B3', // Darker shade if needed
+    primary: '#04696d', // Vibrant Blue
+    primaryLight: '#C4E6E7', // Lighter shade for hover/active states if needed
+    primaryDark: '#035156', // Darker shade if needed
     secondary: '#FF9500', // Orange
     secondaryLight: '#FFB340',
     secondaryDark: '#CC7A00',
@@ -31,9 +31,9 @@ export default {
     statusBar: 'dark', // Dark text/icons on light background
   },
   dark: {
-    primary: '#0A84FF', // Lighter Blue for Dark Mode
-    primaryLight: '#5ABEFF',
-    primaryDark: '#0060D1',
+    primary: '#04696d', // Lighter Blue for Dark Mode
+    primaryLight: '#C4E6E7',
+    primaryDark: '#035156',
     secondary: '#FF9F0A', // Lighter Orange
     secondaryLight: '#FFBC57',
     secondaryDark: '#D18000',

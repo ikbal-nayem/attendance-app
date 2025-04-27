@@ -34,8 +34,8 @@ const Card: React.FC<CardProps> = ({ children, variant = 'default', style }) => 
 const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.light.card,
-    borderRadius: Layout.borderRadius.medium,
-    padding: Layout.spacing.m,
+    borderRadius: Layout.borderRadius.large,
+    padding: Layout.spacing.l,
   },
   outlined: {
     borderWidth: 1,
