@@ -1,5 +1,5 @@
-import Colors from '@/constants/Colors'; // Import Colors
-import Layout from '@/constants/Layout'; // Import Layout
+import Colors from '@/constants/Colors';
+import Layout from '@/constants/Layout';
 import { AuthProvider } from '@/context/AuthContext';
 import { LocationProvider } from '@/context/LocationContext';
 import { NotificationProvider } from '@/context/NotificationContext';
@@ -18,7 +18,6 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, StyleSheet, Text } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-// Prevent splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {

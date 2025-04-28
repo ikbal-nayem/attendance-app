@@ -1,6 +1,5 @@
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
-import Layout from '@/constants/Layout';
 import React from 'react';
 import {
   KeyboardAvoidingView,
