@@ -68,6 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const checkLoginStatus = async () => {
       try {
         const userJson = await AsyncStorage.getItem('user');
+        console.log(userJson)
         if (userJson) {
           setUser(JSON.parse(userJson));
         }

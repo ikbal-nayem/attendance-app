@@ -17,7 +17,7 @@ const AppHeader = ({
   title,
   withBackButton = true,
   bg = 'default',
-  isSticky = true,
+  isSticky,
 }: HeaderProps) => {
   const navigation = useNavigation();
 
@@ -33,7 +33,6 @@ const AppHeader = ({
           bg === 'primary'
             ? styles.primaryHeaderWrapper
             : styles.defaultHeaderWrapper,
-          isSticky && { position: 'sticky' },
         ]}
       >
         {withBackButton && (

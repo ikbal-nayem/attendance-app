@@ -191,15 +191,14 @@ export default function RegisterScreen() {
 
   return (
     <>
-      <AppHeader title="Create Account" bg="primary" />
       <AuthLayout>
+        <AppHeader title="Create Account" bg="primary" />
         <MotiView
           from={{ opacity: 0, translateY: 50 }}
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: 'timing', duration: 500, delay: 100 }}
         >
           <Card style={styles.card}>
-            {/* <Text style={styles.title}>Create Account</Text> */}
             <Text style={styles.subtitle}>Register to get started</Text>
 
             {errors.root && (
