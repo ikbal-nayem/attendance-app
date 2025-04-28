@@ -1,6 +1,6 @@
 import { axiosIns } from '@/api/config';
 import { API_CONSTANTS } from '@/constants/api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { localData } from '@/services/storage';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 type AuthContextType = {
@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     // Check if user is already logged in
     const checkLoginStatus = async () => {
       try {
-        const userJson = await AsyncStorage.getItem('user');
+        const userJson = await localData.get('user');
         if (userJson) {
           setUser(JSON.parse(userJson));
         }
@@ -86,7 +86,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = async () => {
     setIsLoading(true);
-    await AsyncStorage.removeItem('user');
+    await localData.remove('user');
     setUser(null);
     setIsLoading(false);
   };
