@@ -1,7 +1,7 @@
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useNavigation } from 'expo-router';
-import { ArrowLeft } from 'lucide-react-native';
+import { ChevronLeft } from 'lucide-react-native';
 import { MotiView } from 'moti';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -10,14 +10,12 @@ type HeaderProps = {
   title: string;
   withBackButton?: boolean;
   bg?: 'primary' | 'default';
-  isSticky?: boolean;
 };
 
 const AppHeader = ({
   title,
   withBackButton = true,
   bg = 'default',
-  isSticky,
 }: HeaderProps) => {
   const navigation = useNavigation();
 
@@ -36,7 +34,7 @@ const AppHeader = ({
         ]}
       >
         {withBackButton && (
-          <ArrowLeft
+          <ChevronLeft
             size={22}
             color={bg === 'primary' ? Colors.dark.text : Colors.light.text}
             onPress={() => navigation.goBack()}

@@ -11,7 +11,7 @@ import AuthLayout from '@/layout/AuthLayout'; // Import AuthLayout
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useNavigation } from 'expo-router';
-import { Briefcase, Lock, Mail, Phone, User, User2 } from 'lucide-react-native';
+import { Briefcase, Lock, Mail, MoveRight, Phone, User, User2 } from 'lucide-react-native';
 import { MotiView } from 'moti';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -192,7 +192,7 @@ export default function RegisterScreen() {
   return (
     <>
       <AuthLayout>
-        <AppHeader title="Create Account" bg="primary" />
+        <AppHeader title="Create New Account" bg="primary" />
         <MotiView
           from={{ opacity: 0, translateY: 50 }}
           animate={{ opacity: 1, translateY: 0 }}
@@ -353,6 +353,8 @@ export default function RegisterScreen() {
               <Button
                 title="Register"
                 onPress={handleSubmit(onSubmitHandler)}
+                icon={<MoveRight size={20} color={Colors.light.background} />}
+                iconPosition="right"
                 loading={isLoading}
                 fullWidth
                 size="small"

@@ -57,7 +57,9 @@ export default function RootLayout() {
           style={styles.splashLogo}
           resizeMode="contain"
         />
-        <Text style={styles.splashText}>Employee Attendance</Text>
+        <Text style={styles.splashText}>
+          Supervisor/Manager Activity Tracking
+        </Text>
         {!isAppReady && (
           <ActivityIndicator
             size="large"
@@ -75,8 +77,8 @@ export default function RootLayout() {
         <NotificationProvider>
           <LocationProvider>
             <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="auth/login" options={{ headerShown: false }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="auth" options={{ headerShown: false }} />
               <Stack.Screen name="+not-found" />
             </Stack>
             <StatusBar style="auto" />
@@ -102,6 +104,7 @@ const styles = StyleSheet.create({
   splashText: {
     fontFamily: 'Inter-SemiBold', // Use a font from your loaded fonts
     fontSize: 24,
+    textAlign: 'center',
     color: Colors.light.text, // Use text color from new theme
     marginBottom: Layout.spacing.l,
   },

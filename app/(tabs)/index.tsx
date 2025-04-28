@@ -1,28 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  Animated,
-} from 'react-native';
-import { Bell, LogOut, CreditCard as Edit, Layers, SendHorizontal as SendHorizonal, ListChecks, MapPin, Map, Clock, ListTodo } from 'lucide-react-native';
-import { router, Link } from 'expo-router';
-import { useAuth } from '@/context/AuthContext';
-import { useNotifications } from '@/context/NotificationContext';
+import Card from '@/components/Card';
+import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
-import Card from '@/components/Card';
+import { useAuth } from '@/context/AuthContext';
+import { useNotifications } from '@/context/NotificationContext';
+import { Link, router } from 'expo-router';
+import {
+  Bell,
+  Clock,
+  CreditCard as Edit,
+  Layers,
+  ListChecks,
+  ListTodo,
+  LogOut,
+  Map,
+  MapPin,
+  SendHorizontal as SendHorizonal,
+} from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  Animated,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const { unreadCount } = useNotifications();
   const [clockAnimation] = useState(new Animated.Value(0));
-  
+
   useEffect(() => {
     const animation = Animated.loop(
       Animated.sequence([
@@ -38,14 +49,14 @@ export default function Dashboard() {
         }),
       ])
     );
-    
+
     animation.start();
-    
+
     return () => {
       animation.stop();
     };
   }, []);
-  
+
   const scale = clockAnimation.interpolate({
     inputRange: [0, 1],
     outputRange: [1, 1.1],
@@ -66,14 +77,14 @@ export default function Dashboard() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.light.background} />
-      
+      <AppStatusBar />
+
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <Text style={styles.greeting}>Hello,</Text>
           <Text style={styles.userName}>{user.name}</Text>
         </View>
-        
+
         <View style={styles.headerRight}>
           <Link href="/notifications" asChild>
             <TouchableOpacity style={styles.iconButton}>
@@ -87,13 +98,13 @@ export default function Dashboard() {
               )}
             </TouchableOpacity>
           </Link>
-          
+
           <TouchableOpacity style={styles.iconButton} onPress={handleLogout}>
             <LogOut size={24} color={Colors.light.text} />
           </TouchableOpacity>
         </View>
       </View>
-      
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -101,10 +112,14 @@ export default function Dashboard() {
         <Card variant="elevated" style={styles.profileCard}>
           <View style={styles.profileHeader}>
             <Image
-              source={{ uri: user.photo || 'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg' }}
+              source={{
+                uri:
+                  user.photo ||
+                  'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg',
+              }}
               style={styles.profileImage}
             />
-            
+
             <View style={styles.profileInfo}>
               <View style={styles.profileNameRow}>
                 <Text style={styles.profileName}>{user.name}</Text>
@@ -113,53 +128,59 @@ export default function Dashboard() {
                   <Text style={styles.editButtonText}>Update Profile</Text>
                 </TouchableOpacity>
               </View>
-              
+
               <Text style={styles.profileRole}>{user.role}</Text>
               <Text style={styles.profileDepartment}>{user.department}</Text>
-              
+
               <View style={styles.profileDetail}>
                 <Text style={styles.profileDetailLabel}>Status:</Text>
                 <Text style={styles.profileDetailValue}>{user.status}</Text>
               </View>
-              
+
               <View style={styles.profileDetail}>
                 <Text style={styles.profileDetailLabel}>Joining Date:</Text>
-                <Text style={styles.profileDetailValue}>{user.joiningDate}</Text>
+                <Text style={styles.profileDetailValue}>
+                  {user.joiningDate}
+                </Text>
               </View>
             </View>
           </View>
-          
+
           <View style={styles.virtualCardSection}>
             <View style={styles.virtualCardHeader}>
               <Text style={styles.virtualCardHeaderText}>Virtual Card</Text>
             </View>
-            
+
             <View style={styles.qrCodeContainer}>
               <Image
-                source={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/QR_Code_Example.svg/1200px-QR_Code_Example.svg.png' }}
+                source={{
+                  uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/QR_Code_Example.svg/1200px-QR_Code_Example.svg.png',
+                }}
                 style={styles.qrCode}
               />
             </View>
-            
+
             <View style={styles.staffIdContainer}>
               <Text style={styles.staffIdLabel}>Staff ID</Text>
               <Text style={styles.staffId}>{user.staffId}</Text>
             </View>
           </View>
         </Card>
-        
+
         <Text style={styles.sectionTitle}>Quick Actions</Text>
-        
+
         <View style={styles.quickActionsContainer}>
           <Link href="/attendance" asChild>
             <TouchableOpacity style={styles.quickActionButton}>
-              <Animated.View style={[styles.quickActionIcon, { transform: [{ scale }] }]}>
+              <Animated.View
+                style={[styles.quickActionIcon, { transform: [{ scale }] }]}
+              >
                 <Clock size={24} color={Colors.light.primary} />
               </Animated.View>
               <Text style={styles.quickActionText}>Attendance</Text>
             </TouchableOpacity>
           </Link>
-          
+
           <Link href="/activity" asChild>
             <TouchableOpacity style={styles.quickActionButton}>
               <View style={styles.quickActionIcon}>
@@ -168,7 +189,7 @@ export default function Dashboard() {
               <Text style={styles.quickActionText}>Activity</Text>
             </TouchableOpacity>
           </Link>
-          
+
           <Link href="/notifications/send" asChild>
             <TouchableOpacity style={styles.quickActionButton}>
               <View style={styles.quickActionIcon}>
@@ -178,9 +199,9 @@ export default function Dashboard() {
             </TouchableOpacity>
           </Link>
         </View>
-        
+
         <Text style={styles.sectionTitle}>Enquiry</Text>
-        
+
         <View style={styles.enquiryContainer}>
           <Link href="/enquiry/activities" asChild>
             <TouchableOpacity style={styles.enquiryCard}>
@@ -190,25 +211,29 @@ export default function Dashboard() {
               <Text style={styles.enquiryTitle}>Daily Activities</Text>
             </TouchableOpacity>
           </Link>
-          
+
           <Link href="/enquiry/attendance-history" asChild>
             <TouchableOpacity style={styles.enquiryCard}>
               <View style={styles.enquiryIcon}>
                 <ListChecks size={24} color="#2980B9" />
               </View>
-              <Text style={styles.enquiryTitle}>Clock-in/Clock-out History</Text>
+              <Text style={styles.enquiryTitle}>
+                Clock-in/Clock-out History
+              </Text>
             </TouchableOpacity>
           </Link>
-          
+
           <Link href="/enquiry/geolocation" asChild>
             <TouchableOpacity style={styles.enquiryCard}>
               <View style={styles.enquiryIcon}>
                 <MapPin size={24} color="#16A085" />
               </View>
-              <Text style={styles.enquiryTitle}>Geolocation & Territory History</Text>
+              <Text style={styles.enquiryTitle}>
+                Geolocation & Territory History
+              </Text>
             </TouchableOpacity>
           </Link>
-          
+
           <Link href="/enquiry/live-tracking" asChild>
             <TouchableOpacity style={styles.enquiryCard}>
               <View style={styles.enquiryIcon}>

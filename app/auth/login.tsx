@@ -5,9 +5,10 @@ import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
 import AuthLayout from '@/layout/AuthLayout'; // Import AuthLayout
+import { makeFormData } from '@/utils/form-actions';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
-import { Lock, CircleUser as UserCircle } from 'lucide-react-native';
+import { Lock, MoveRight, User } from 'lucide-react-native';
 import { MotiView } from 'moti'; // Import MotiView
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -15,8 +16,8 @@ import { Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { z } from 'zod';
 
 const loginSchema = z.object({
-  identifier: z.string().min(1, 'Staff ID or Email is required'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  sUserID: z.string().min(1, 'Staff ID or Email is required'),
+  sPassword: z.string().min(6, 'Password must be at least 6 characters'),
 });
 
 type FormData = z.infer<typeof loginSchema>;
@@ -37,13 +38,13 @@ export default function LoginScreen() {
   } = useForm<FormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      identifier: '',
-      password: '',
+      sUserID: '',
+      sPassword: '',
     },
   });
 
   const onSubmit = async (data: FormData) => {
-    const success = await login(data.identifier, data.password);
+    const success = await login(makeFormData(data));
     if (!success) {
       setFormError('root', {
         type: 'manual',
@@ -75,7 +76,7 @@ export default function LoginScreen() {
           )}
 
           <Controller
-            name="identifier"
+            name="sUserID"
             control={control}
             render={({
               field: { onChange, onBlur, value },
@@ -90,14 +91,14 @@ export default function LoginScreen() {
                 onBlur={onBlur}
                 keyboardType="email-address"
                 autoCapitalize="none"
-                leftIcon={<UserCircle size={20} color={Colors.light.subtext} />}
-                error={errors.identifier?.message}
+                leftIcon={<User size={20} color={Colors.light.subtext} />}
+                error={errors.sUserID?.message}
               />
             )}
           />
 
           <Controller
-            name="password"
+            name="sPassword"
             control={control}
             render={({
               field: { onChange, onBlur, value },
@@ -113,15 +114,16 @@ export default function LoginScreen() {
                 secureTextEntry
                 showPasswordToggle
                 leftIcon={<Lock size={20} color={Colors.light.subtext} />}
-                error={errors.password?.message}
+                error={errors.sPassword?.message}
               />
             )}
           />
 
-          {/* Keep the button */}
           <Button
             title="Sign In"
             onPress={handleSubmit(onSubmit)}
+            icon={<MoveRight size={20} color={Colors.light.background} />}
+            iconPosition="right"
             loading={isLoading}
             fullWidth
             style={styles.button}
