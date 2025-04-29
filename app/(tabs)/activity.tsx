@@ -87,7 +87,7 @@ export default function ActivityScreen() {
     try {
       const success = await addActivity({
         ...formData,
-        userId: user?.id || '1',
+        userId: user?.sUserID || '1',
       });
 
       if (success) {
@@ -154,7 +154,6 @@ export default function ActivityScreen() {
   };
 
   const getAttachmentName = (uri: string) => {
-    // Extract filename from URI
     const parts = uri.split('/');
     return parts[parts.length - 1];
   };
@@ -368,7 +367,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: Colors.light.primary,
-    borderRadius: Layout.borderRadius.medium,
+    borderRadius: Layout.borderRadius.xl,
     backgroundColor: `${Colors.light.primary}10`,
     height: Layout.inputHeight,
   },

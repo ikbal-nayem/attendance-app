@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
   ViewStyle,
+  TouchableWithoutFeedback, // Import TouchableWithoutFeedback
 } from 'react-native';
 
 type SelectOption = {
@@ -110,25 +111,31 @@ const Select: React.FC<SelectProps> = ({
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <SafeAreaView style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{modalTitle}</Text>
-              <TouchableOpacity
-                onPress={() => setModalVisible(false)}
-                style={styles.closeButton}
-              >
-                <X size={24} color={Colors.light.text} />
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              data={options}
-              renderItem={renderItem}
-              keyExtractor={(item) => item.value}
-              style={styles.optionsList}
-            />
-          </View>
-        </SafeAreaView>
+        {/* Wrap with TouchableWithoutFeedback to detect taps outside the modal content */}
+        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+          <SafeAreaView style={styles.modalOverlay}>
+            {/* Wrap content with another Touchable to prevent closing when tapping inside */}
+            <TouchableWithoutFeedback>
+              <View style={styles.modalContent}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>{modalTitle}</Text>
+                  <TouchableOpacity
+                    onPress={() => setModalVisible(false)}
+                    style={styles.closeButton}
+                  >
+                    <X size={24} color={Colors.light.text} />
+                  </TouchableOpacity>
+                </View>
+                <FlatList
+                  data={options}
+                  renderItem={renderItem}
+                  keyExtractor={(item) => item.value}
+                  style={styles.optionsList}
+                />
+              </View>
+            </TouchableWithoutFeedback>
+          </SafeAreaView>
+        </TouchableWithoutFeedback>
       </Modal>
     </View>
   );
@@ -150,7 +157,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.light.inputBorder,
-    borderRadius: Layout.borderRadius.medium,
+    borderRadius: Layout.borderRadius.xl, // Match Input component
     backgroundColor: Colors.light.inputBackground,
     height: Layout.inputHeight,
     paddingHorizontal: Layout.spacing.m,

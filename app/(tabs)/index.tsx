@@ -1,66 +1,54 @@
-import Card from '@/components/Card';
+import React, { useState } from 'react'; // Import useState
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  Image,
+  TouchableOpacity,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import {
+  Bell,
+  CalendarDays,
+  Clock,
+  Edit,
+  LogOut,
+  QrCode,
+  ArrowRightCircle,
+  ListTodo, // Added back
+  SendHorizontal as SendHorizonal, // Added back
+  Layers, // Added back
+  ListChecks, // Added back
+  MapPin, // Added back
+  Map, // Added back
+} from 'lucide-react-native';
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
-import { useNotifications } from '@/context/NotificationContext';
-import { Link, router } from 'expo-router';
-import {
-  Bell,
-  Clock,
-  CreditCard as Edit,
-  Layers,
-  ListChecks,
-  ListTodo,
-  LogOut,
-  Map,
-  MapPin,
-  SendHorizontal as SendHorizonal,
-} from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
-import {
-  Animated,
-  Image,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { router, Link, useFocusEffect } from 'expo-router'; // Added Link and useFocusEffect
+import { IUser } from '@/interfaces/auth'; // Import IUser interface
+import { Animated } from 'react-native'; // Import Animated
 
-export default function Dashboard() {
-  const { user, logout } = useAuth();
-  const { unreadCount } = useNotifications();
-  const [clockAnimation] = useState(new Animated.Value(0));
+export default function DashboardScreen() {
+  const { user, logout } = useAuth() as { user: IUser | null; logout: () => Promise<void> }; // Type assertion
+  const [fadeAnim] = useState(new Animated.Value(0)); // Animation state
 
-  useEffect(() => {
-    const animation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(clockAnimation, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(clockAnimation, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ])
-    );
+  // Fade in animation on screen focus
+  useFocusEffect(
+    React.useCallback(() => {
+      fadeAnim.setValue(0); // Reset animation
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500, // Adjust duration as needed
+        useNativeDriver: true,
+      }).start();
+      return () => {}; // Optional cleanup
+    }, [])
+  );
 
-    animation.start();
-
-    return () => {
-      animation.stop();
-    };
-  }, []);
-
-  const scale = clockAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 1.1],
-  });
 
   const handleLogout = async () => {
     await logout();
@@ -68,122 +56,153 @@ export default function Dashboard() {
   };
 
   if (!user) {
+    // Optional: Add a loading state or redirect
     return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
+      <SafeAreaView style={styles.container}>
+        <AppStatusBar />
+        <View style={styles.loadingContainer}>
+          <Text>Loading...</Text>
+        </View>
+      </SafeAreaView>
     );
   }
+
+  // Dummy data - replace with actual data where available
+  const lastPunchTime = '07:33 AM';
+  const punchDate = 'Wed, 11th Mar. 2020'; // Example date
+  const todaysTime = '04:33hr';
 
   return (
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
-
+      {/* Header outside ScrollView */}
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.greeting}>Hello,</Text>
-          <Text style={styles.userName}>{user.name}</Text>
+        <View style={styles.userInfo}>
+          <Image
+              source={{
+                uri: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png', // Placeholder
+              }}
+              style={styles.avatar}
+            />
+            <View>
+              {/* Use sEmployeeCode for Staff ID, fallback if needed */}
+              <Text style={styles.userId}>{user.sEmployeeCode || '710002945'}</Text>
+              <Text style={styles.userName}>{user.sUserName}</Text>
+            </View>
+          </View>
+          <TouchableOpacity style={styles.iconButton}>
+            <Bell size={26} color={Colors.light.text} />
+            {/* Add badge if needed */}
+          </TouchableOpacity>
+          {/* Optional: Add logout here if needed */}
+          {/* <TouchableOpacity onPress={handleLogout} style={styles.iconButton}>
+             <LogOut size={24} color={Colors.light.text} />
+            </TouchableOpacity> */}
+       </View>
+ 
+       {/* Scrollable Content Area */}
+       <ScrollView
+         showsVerticalScrollIndicator={false}
+         contentContainerStyle={styles.scrollContent}
+       >
+         {/* Animated View for Content */}
+         <Animated.View style={{ opacity: fadeAnim }}>
+           {/* Profile Card */}
+           <LinearGradient
+             colors={['#E0F7FA', '#B2EBF2']} // Light blue gradient
+          style={styles.profileCard}
+        >
+          <View style={styles.profileCardContent}>
+            <View style={styles.profileDetails}>
+              <Text style={styles.userRole}>
+                {/* Use sDesignation for Role */}
+                {user.sDesignation || 'Asst. Admin Officer'}
+              </Text>
+              <Text style={styles.userDepartment}>
+                {/* Use sDepartment for Department */}
+                {user.sDepartment || 'Admission Office'}
+              </Text>
+              {/* status does not exist on IUser */}
+              {/* <Text style={styles.detailText}>
+                {user.status || 'Full Time'}
+              </Text> */}
+              <Text style={styles.detailText}>
+                {/* Use sDepartment */}
+                Dept: {user.sDepartment || 'Administration'}
+              </Text>
+              {/* joiningDate does not exist on IUser */}
+              {/* <Text style={styles.detailText}>
+                Joining Date: {user.joiningDate || '12-2-2020'}
+              </Text> */}
+              {/* tenure relies on joiningDate */}
+              {/* <Text style={styles.detailText}>{tenure}</Text> */}
+            </View>
+
+            <View style={styles.profileActions}>
+              <TouchableOpacity style={styles.updateButton}>
+                <Edit size={16} color={Colors.light.primary} />
+                <Text style={styles.updateButtonText}>Update Profile</Text>
+              </TouchableOpacity>
+              <View style={styles.qrSection}>
+                <Text style={styles.virtualCardText}>Virtual Card</Text>
+                <View style={styles.qrCodeContainer}>
+                  <QrCode size={60} color={Colors.light.text} />
+                  {/* Replace with actual QR code component if needed */}
+                  {/* <Image source={{ uri: 'QR_CODE_URI' }} style={styles.qrCodeImage} /> */}
+                </View>
+              </View>
+            </View>
+          </View>
+        </LinearGradient>
+
+        {/* Check Out Button */}
+        <TouchableOpacity style={styles.checkOutButton}>
+          <Text style={styles.checkOutButtonText}>Tap to Check Out</Text>
+        </TouchableOpacity>
+
+        {/* Punch Info */}
+        <View style={styles.punchInfoCard}>
+          <View style={styles.punchHeader}>
+            <ArrowRightCircle size={20} color="#4CAF50" />
+            <Text style={styles.punchHeaderText}>Punch In at</Text>
+          </View>
+          <Text style={styles.punchTime}>
+            {lastPunchTime} | <Text style={styles.punchDate}>{punchDate}</Text>
+          </Text>
+          <Text style={styles.todaysTime}>Today's Time: {todaysTime}</Text>
         </View>
 
-        <View style={styles.headerRight}>
-          <Link href="/notifications" asChild>
-            <TouchableOpacity style={styles.iconButton}>
-              <Bell size={24} color={Colors.light.text} />
-              {unreadCount > 0 && (
-                <View style={styles.notificationBadge}>
-                  <Text style={styles.notificationBadgeText}>
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          </Link>
+        {/* Action Grid */}
+        <View style={styles.actionGrid}>
+          {/* Removed onPress for Leave as '/(tabs)/leave' route doesn't exist */}
+          <TouchableOpacity
+            style={styles.actionCard}
+            // onPress={() => router.push('/(tabs)/leave')}
+          >
+            <View style={[styles.actionIconContainer, { backgroundColor: '#E3F2FD' }]}>
+              <CalendarDays size={30} color="#2196F3" />
+            </View>
+            <Text style={styles.actionText}>Leave</Text>
+          </TouchableOpacity>
 
-          <TouchableOpacity style={styles.iconButton} onPress={handleLogout}>
-            <LogOut size={24} color={Colors.light.text} />
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => router.push('/(tabs)/attendance')}
+          >
+            <View style={[styles.actionIconContainer, { backgroundColor: '#E0F2F7' }]}>
+              <Clock size={30} color="#00ACC1" />
+            </View>
+            <Text style={styles.actionText}>Attendance</Text>
           </TouchableOpacity>
         </View>
-      </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        <Card variant="elevated" style={styles.profileCard}>
-          <View style={styles.profileHeader}>
-            <Image
-              source={{
-                uri:
-                  user.photo ||
-                  'https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg',
-              }}
-              style={styles.profileImage}
-            />
-
-            <View style={styles.profileInfo}>
-              <View style={styles.profileNameRow}>
-                <Text style={styles.profileName}>{user.name}</Text>
-                <TouchableOpacity style={styles.editButton}>
-                  <Edit size={16} color={Colors.light.primary} />
-                  <Text style={styles.editButtonText}>Update Profile</Text>
-                </TouchableOpacity>
-              </View>
-
-              <Text style={styles.profileRole}>{user.role}</Text>
-              <Text style={styles.profileDepartment}>{user.department}</Text>
-
-              <View style={styles.profileDetail}>
-                <Text style={styles.profileDetailLabel}>Status:</Text>
-                <Text style={styles.profileDetailValue}>{user.status}</Text>
-              </View>
-
-              <View style={styles.profileDetail}>
-                <Text style={styles.profileDetailLabel}>Joining Date:</Text>
-                <Text style={styles.profileDetailValue}>
-                  {user.joiningDate}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          <View style={styles.virtualCardSection}>
-            <View style={styles.virtualCardHeader}>
-              <Text style={styles.virtualCardHeaderText}>Virtual Card</Text>
-            </View>
-
-            <View style={styles.qrCodeContainer}>
-              <Image
-                source={{
-                  uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/QR_Code_Example.svg/1200px-QR_Code_Example.svg.png',
-                }}
-                style={styles.qrCode}
-              />
-            </View>
-
-            <View style={styles.staffIdContainer}>
-              <Text style={styles.staffIdLabel}>Staff ID</Text>
-              <Text style={styles.staffId}>{user.staffId}</Text>
-            </View>
-          </View>
-        </Card>
-
+        {/* Quick Actions Section (Restored & Adapted) */}
         <Text style={styles.sectionTitle}>Quick Actions</Text>
-
         <View style={styles.quickActionsContainer}>
-          <Link href="/attendance" asChild>
+          {/* Attendance already in grid above, keep others */}
+          <Link href="/(tabs)/activity" asChild>
             <TouchableOpacity style={styles.quickActionButton}>
-              <Animated.View
-                style={[styles.quickActionIcon, { transform: [{ scale }] }]}
-              >
-                <Clock size={24} color={Colors.light.primary} />
-              </Animated.View>
-              <Text style={styles.quickActionText}>Attendance</Text>
-            </TouchableOpacity>
-          </Link>
-
-          <Link href="/activity" asChild>
-            <TouchableOpacity style={styles.quickActionButton}>
-              <View style={styles.quickActionIcon}>
+              <View style={[styles.quickActionIcon, { backgroundColor: '#FFF9C4' }]}>
                 <ListTodo size={24} color={Colors.light.accent} />
               </View>
               <Text style={styles.quickActionText}>Activity</Text>
@@ -192,20 +211,23 @@ export default function Dashboard() {
 
           <Link href="/notifications/send" asChild>
             <TouchableOpacity style={styles.quickActionButton}>
-              <View style={styles.quickActionIcon}>
+              <View style={[styles.quickActionIcon, { backgroundColor: '#E1F5FE' }]}>
                 <SendHorizonal size={24} color={Colors.light.secondary} />
               </View>
               <Text style={styles.quickActionText}>Send Notification</Text>
             </TouchableOpacity>
           </Link>
+
+          {/* Add a placeholder or another action if needed for 3 items */}
+           <View style={styles.quickActionButton} />
         </View>
 
+        {/* Enquiry Section (Restored & Adapted) */}
         <Text style={styles.sectionTitle}>Enquiry</Text>
-
         <View style={styles.enquiryContainer}>
           <Link href="/enquiry/activities" asChild>
             <TouchableOpacity style={styles.enquiryCard}>
-              <View style={styles.enquiryIcon}>
+              <View style={styles.enquiryIconContainer}>
                 <Layers size={24} color="#8E44AD" />
               </View>
               <Text style={styles.enquiryTitle}>Daily Activities</Text>
@@ -214,35 +236,32 @@ export default function Dashboard() {
 
           <Link href="/enquiry/attendance-history" asChild>
             <TouchableOpacity style={styles.enquiryCard}>
-              <View style={styles.enquiryIcon}>
+              <View style={styles.enquiryIconContainer}>
                 <ListChecks size={24} color="#2980B9" />
               </View>
-              <Text style={styles.enquiryTitle}>
-                Clock-in/Clock-out History
-              </Text>
+              <Text style={styles.enquiryTitle}>Clock-in/Clock-out History</Text>
             </TouchableOpacity>
           </Link>
 
           <Link href="/enquiry/geolocation" asChild>
             <TouchableOpacity style={styles.enquiryCard}>
-              <View style={styles.enquiryIcon}>
+              <View style={styles.enquiryIconContainer}>
                 <MapPin size={24} color="#16A085" />
               </View>
-              <Text style={styles.enquiryTitle}>
-                Geolocation & Territory History
-              </Text>
+              <Text style={styles.enquiryTitle}>Geolocation History</Text>
             </TouchableOpacity>
           </Link>
 
           <Link href="/enquiry/live-tracking" asChild>
             <TouchableOpacity style={styles.enquiryCard}>
-              <View style={styles.enquiryIcon}>
+              <View style={styles.enquiryIconContainer}>
                 <Map size={24} color="#E74C3C" />
               </View>
               <Text style={styles.enquiryTitle}>Live Tracking</Text>
             </TouchableOpacity>
           </Link>
         </View>
+       </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -251,179 +270,200 @@ export default function Dashboard() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.background,
+    backgroundColor: Colors.light.background, // Or a slightly off-white like #F8F9FA
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loadingText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 16,
-    color: Colors.light.text,
+  scrollContent: {
+    padding: Layout.spacing.m, // Consistent padding
+    paddingBottom: Layout.spacing.xl * 2, // Extra padding at bottom for scroll
   },
-  header: {
+  header: { // Styles for header outside scrollview
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: Layout.spacing.l,
-    paddingTop: Layout.spacing.l,
+    paddingHorizontal: Layout.spacing.m, // Use main padding
+    paddingTop: Layout.spacing.s, // Adjust as needed
     paddingBottom: Layout.spacing.m,
+    // Removed marginBottom as it's outside scroll
   },
-  headerLeft: {},
-  greeting: {
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: Layout.spacing.m,
+    borderWidth: 1,
+    borderColor: Colors.light.tint + '50', // Subtle border
+  },
+  userId: {
+    fontSize: 14,
     fontFamily: 'Inter-Regular',
-    fontSize: 16,
     color: Colors.light.subtext,
   },
   userName: {
+    fontSize: 18,
     fontFamily: 'Inter-SemiBold',
-    fontSize: 20,
     color: Colors.light.text,
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   iconButton: {
     padding: Layout.spacing.s,
-    marginLeft: Layout.spacing.s,
-    position: 'relative',
-  },
-  notificationBadge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    backgroundColor: Colors.light.error,
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-  },
-  notificationBadgeText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 10,
-    color: 'white',
-  },
-  scrollContent: {
-    padding: Layout.spacing.l,
   },
   profileCard: {
+    borderRadius: Layout.borderRadius.large,
     marginBottom: Layout.spacing.l,
+    padding: Layout.spacing.m,
+    ...Layout.shadow.medium, // Add shadow for depth
   },
-  profileHeader: {
-    flexDirection: 'row',
-    marginBottom: Layout.spacing.m,
-  },
-  profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginRight: Layout.spacing.m,
-  },
-  profileInfo: {
-    flex: 1,
-  },
-  profileNameRow: {
+  profileCardContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
   },
-  profileName: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 18,
-    color: Colors.light.text,
-    marginBottom: 2,
+  profileDetails: {
+    flex: 1, // Take available space
+    marginRight: Layout.spacing.m,
   },
-  editButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: `${Colors.light.primary}15`,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderRadius: Layout.borderRadius.small,
-  },
-  editButtonText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 12,
-    color: Colors.light.primary,
-    marginLeft: 4,
-  },
-  profileRole: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 16,
-    color: Colors.light.primary,
-    marginBottom: 2,
-  },
-  profileDepartment: {
-    fontFamily: 'Inter-Regular',
+  userRole: {
     fontSize: 14,
+    fontFamily: 'Inter-Regular',
     color: Colors.light.subtext,
+    marginBottom: 2,
+  },
+  userDepartment: {
+    fontSize: 18,
+    fontFamily: 'Inter-SemiBold',
+    color: Colors.light.primary, // Use primary color
     marginBottom: Layout.spacing.s,
   },
-  profileDetail: {
-    flexDirection: 'row',
-    marginBottom: 2,
-  },
-  profileDetailLabel: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 14,
-    color: Colors.light.subtext,
-    width: 100,
-  },
-  profileDetailValue: {
+  detailText: {
+    fontSize: 13,
     fontFamily: 'Inter-Regular',
-    fontSize: 14,
     color: Colors.light.text,
+    marginBottom: 3,
   },
-  virtualCardSection: {
-    backgroundColor: `${Colors.light.primary}10`,
-    borderRadius: Layout.borderRadius.medium,
-    padding: Layout.spacing.m,
-    alignItems: 'center',
+  profileActions: {
+    alignItems: 'flex-end', // Align items to the right
   },
-  virtualCardHeader: {
+  updateButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: 'white',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: Layout.borderRadius.large, // More rounded
     marginBottom: Layout.spacing.m,
+    ...Layout.shadow.light,
   },
-  virtualCardHeaderText: {
+  updateButtonText: {
+    fontSize: 13,
     fontFamily: 'Inter-Medium',
-    fontSize: 16,
     color: Colors.light.primary,
+    marginLeft: 5,
+  },
+  qrSection: {
+    alignItems: 'center',
+  },
+  virtualCardText: {
+    fontSize: 12,
+    fontFamily: 'Inter-Medium',
+    color: Colors.light.text,
+    marginBottom: Layout.spacing.xs,
   },
   qrCodeContainer: {
     backgroundColor: 'white',
+    padding: Layout.spacing.xs,
     borderRadius: Layout.borderRadius.small,
-    padding: Layout.spacing.s,
+    ...Layout.shadow.light,
+  },
+  // qrCodeImage: { // If using an actual image
+  //   width: 60,
+  //   height: 60,
+  // },
+  checkOutButton: {
+    backgroundColor: '#EF5350', // Red color from image
+    paddingVertical: Layout.spacing.m,
+    borderRadius: Layout.borderRadius.large * 2, // Very rounded
+    alignItems: 'center',
+    marginBottom: Layout.spacing.l,
+    ...Layout.shadow.medium,
+  },
+  checkOutButtonText: {
+    fontSize: 16,
+    fontFamily: 'Inter-SemiBold',
+    color: 'white',
+  },
+  punchInfoCard: {
+    backgroundColor: 'white',
+    borderRadius: Layout.borderRadius.large,
+    padding: Layout.spacing.m,
+    marginBottom: Layout.spacing.l,
+    ...Layout.shadow.light,
+  },
+  punchHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Layout.spacing.s,
+  },
+  punchHeaderText: {
+    fontSize: 14,
+    fontFamily: 'Inter-Medium',
+    color: Colors.light.subtext,
+    marginLeft: Layout.spacing.xs,
+  },
+  punchTime: {
+    fontSize: 20,
+    fontFamily: 'Inter-SemiBold',
+    color: Colors.light.text,
+    marginBottom: 3,
+  },
+  punchDate: {
+    fontSize: 18,
+    fontFamily: 'Inter-Regular',
+    color: Colors.light.subtext,
+  },
+  todaysTime: {
+    fontSize: 14,
+    fontFamily: 'Inter-Regular',
+    color: Colors.light.subtext,
+  },
+  actionGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  actionCard: {
+    backgroundColor: 'white',
+    borderRadius: Layout.borderRadius.large,
+    padding: Layout.spacing.m,
+    width: '48%', // Two cards side-by-side with a small gap
+    alignItems: 'center',
+    ...Layout.shadow.light,
+  },
+  actionIconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: Layout.borderRadius.medium, // Slightly less rounded than avatar
+    justifyContent: 'center',
+    alignItems: 'center',
     marginBottom: Layout.spacing.m,
   },
-  qrCode: {
-    width: 150,
-    height: 150,
-  },
-  staffIdContainer: {
-    alignItems: 'center',
-  },
-  staffIdLabel: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 12,
-    color: Colors.light.subtext,
-    marginBottom: 2,
-  },
-  staffId: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 18,
+  actionText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Medium',
     color: Colors.light.text,
   },
+  // Styles for restored sections (adapted)
   sectionTitle: {
     fontFamily: 'Inter-SemiBold',
     fontSize: 18,
     color: Colors.light.text,
     marginBottom: Layout.spacing.m,
+    marginTop: Layout.spacing.l, // Add margin top for separation
   },
   quickActionsContainer: {
     flexDirection: 'row',
@@ -432,17 +472,17 @@ const styles = StyleSheet.create({
   },
   quickActionButton: {
     alignItems: 'center',
-    width: '30%',
+    width: '30%', // Keep 3 items layout
   },
   quickActionIcon: {
     width: 60,
     height: 60,
-    backgroundColor: 'white',
-    borderRadius: 30,
+    borderRadius: 30, // Circular icons
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: Layout.spacing.s,
-    ...Layout.shadow.medium,
+    ...Layout.shadow.medium, // Use consistent shadow
+    backgroundColor: 'white', // Default background
   },
   quickActionText: {
     fontFamily: 'Inter-Medium',
@@ -456,19 +496,28 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   enquiryCard: {
-    width: '48%',
+    width: '48%', // Two cards per row
     backgroundColor: 'white',
-    borderRadius: Layout.borderRadius.medium,
+    borderRadius: Layout.borderRadius.large, // Consistent radius
     padding: Layout.spacing.m,
     marginBottom: Layout.spacing.m,
-    ...Layout.shadow.light,
+    ...Layout.shadow.light, // Consistent shadow
+    alignItems: 'center', // Center content
   },
-  enquiryIcon: {
-    marginBottom: Layout.spacing.s,
+  enquiryIconContainer: { // Container for icon
+    marginBottom: Layout.spacing.m,
+    // Add background/styling if needed, e.g., colored circle
+    // width: 50,
+    // height: 50,
+    // borderRadius: 25,
+    // justifyContent: 'center',
+    // alignItems: 'center',
+    // backgroundColor: '#f0f0f0',
   },
   enquiryTitle: {
     fontFamily: 'Inter-Medium',
     fontSize: 14,
     color: Colors.light.text,
+    textAlign: 'center',
   },
 });

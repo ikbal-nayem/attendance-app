@@ -1,6 +1,8 @@
 import { axiosIns } from '@/api/config';
 import { API_CONSTANTS } from '@/constants/api';
+import { IUser } from '@/interfaces/auth'; // Import IUser
 import { localData } from '@/services/storage';
+import { router } from 'expo-router';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 type AuthContextType = {
@@ -8,7 +10,7 @@ type AuthContextType = {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (data: FormData) => Promise<boolean>;
-  logout: () => void;
+  logout: () => Promise<void>; // Correct return type to Promise<void>
   register: (userData: Partial<IUser>) => Promise<boolean>;
   verifyOtp: (otp: string) => Promise<boolean>;
   tempUserData: Partial<IUser> | null;
@@ -20,7 +22,7 @@ const defaultContext: AuthContextType = {
   isAuthenticated: false,
   isLoading: true,
   login: async () => false,
-  logout: () => {},
+  logout: async () => {}, // Match async in default
   register: async () => false,
   verifyOtp: async () => false,
   tempUserData: null,
@@ -43,6 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         const userJson = await localData.get('user');
         if (userJson) {
           setUser(JSON.parse(userJson));
+          router.replace('/(tabs)');
         }
       } catch (error) {
         console.error('Error retrieving user data:', error);
@@ -54,34 +57,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     checkLoginStatus();
   }, []);
 
-  const login = (data: IObject): Promise<boolean> => {
+  const login = (data: FormData): Promise<boolean> => { // Match type definition FormData
     return new Promise((resolve) => {
       setIsLoading(true);
       axiosIns
         .post(API_CONSTANTS.SIGN_IN, data)
         .then(async (response) => {
-          console.log(response.data);
-          // await AsyncStorage.setItem('user', JSON.stringify(dummyUser));
-          // setUser(dummyUser);
-          resolve(true);
+          await localData.set('user', JSON.stringify(response.data));
+          setUser(response.data);
+          resolve(response.data);
         })
         .catch((error) => {
           console.error(error);
         })
         .finally(() => setIsLoading(false));
     });
-
-    // // Simulate API call delay
-    // await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // // Simple dummy validation
-    // if (staffId === dummyUser.staffId || staffId === dummyUser.email) {
-    //   setIsLoading(false);
-    //   return true;
-    // }
-
-    // setIsLoading(false);
-    // return false;
   };
 
   const logout = async () => {

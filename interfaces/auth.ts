@@ -1,4 +1,4 @@
-interface IUser {
+export interface IUser { // Add export keyword
   sUserID: string;
   sUserName: string;
   sSessionID: string;

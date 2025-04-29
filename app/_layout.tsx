@@ -3,6 +3,7 @@ import Layout from '@/constants/Layout';
 import { AuthProvider } from '@/context/AuthContext';
 import { LocationProvider } from '@/context/LocationContext';
 import { NotificationProvider } from '@/context/NotificationContext';
+import { ToastProvider } from '@/context/ToastContext'; // Import ToastProvider
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
 import {
   Inter_400Regular,
@@ -76,12 +77,14 @@ export default function RootLayout() {
       <AuthProvider>
         <NotificationProvider>
           <LocationProvider>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="auth/login" options={{ headerShown: false }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-            <StatusBar style="auto" />
+            <ToastProvider>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+              <StatusBar style="auto" />
+            </ToastProvider>
           </LocationProvider>
         </NotificationProvider>
       </AuthProvider>

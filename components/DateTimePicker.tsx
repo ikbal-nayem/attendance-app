@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderWidth: 1,
     borderColor: Colors.light.inputBorder,
-    borderRadius: Layout.borderRadius.medium,
+    borderRadius: Layout.borderRadius.xl, // Match Input component
     backgroundColor: Colors.light.inputBackground,
     height: Layout.inputHeight,
     paddingHorizontal: Layout.spacing.m,

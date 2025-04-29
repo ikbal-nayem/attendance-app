@@ -4,12 +4,13 @@ import Input from '@/components/Input';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
-import AuthLayout from '@/layout/AuthLayout'; // Import AuthLayout
+import { useToast } from '@/context/ToastContext';
+import AuthLayout from '@/layout/AuthLayout';
 import { makeFormData } from '@/utils/form-actions';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
 import { Lock, MoveRight, User } from 'lucide-react-native';
-import { MotiView } from 'moti'; // Import MotiView
+import { MotiView } from 'moti';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
@@ -29,6 +30,7 @@ type FieldProps = {
 };
 
 export default function LoginScreen() {
+  const { showToast } = useToast();
   const { login, isLoading } = useAuth();
   const {
     control,
@@ -51,6 +53,10 @@ export default function LoginScreen() {
         message: 'Invalid credentials. Please try again.',
       });
     } else {
+      showToast({
+        type: 'success',
+        message: 'Login successful!',
+      });
       router.replace('/(tabs)');
     }
   };
@@ -89,6 +95,7 @@ export default function LoginScreen() {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
+                editable={!isLoading}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 leftIcon={<User size={20} color={Colors.light.subtext} />}
@@ -111,6 +118,7 @@ export default function LoginScreen() {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
+                editable={!isLoading}
                 secureTextEntry
                 showPasswordToggle
                 leftIcon={<Lock size={20} color={Colors.light.subtext} />}

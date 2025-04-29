@@ -17,8 +17,10 @@ export default {
     success: '#34C759', // Green
     warning: '#FFCC00', // Yellow
     error: '#FF3B30', // Red
+    info: '#007AFF', // Vibrant Blue (Using primary for info)
     text: '#1C1C1E', // Almost Black
     subtext: '#8A8A8E', // Medium Grey
+    textSecondary: '#8A8A8E', // Using subtext for secondary text
     background: '#F2F2F7', // Very Light Grey (iOS style)
     card: '#FFFFFF', // White
     border: '#D1D1D6', // Light Grey
@@ -43,8 +45,10 @@ export default {
     success: '#30D158', // Lighter Green
     warning: '#FFD60A', // Lighter Yellow
     error: '#FF453A', // Lighter Red
+    info: '#0A84FF', // Lighter Blue for Dark Mode (Using primary for info)
     text: '#FFFFFF', // White
     subtext: '#8D8D93', // Lighter Grey
+    textSecondary: '#8D8D93', // Using subtext for secondary text
     background: '#000000', // Black (iOS style)
     card: '#1C1C1E', // Almost Black
     border: '#3A3A3C', // Dark Grey
