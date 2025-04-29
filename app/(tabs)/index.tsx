@@ -1,54 +1,65 @@
-import React, { useState } from 'react'; // Import useState
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import {
-  Bell,
-  CalendarDays,
-  Clock,
-  Edit,
-  LogOut,
-  QrCode,
-  ArrowRightCircle,
-  ListTodo, // Added back
-  SendHorizontal as SendHorizonal, // Added back
-  Layers, // Added back
-  ListChecks, // Added back
-  MapPin, // Added back
-  Map, // Added back
-} from 'lucide-react-native';
+import Popover from '@/components/Popover';
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
-import { router, Link, useFocusEffect } from 'expo-router'; // Added Link and useFocusEffect
-import { IUser } from '@/interfaces/auth'; // Import IUser interface
-import { Animated } from 'react-native'; // Import Animated
+import { IUser } from '@/interfaces/auth';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Link, router, useFocusEffect } from 'expo-router';
+import {
+  ArrowRightCircle,
+  Bell,
+  CalendarDays,
+  Clock,
+  Edit,
+  Layers,
+  ListChecks,
+  ListTodo,
+  LogOut,
+  Map,
+  MapPin,
+  QrCode,
+  SendHorizontal as SendHorizonal,
+} from 'lucide-react-native';
+import React, { useState } from 'react';
+import {
+  Animated,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+
+const popoverContent = (handleLogout: () => void) => (
+  <TouchableOpacity onPress={handleLogout}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+      <LogOut size={20} color={Colors.light.text} />
+      <Text>Logout</Text>
+    </View>
+  </TouchableOpacity>
+);
 
 export default function DashboardScreen() {
-  const { user, logout } = useAuth() as { user: IUser | null; logout: () => Promise<void> }; // Type assertion
-  const [fadeAnim] = useState(new Animated.Value(0)); // Animation state
+  const { user, logout } = useAuth() as {
+    user: IUser | null;
+    logout: () => Promise<void>;
+  };
+  const [fadeAnim] = useState(new Animated.Value(0));
 
-  // Fade in animation on screen focus
   useFocusEffect(
     React.useCallback(() => {
-      fadeAnim.setValue(0); // Reset animation
+      fadeAnim.setValue(0);
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 500, // Adjust duration as needed
+        duration: 500,
         useNativeDriver: true,
       }).start();
-      return () => {}; // Optional cleanup
+      return () => {};
     }, [])
   );
-
 
   const handleLogout = async () => {
     await logout();
@@ -56,7 +67,6 @@ export default function DashboardScreen() {
   };
 
   if (!user) {
-    // Optional: Add a loading state or redirect
     return (
       <SafeAreaView style={styles.container}>
         <AppStatusBar />
@@ -67,201 +77,219 @@ export default function DashboardScreen() {
     );
   }
 
-  // Dummy data - replace with actual data where available
   const lastPunchTime = '07:33 AM';
-  const punchDate = 'Wed, 11th Mar. 2020'; // Example date
+  const punchDate = 'Wed, 11th Mar. 2020';
   const todaysTime = '04:33hr';
 
   return (
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
-      {/* Header outside ScrollView */}
       <View style={styles.header}>
         <View style={styles.userInfo}>
-          <Image
+          <Popover content={popoverContent(handleLogout)}>
+            <Image
               source={{
                 uri: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png', // Placeholder
               }}
               style={styles.avatar}
             />
-            <View>
-              {/* Use sEmployeeCode for Staff ID, fallback if needed */}
-              <Text style={styles.userId}>{user.sEmployeeCode || '710002945'}</Text>
-              <Text style={styles.userName}>{user.sUserName}</Text>
-            </View>
+          </Popover>
+          <View>
+            <Text style={styles.userId}>
+              {user.sEmployeeCode || '710002945'}
+            </Text>
+            <Text style={styles.userName}>{user.sUserName}</Text>
           </View>
-          <TouchableOpacity style={styles.iconButton}>
-            <Bell size={26} color={Colors.light.text} />
-            {/* Add badge if needed */}
-          </TouchableOpacity>
-          {/* Optional: Add logout here if needed */}
-          {/* <TouchableOpacity onPress={handleLogout} style={styles.iconButton}>
-             <LogOut size={24} color={Colors.light.text} />
-            </TouchableOpacity> */}
-       </View>
- 
-       {/* Scrollable Content Area */}
-       <ScrollView
-         showsVerticalScrollIndicator={false}
-         contentContainerStyle={styles.scrollContent}
-       >
-         {/* Animated View for Content */}
-         <Animated.View style={{ opacity: fadeAnim }}>
-           {/* Profile Card */}
-           <LinearGradient
-             colors={['#E0F7FA', '#B2EBF2']} // Light blue gradient
-          style={styles.profileCard}
-        >
-          <View style={styles.profileCardContent}>
-            <View style={styles.profileDetails}>
-              <Text style={styles.userRole}>
-                {/* Use sDesignation for Role */}
-                {user.sDesignation || 'Asst. Admin Officer'}
-              </Text>
-              <Text style={styles.userDepartment}>
-                {/* Use sDepartment for Department */}
-                {user.sDepartment || 'Admission Office'}
-              </Text>
-              {/* status does not exist on IUser */}
-              {/* <Text style={styles.detailText}>
+        </View>
+        <TouchableOpacity style={styles.iconButton}>
+          <Bell size={26} color={Colors.light.text} />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {/* Animated View for Content */}
+        <Animated.View style={{ opacity: fadeAnim }}>
+          {/* Profile Card */}
+          <LinearGradient
+            colors={['#E0F7FA', '#B2EBF2']} // Light blue gradient
+            style={styles.profileCard}
+          >
+            <View style={styles.profileCardContent}>
+              <View style={styles.profileDetails}>
+                <Text style={styles.userRole}>
+                  {/* Use sDesignation for Role */}
+                  {user.sDesignation || 'Asst. Admin Officer'}
+                </Text>
+                <Text style={styles.userDepartment}>
+                  {/* Use sDepartment for Department */}
+                  {user.sDepartment || 'Admission Office'}
+                </Text>
+                {/* status does not exist on IUser */}
+                {/* <Text style={styles.detailText}>
                 {user.status || 'Full Time'}
               </Text> */}
-              <Text style={styles.detailText}>
-                {/* Use sDepartment */}
-                Dept: {user.sDepartment || 'Administration'}
-              </Text>
-              {/* joiningDate does not exist on IUser */}
-              {/* <Text style={styles.detailText}>
+                <Text style={styles.detailText}>
+                  {/* Use sDepartment */}
+                  Dept: {user.sDepartment || 'Administration'}
+                </Text>
+                {/* joiningDate does not exist on IUser */}
+                {/* <Text style={styles.detailText}>
                 Joining Date: {user.joiningDate || '12-2-2020'}
               </Text> */}
-              {/* tenure relies on joiningDate */}
-              {/* <Text style={styles.detailText}>{tenure}</Text> */}
-            </View>
+                {/* tenure relies on joiningDate */}
+                {/* <Text style={styles.detailText}>{tenure}</Text> */}
+              </View>
 
-            <View style={styles.profileActions}>
-              <TouchableOpacity style={styles.updateButton}>
-                <Edit size={16} color={Colors.light.primary} />
-                <Text style={styles.updateButtonText}>Update Profile</Text>
-              </TouchableOpacity>
-              <View style={styles.qrSection}>
-                <Text style={styles.virtualCardText}>Virtual Card</Text>
-                <View style={styles.qrCodeContainer}>
-                  <QrCode size={60} color={Colors.light.text} />
-                  {/* Replace with actual QR code component if needed */}
-                  {/* <Image source={{ uri: 'QR_CODE_URI' }} style={styles.qrCodeImage} /> */}
+              <View style={styles.profileActions}>
+                <TouchableOpacity style={styles.updateButton}>
+                  <Edit size={16} color={Colors.light.primary} />
+                  <Text style={styles.updateButtonText}>Update Profile</Text>
+                </TouchableOpacity>
+                <View style={styles.qrSection}>
+                  <Text style={styles.virtualCardText}>Virtual Card</Text>
+                  <View style={styles.qrCodeContainer}>
+                    <QrCode size={60} color={Colors.light.text} />
+                    {/* Replace with actual QR code component if needed */}
+                    {/* <Image source={{ uri: 'QR_CODE_URI' }} style={styles.qrCodeImage} /> */}
+                  </View>
                 </View>
               </View>
             </View>
-          </View>
-        </LinearGradient>
+          </LinearGradient>
 
-        {/* Check Out Button */}
-        <TouchableOpacity style={styles.checkOutButton}>
-          <Text style={styles.checkOutButtonText}>Tap to Check Out</Text>
-        </TouchableOpacity>
-
-        {/* Punch Info */}
-        <View style={styles.punchInfoCard}>
-          <View style={styles.punchHeader}>
-            <ArrowRightCircle size={20} color="#4CAF50" />
-            <Text style={styles.punchHeaderText}>Punch In at</Text>
-          </View>
-          <Text style={styles.punchTime}>
-            {lastPunchTime} | <Text style={styles.punchDate}>{punchDate}</Text>
-          </Text>
-          <Text style={styles.todaysTime}>Today's Time: {todaysTime}</Text>
-        </View>
-
-        {/* Action Grid */}
-        <View style={styles.actionGrid}>
-          {/* Removed onPress for Leave as '/(tabs)/leave' route doesn't exist */}
-          <TouchableOpacity
-            style={styles.actionCard}
-            // onPress={() => router.push('/(tabs)/leave')}
-          >
-            <View style={[styles.actionIconContainer, { backgroundColor: '#E3F2FD' }]}>
-              <CalendarDays size={30} color="#2196F3" />
-            </View>
-            <Text style={styles.actionText}>Leave</Text>
+          {/* Check Out Button */}
+          <TouchableOpacity style={styles.checkOutButton}>
+            <Text style={styles.checkOutButtonText}>Tap to Check Out</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.actionCard}
-            onPress={() => router.push('/(tabs)/attendance')}
-          >
-            <View style={[styles.actionIconContainer, { backgroundColor: '#E0F2F7' }]}>
-              <Clock size={30} color="#00ACC1" />
+          {/* Punch Info */}
+          <View style={styles.punchInfoCard}>
+            <View style={styles.punchHeader}>
+              <ArrowRightCircle size={20} color="#4CAF50" />
+              <Text style={styles.punchHeaderText}>Punch In at</Text>
             </View>
-            <Text style={styles.actionText}>Attendance</Text>
-          </TouchableOpacity>
-        </View>
+            <Text style={styles.punchTime}>
+              {lastPunchTime} |{' '}
+              <Text style={styles.punchDate}>{punchDate}</Text>
+            </Text>
+            <Text style={styles.todaysTime}>Today's Time: {todaysTime}</Text>
+          </View>
 
-        {/* Quick Actions Section (Restored & Adapted) */}
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.quickActionsContainer}>
-          {/* Attendance already in grid above, keep others */}
-          <Link href="/(tabs)/activity" asChild>
-            <TouchableOpacity style={styles.quickActionButton}>
-              <View style={[styles.quickActionIcon, { backgroundColor: '#FFF9C4' }]}>
-                <ListTodo size={24} color={Colors.light.accent} />
+          {/* Action Grid */}
+          <View style={styles.actionGrid}>
+            {/* Removed onPress for Leave as '/(tabs)/leave' route doesn't exist */}
+            <TouchableOpacity
+              style={styles.actionCard}
+              // onPress={() => router.push('/(tabs)/leave')}
+            >
+              <View
+                style={[
+                  styles.actionIconContainer,
+                  { backgroundColor: '#E3F2FD' },
+                ]}
+              >
+                <CalendarDays size={30} color="#2196F3" />
               </View>
-              <Text style={styles.quickActionText}>Activity</Text>
+              <Text style={styles.actionText}>Leave</Text>
             </TouchableOpacity>
-          </Link>
 
-          <Link href="/notifications/send" asChild>
-            <TouchableOpacity style={styles.quickActionButton}>
-              <View style={[styles.quickActionIcon, { backgroundColor: '#E1F5FE' }]}>
-                <SendHorizonal size={24} color={Colors.light.secondary} />
+            <TouchableOpacity
+              style={styles.actionCard}
+              onPress={() => router.push('/(tabs)/attendance')}
+            >
+              <View
+                style={[
+                  styles.actionIconContainer,
+                  { backgroundColor: '#E0F2F7' },
+                ]}
+              >
+                <Clock size={30} color="#00ACC1" />
               </View>
-              <Text style={styles.quickActionText}>Send Notification</Text>
+              <Text style={styles.actionText}>Attendance</Text>
             </TouchableOpacity>
-          </Link>
+          </View>
 
-          {/* Add a placeholder or another action if needed for 3 items */}
-           <View style={styles.quickActionButton} />
-        </View>
+          {/* Quick Actions Section (Restored & Adapted) */}
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <View style={styles.quickActionsContainer}>
+            {/* Attendance already in grid above, keep others */}
+            <Link href="/(tabs)/activity" asChild>
+              <TouchableOpacity style={styles.quickActionButton}>
+                <View
+                  style={[
+                    styles.quickActionIcon,
+                    { backgroundColor: '#FFF9C4' },
+                  ]}
+                >
+                  <ListTodo size={24} color={Colors.light.accent} />
+                </View>
+                <Text style={styles.quickActionText}>Activity</Text>
+              </TouchableOpacity>
+            </Link>
 
-        {/* Enquiry Section (Restored & Adapted) */}
-        <Text style={styles.sectionTitle}>Enquiry</Text>
-        <View style={styles.enquiryContainer}>
-          <Link href="/enquiry/activities" asChild>
-            <TouchableOpacity style={styles.enquiryCard}>
-              <View style={styles.enquiryIconContainer}>
-                <Layers size={24} color="#8E44AD" />
-              </View>
-              <Text style={styles.enquiryTitle}>Daily Activities</Text>
-            </TouchableOpacity>
-          </Link>
+            <Link href="/notifications/send" asChild>
+              <TouchableOpacity style={styles.quickActionButton}>
+                <View
+                  style={[
+                    styles.quickActionIcon,
+                    { backgroundColor: '#E1F5FE' },
+                  ]}
+                >
+                  <SendHorizonal size={24} color={Colors.light.secondary} />
+                </View>
+                <Text style={styles.quickActionText}>Send Notification</Text>
+              </TouchableOpacity>
+            </Link>
 
-          <Link href="/enquiry/attendance-history" asChild>
-            <TouchableOpacity style={styles.enquiryCard}>
-              <View style={styles.enquiryIconContainer}>
-                <ListChecks size={24} color="#2980B9" />
-              </View>
-              <Text style={styles.enquiryTitle}>Clock-in/Clock-out History</Text>
-            </TouchableOpacity>
-          </Link>
+            {/* Add a placeholder or another action if needed for 3 items */}
+            <View style={styles.quickActionButton} />
+          </View>
 
-          <Link href="/enquiry/geolocation" asChild>
-            <TouchableOpacity style={styles.enquiryCard}>
-              <View style={styles.enquiryIconContainer}>
-                <MapPin size={24} color="#16A085" />
-              </View>
-              <Text style={styles.enquiryTitle}>Geolocation History</Text>
-            </TouchableOpacity>
-          </Link>
+          {/* Enquiry Section (Restored & Adapted) */}
+          <Text style={styles.sectionTitle}>Enquiry</Text>
+          <View style={styles.enquiryContainer}>
+            <Link href="/enquiry/activities" asChild>
+              <TouchableOpacity style={styles.enquiryCard}>
+                <View style={styles.enquiryIconContainer}>
+                  <Layers size={24} color="#8E44AD" />
+                </View>
+                <Text style={styles.enquiryTitle}>Daily Activities</Text>
+              </TouchableOpacity>
+            </Link>
 
-          <Link href="/enquiry/live-tracking" asChild>
-            <TouchableOpacity style={styles.enquiryCard}>
-              <View style={styles.enquiryIconContainer}>
-                <Map size={24} color="#E74C3C" />
-              </View>
-              <Text style={styles.enquiryTitle}>Live Tracking</Text>
-            </TouchableOpacity>
-          </Link>
-        </View>
-       </Animated.View>
+            <Link href="/enquiry/attendance-history" asChild>
+              <TouchableOpacity style={styles.enquiryCard}>
+                <View style={styles.enquiryIconContainer}>
+                  <ListChecks size={24} color="#2980B9" />
+                </View>
+                <Text style={styles.enquiryTitle}>
+                  Clock-in/Clock-out History
+                </Text>
+              </TouchableOpacity>
+            </Link>
+
+            <Link href="/enquiry/geolocation" asChild>
+              <TouchableOpacity style={styles.enquiryCard}>
+                <View style={styles.enquiryIconContainer}>
+                  <MapPin size={24} color="#16A085" />
+                </View>
+                <Text style={styles.enquiryTitle}>Geolocation History</Text>
+              </TouchableOpacity>
+            </Link>
+
+            <Link href="/enquiry/live-tracking" asChild>
+              <TouchableOpacity style={styles.enquiryCard}>
+                <View style={styles.enquiryIconContainer}>
+                  <Map size={24} color="#E74C3C" />
+                </View>
+                <Text style={styles.enquiryTitle}>Live Tracking</Text>
+              </TouchableOpacity>
+            </Link>
+          </View>
+        </Animated.View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -281,7 +309,8 @@ const styles = StyleSheet.create({
     padding: Layout.spacing.m, // Consistent padding
     paddingBottom: Layout.spacing.xl * 2, // Extra padding at bottom for scroll
   },
-  header: { // Styles for header outside scrollview
+  header: {
+    // Styles for header outside scrollview
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -504,7 +533,8 @@ const styles = StyleSheet.create({
     ...Layout.shadow.light, // Consistent shadow
     alignItems: 'center', // Center content
   },
-  enquiryIconContainer: { // Container for icon
+  enquiryIconContainer: {
+    // Container for icon
     marginBottom: Layout.spacing.m,
     // Add background/styling if needed, e.g., colored circle
     // width: 50,
