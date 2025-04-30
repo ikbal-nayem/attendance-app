@@ -3,7 +3,6 @@ import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
-import { IUser } from '@/interfaces/auth';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, router, useFocusEffect } from 'expo-router';
 import {

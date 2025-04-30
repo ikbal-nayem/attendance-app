@@ -1,5 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { localData } from '@/services/storage';
 import * as Location from 'expo-location';
+import { router } from 'expo-router';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 
@@ -14,25 +15,18 @@ export type LocationData = {
   address?: string;
 };
 
-export type UserLocation = {
-  userId: string;
-  userName: string;
-  location: LocationData;
-};
-
 type LocationContextType = {
   currentLocation: LocationData | null;
   locationPermission: boolean;
   locationErrorMsg: string | null;
   isTracking: boolean;
   locationHistory: LocationData[];
-  userLocations: UserLocation[];
   startTracking: () => Promise<void>;
   stopTracking: () => void;
   requestLocationPermission: () => Promise<boolean>;
   getAddressFromCoordinates: (
-    latitude: number,
-    longitude: number
+    latitude?: number,
+    longitude?: number
   ) => Promise<string>;
 };
 
@@ -42,7 +36,6 @@ const defaultContext: LocationContextType = {
   locationErrorMsg: null,
   isTracking: false,
   locationHistory: [],
-  userLocations: [],
   startTracking: async () => {},
   stopTracking: () => {},
   requestLocationPermission: async () => false,
@@ -50,40 +43,6 @@ const defaultContext: LocationContextType = {
 };
 
 const LocationContext = createContext<LocationContextType>(defaultContext);
-
-// Sample user locations for the map
-const sampleUserLocations: UserLocation[] = [
-  {
-    userId: '1',
-    userName: 'John Smith',
-    location: {
-      latitude: 37.7749,
-      longitude: -122.4194,
-      timestamp: Date.now() - 3600000, // 1 hour ago
-      accuracy: 10,
-    },
-  },
-  {
-    userId: '2',
-    userName: 'Sarah Johnson',
-    location: {
-      latitude: 37.7854,
-      longitude: -122.4055,
-      timestamp: Date.now() - 1800000, // 30 minutes ago
-      accuracy: 15,
-    },
-  },
-  {
-    userId: '3',
-    userName: 'Michael Chen',
-    location: {
-      latitude: 37.7946,
-      longitude: -122.3999,
-      timestamp: Date.now() - 600000, // 10 minutes ago
-      accuracy: 8,
-    },
-  },
-];
 
 export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -95,8 +54,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
   const [locationErrorMsg, setLocationErrorMsg] = useState<string | null>(null);
   const [isTracking, setIsTracking] = useState(false);
   const [locationHistory, setLocationHistory] = useState<LocationData[]>([]);
-  const [userLocations, setUserLocations] =
-    useState<UserLocation[]>(sampleUserLocations);
   const [locationTrackingInterval, setLocationTrackingInterval] =
     useState<NodeJS.Timeout | null>(null);
 
@@ -104,9 +61,9 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
     // Load location history from storage
     const loadLocationHistory = async () => {
       try {
-        const storedHistory = await AsyncStorage.getItem('locationHistory');
+        const storedHistory = await localData.get('locationHistory');
         if (storedHistory) {
-          setLocationHistory(JSON.parse(storedHistory));
+          setLocationHistory(storedHistory);
         }
       } catch (error) {
         console.error('Error loading location history:', error);
@@ -114,7 +71,14 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     loadLocationHistory();
-    requestLocationPermission();
+    const checkPermission = async () => {
+      const hasPermission = await requestLocationPermission();
+      if (!hasPermission) {
+        router.replace('/auth/PermissionRequestScreen');
+      }
+    };
+    checkPermission();
+    startTracking();
 
     return () => {
       if (locationTrackingInterval) {
@@ -125,10 +89,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const saveLocationHistory = async (updatedHistory: LocationData[]) => {
     try {
-      await AsyncStorage.setItem(
-        'locationHistory',
-        JSON.stringify(updatedHistory)
-      );
+      await localData.set('locationHistory', updatedHistory);
     } catch (error) {
       console.error('Error saving location history:', error);
     }
@@ -145,14 +106,12 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
         return false;
       }
 
-      // Only request background permissions on native platforms
       if (Platform.OS !== 'web') {
         const { status: backgroundStatus } =
           await Location.requestBackgroundPermissionsAsync();
 
         if (backgroundStatus !== 'granted') {
           setLocationErrorMsg('Permission for background location was denied');
-          // Still allow foreground location
         }
       }
 
@@ -212,7 +171,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
         setLocationHistory(updatedHistory);
         saveLocationHistory(updatedHistory);
       }
-    }, 5 * 60 * 1000); // 5 minutes
+    }, 10 * 60 * 1000); // 5 minutes
 
     setLocationTrackingInterval(interval);
     setIsTracking(true);
@@ -227,9 +186,10 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const getAddressFromCoordinates = async (
-    latitude: number,
-    longitude: number
+    latitude?: number,
+    longitude?: number
   ): Promise<string> => {
+    if (!latitude || !longitude) return 'Unknown location';
     try {
       const location = await Location.reverseGeocodeAsync({
         latitude,
@@ -237,11 +197,25 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       if (location && location.length > 0) {
-        const { street, city, region, country, postalCode } = location[0];
-        const addressParts = [street, city, region, postalCode, country].filter(
-          Boolean
-        );
-        return addressParts.join(', ');
+        const {
+          formattedAddress,
+          streetNumber,
+          street,
+          city,
+          region,
+          country,
+          postalCode,
+        } = location[0];
+
+        const addressParts = [
+          streetNumber,
+          street,
+          city,
+          region,
+          postalCode,
+          country,
+        ].filter(Boolean);
+        return formattedAddress || addressParts.join(', ');
       }
 
       return 'Unknown location';
@@ -257,7 +231,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
     locationErrorMsg,
     isTracking,
     locationHistory,
-    userLocations,
     startTracking,
     stopTracking,
     requestLocationPermission,

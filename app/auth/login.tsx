@@ -4,6 +4,7 @@ import Input from '@/components/Input';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
+import { useLocation } from '@/context/LocationContext';
 import { useToast } from '@/context/ToastContext';
 import AuthLayout from '@/layout/AuthLayout';
 import { makeFormData } from '@/utils/form-actions';
@@ -32,6 +33,7 @@ type FieldProps = {
 export default function LoginScreen() {
   const { showToast } = useToast();
   const { login, isLoading } = useAuth();
+  const { currentLocation, getAddressFromCoordinates } = useLocation();
   const {
     control,
     handleSubmit,
@@ -45,7 +47,16 @@ export default function LoginScreen() {
     },
   });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: IObject) => {
+    data = {
+      ...data,
+      sLatitude: currentLocation?.latitude,
+      sLongitude: currentLocation?.longitude,
+      sLocation: await getAddressFromCoordinates(
+        currentLocation?.latitude,
+        currentLocation?.longitude
+      ),
+    };
     const success = await login(makeFormData(data));
     if (!success) {
       setFormError('root', {
@@ -78,7 +89,7 @@ export default function LoginScreen() {
           <Text style={styles.subtitle}>Sign in to your account</Text>
 
           {errors.root && (
-            <Text style={styles.errorText}>{errors.root.message}</Text>
+            <Text style={styles.errorText}>{errors.root?.message}</Text>
           )}
 
           <Controller
