@@ -59,22 +59,22 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     // Load location history from storage
-    const loadLocationHistory = async () => {
-      try {
-        const storedHistory = await localData.get('locationHistory');
-        if (storedHistory) {
-          setLocationHistory(storedHistory);
-        }
-      } catch (error) {
-        console.error('Error loading location history:', error);
-      }
-    };
+    // const loadLocationHistory = async () => {
+    //   try {
+    //     const storedHistory = await localData.get('locationHistory');
+    //     if (storedHistory) {
+    //       setLocationHistory(storedHistory);
+    //     }
+    //   } catch (error) {
+    //     console.error('Error loading location history:', error);
+    //   }
+    // };
 
-    loadLocationHistory();
+    // loadLocationHistory();
     const checkPermission = async () => {
       const hasPermission = await requestLocationPermission();
       if (!hasPermission) {
-        router.replace('/auth/PermissionRequestScreen');
+        router.replace('/permission-request');
       }
     };
     checkPermission();
@@ -160,7 +160,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
     if (initialLocation) {
       const updatedHistory = [...locationHistory, initialLocation];
       setLocationHistory(updatedHistory);
-      saveLocationHistory(updatedHistory);
+      // saveLocationHistory(updatedHistory);
     }
 
     // Set up periodic location tracking (every 5 minutes)
@@ -169,7 +169,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
       if (location) {
         const updatedHistory = [...locationHistory, location];
         setLocationHistory(updatedHistory);
-        saveLocationHistory(updatedHistory);
+        // saveLocationHistory(updatedHistory);
       }
     }, 10 * 60 * 1000); // 5 minutes
 

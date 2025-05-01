@@ -1,6 +1,5 @@
 import { axiosIns } from '@/api/config';
 import { API_CONSTANTS } from '@/constants/api';
-import { IUser } from '@/interfaces/auth'; // Import IUser
 import { localData } from '@/services/storage';
 import { router } from 'expo-router';
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -9,9 +8,9 @@ type AuthContextType = {
   user: IUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (data: FormData) => Promise<boolean>;
-  logout: () => Promise<void>; // Correct return type to Promise<void>
-  register: (userData: Partial<IUser>) => Promise<boolean>;
+  login: (data: FormData) => Promise<boolean | string>;
+  logout: () => Promise<void>;
+  register: (userData: any) => Promise<boolean>;
   verifyOtp: (otp: string) => Promise<boolean>;
   tempUserData: Partial<IUser> | null;
   setTempUserData: (data: Partial<IUser> | null) => void;
@@ -22,7 +21,7 @@ const defaultContext: AuthContextType = {
   isAuthenticated: false,
   isLoading: true,
   login: async () => false,
-  logout: async () => {}, // Match async in default
+  logout: async () => {},
   register: async () => false,
   verifyOtp: async () => false,
   tempUserData: null,
@@ -44,7 +43,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       try {
         const userJson = await localData.get('user');
         if (userJson) {
-          setUser(JSON.parse(userJson));
+          console.log('User found: ', userJson)
+          setUser(userJson);
           router.replace('/(tabs)');
         }
       } catch (error) {
@@ -57,18 +57,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     checkLoginStatus();
   }, []);
 
-  const login = (data: FormData): Promise<boolean> => { // Match type definition FormData
-    return new Promise((resolve) => {
-      setIsLoading(true);
+  const login = (data: FormData): Promise<boolean | string> => {
+    setIsLoading(true);
+    return new Promise((resolve, reject) => {
       axiosIns
-        .post(API_CONSTANTS.SIGN_IN, data)
+        .post(API_CONSTANTS.AUTH.SIGN_IN, data)
         .then(async (response) => {
-          await localData.set('user', JSON.stringify(response.data));
-          setUser(response.data);
-          resolve(response.data);
+          if (response.data?.success) {
+            await localData.set('user', response.data);
+            setUser(response.data);
+            resolve(true);
+          }
+          reject(response.data.sMessageInfo);
         })
         .catch((error) => {
           console.error(error);
+          reject('An error occurred during login. Please try again.');
         })
         .finally(() => setIsLoading(false));
     });
@@ -81,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(false);
   };
 
-  const register = async (userData: Partial<IUser>): Promise<boolean> => {
+  const register = async (userData: any): Promise<boolean> => {
     setIsLoading(true);
 
     // Simulate API call delay

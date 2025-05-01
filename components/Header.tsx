@@ -2,9 +2,9 @@ import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useNavigation } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import { MotiView } from 'moti';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 
 type HeaderProps = {
   title: string;
@@ -20,10 +20,8 @@ const AppHeader = ({
   const navigation = useNavigation();
 
   return (
-    <MotiView
-      from={{ opacity: 0, translateY: -50 }}
-      animate={{ opacity: 1, translateY: 0 }}
-      transition={{ type: 'timing', duration: 500, delay: 100 }}
+    <Animated.View
+      entering={FadeInDown.duration(500).delay(100)}
     >
       <View
         style={[
@@ -48,7 +46,7 @@ const AppHeader = ({
           {title}
         </Text>
       </View>
-    </MotiView>
+    </Animated.View>
   );
 };
 

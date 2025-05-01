@@ -20,9 +20,9 @@ import {
   User,
   User2,
 } from 'lucide-react-native';
-import { MotiView } from 'moti';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import {
   Alert,
   Image,
@@ -203,10 +203,8 @@ export default function RegisterScreen() {
       <AuthLayout>
         <AppHeader title="Create New Account" bg="primary" />
         <ScrollView keyboardShouldPersistTaps="handled">
-          <MotiView
-            from={{ opacity: 0, translateY: 50 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 500, delay: 100 }}
+          <Animated.View
+            entering={FadeInDown.duration(500).delay(100)}
           >
             <Card style={styles.card}>
               <Text style={styles.subtitle}>Register to get started</Text>
@@ -215,10 +213,8 @@ export default function RegisterScreen() {
                 <Text style={styles.errorText}>{errors.root.message}</Text>
               )}
 
-              <MotiView
-                from={{ opacity: 0, translateY: 20 }}
-                animate={{ opacity: 1, translateY: 0 }}
-                transition={{ type: 'timing', duration: 500, delay: 200 }}
+              <Animated.View
+                entering={FadeInDown.duration(500).delay(200)}
                 style={styles.photoContainer}
               >
                 <TouchableOpacity
@@ -241,7 +237,7 @@ export default function RegisterScreen() {
                     </View>
                   )}
                 </TouchableOpacity>
-              </MotiView>
+              </Animated.View>
 
               <Controller
                 control={control}
@@ -354,10 +350,8 @@ export default function RegisterScreen() {
                 label="Is Company Device"
               />
 
-              <MotiView
-                from={{ opacity: 0, translateY: 20 }}
-                animate={{ opacity: 1, translateY: 0 }}
-                transition={{ type: 'timing', duration: 500, delay: 400 }}
+              <Animated.View
+                entering={FadeInDown.duration(500).delay(400)}
                 style={styles.button}
               >
                 <Button
@@ -369,21 +363,19 @@ export default function RegisterScreen() {
                   fullWidth
                   size="small"
                 />
-              </MotiView>
+              </Animated.View>
 
-              <MotiView
-                from={{ opacity: 0, translateY: 20 }}
-                animate={{ opacity: 1, translateY: 0 }}
-                transition={{ type: 'timing', duration: 500, delay: 500 }}
+              <Animated.View
+                entering={FadeInDown.duration(500).delay(500)}
                 style={styles.loginContainer}
               >
                 <Text style={styles.loginText}>Already have an account? </Text>
                 <TouchableOpacity onPress={() => router.replace('/auth/login')}>
                   <Text style={styles.loginLink}>Sign In</Text>
                 </TouchableOpacity>
-              </MotiView>
+              </Animated.View>
             </Card>
-          </MotiView>
+          </Animated.View>
         </ScrollView>
       </AuthLayout>
     </>

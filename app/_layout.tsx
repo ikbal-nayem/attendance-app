@@ -14,9 +14,9 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { MotiView } from 'moti';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, StyleSheet, Text } from 'react-native';
+import Animated, { FadeOut } from 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 SplashScreen.preventAutoHideAsync();
@@ -31,7 +31,6 @@ export default function RootLayout() {
   });
 
   const [isAppReady, setIsAppReady] = useState(false);
-  const [isSplashVisible, setIsSplashVisible] = useState(true);
 
   useEffect(() => {
     if (fontsLoaded) {
@@ -40,18 +39,11 @@ export default function RootLayout() {
     }
   }, [fontsLoaded]);
 
-  if (!isAppReady || isSplashVisible) {
+  if (!isAppReady) {
     return (
-      <MotiView
+      <Animated.View
         style={styles.splashContainer}
-        from={{ opacity: 1 }}
-        animate={{ opacity: isAppReady ? 0 : 1 }}
-        transition={{ duration: 500 }}
-        onDidAnimate={(_key, finished) => {
-          if (finished && isAppReady) {
-            setIsSplashVisible(false);
-          }
-        }}
+        exiting={isAppReady ? FadeOut.duration(500) : undefined}
       >
         <Image
           source={require('../assets/images/logo.png')}
@@ -68,7 +60,7 @@ export default function RootLayout() {
             style={styles.loadingIndicator}
           />
         )}
-      </MotiView>
+      </Animated.View>
     );
   }
 

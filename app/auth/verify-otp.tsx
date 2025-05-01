@@ -1,14 +1,15 @@
-import AuthLayout from '@/layout/AuthLayout';
 import Button from '@/components/Button';
 import Card from '@/components/Card';
+import AppHeader from '@/components/Header';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
+import AuthLayout from '@/layout/AuthLayout';
 import { zodResolver } from '@hookform/resolvers/zod'; // Import zodResolver
 import { router } from 'expo-router';
-import { MotiView } from 'moti'; // Import MotiView
 import React, { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form'; // Import react-hook-form
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import {
   Keyboard,
   StyleSheet,
@@ -117,19 +118,16 @@ export default function VerifyOTPScreen() {
 
   return (
     <AuthLayout>
-      <MotiView
-        from={{ opacity: 0, translateY: 50 }}
-        animate={{ opacity: 1, translateY: 0 }}
-        transition={{ type: 'timing', duration: 500, delay: 100 }}
+      <AppHeader title="Verify Your Email" bg="primary" />
+      <Animated.View
+        entering={FadeInDown.duration(500).delay(100)}
       >
         <Card style={styles.card}>
-          <Text style={styles.title}>Verify Your Email</Text>
-
           <View style={{ marginTop: Layout.spacing.xl }}>
             <Text style={styles.subtitle}>
               We have sent a verification code to the email address &nbsp;
               <Text style={{ fontWeight: 'bold' }}>
-                '{tempUserData?.email}'
+                '{tempUserData?.sEmailAddress}'
               </Text>
             </Text>
           </View>
@@ -187,10 +185,8 @@ export default function VerifyOTPScreen() {
             </Text>
           )}
 
-          <MotiView
-            from={{ opacity: 0, translateY: 20 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 500, delay: 200 }}
+          <Animated.View
+            entering={FadeInDown.duration(500).delay(200)}
             style={styles.timerContainer}
           >
             <Text style={styles.timerText}>
@@ -215,12 +211,10 @@ export default function VerifyOTPScreen() {
                 Resend OTP
               </Text>
             </TouchableOpacity>
-          </MotiView>
+          </Animated.View>
 
-          <MotiView
-            from={{ opacity: 0, translateY: 20 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 500, delay: 300 }}
+          <Animated.View
+            entering={FadeInDown.duration(500).delay(300)}
             style={styles.button}
           >
             <Button
@@ -231,12 +225,10 @@ export default function VerifyOTPScreen() {
               fullWidth
               // disabled={otpValue.length !== OTP_LENGTH}
             />
-          </MotiView>
+          </Animated.View>
 
-          <MotiView
-            from={{ opacity: 0, translateY: 20 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 500, delay: 400 }}
+          <Animated.View
+            entering={FadeInDown.duration(500).delay(400)}
           >
             <Button
               title="Go Back"
@@ -245,9 +237,9 @@ export default function VerifyOTPScreen() {
               variant="outline"
               fullWidth
             />
-          </MotiView>
+          </Animated.View>
         </Card>
-      </MotiView>
+      </Animated.View>
     </AuthLayout>
   );
 }

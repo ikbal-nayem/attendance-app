@@ -11,10 +11,16 @@ import { makeFormData } from '@/utils/form-actions';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
 import { Lock, MoveRight, User } from 'lucide-react-native';
-import { MotiView } from 'moti';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { z } from 'zod';
 
 const loginSchema = z.object({
@@ -30,9 +36,63 @@ type FieldProps = {
   value: string;
 };
 
+const header = () => {
+  const logoOpacity = useSharedValue(0);
+  const logoTranslateY = useSharedValue(-50);
+
+  const logoAnimation = useAnimatedStyle(() => ({
+    opacity: logoOpacity.value,
+    transform: [{ translateY: logoTranslateY.value }],
+  }));
+
+  React.useEffect(() => {
+    logoOpacity.value = withTiming(1, { duration: 500 });
+    logoTranslateY.value = withSpring(0, {
+      damping: 10,
+      stiffness: 100,
+    });
+  }, []);
+
+  return (
+    <Animated.View style={[styles.logoContainer, logoAnimation]}>
+      <Image
+        source={require('../../assets/images/logo.png')}
+        style={styles.logoImage}
+      />
+      <Text style={styles.logoText}>Supervisor/Manager Activity Tracking</Text>
+    </Animated.View>
+  );
+};
+
 export default function LoginScreen() {
+  const cardOpacity = useSharedValue(0);
+  const cardTranslateY = useSharedValue(50);
+  const cardAnimation = useAnimatedStyle(() => ({
+    opacity: cardOpacity.value,
+    transform: [{ translateY: cardTranslateY.value }],
+  }));
+
+  const registerOpacity = useSharedValue(0);
+  const registerTranslateY = useSharedValue(20);
+  const registerAnimation = useAnimatedStyle(() => ({
+    opacity: registerOpacity.value,
+    transform: [{ translateY: registerTranslateY.value }],
+  }));
+
+  React.useEffect(() => {
+    cardOpacity.value = withDelay(100, withTiming(1, { duration: 500 }));
+    cardTranslateY.value = withSpring(0, {
+      damping: 10,
+      stiffness: 100,
+    });
+    registerOpacity.value = withDelay(200, withTiming(1, { duration: 500 }));
+    registerTranslateY.value = withSpring(0, {
+      damping: 10,
+      stiffness: 100,
+    });
+  }, []);
   const { showToast } = useToast();
-  const { login, isLoading } = useAuth();
+  const { login, user, isLoading } = useAuth();
   const { currentLocation, getAddressFromCoordinates } = useLocation();
   const {
     control,
@@ -57,19 +117,21 @@ export default function LoginScreen() {
         currentLocation?.longitude
       ),
     };
-    const success = await login(makeFormData(data));
-    if (!success) {
-      setFormError('root', {
-        type: 'manual',
-        message: 'Invalid credentials. Please try again.',
+    login(makeFormData(data))
+      .then((res) => {
+        if (res !== true) return;
+        showToast({
+          type: 'success',
+          message: `Welcome back, ${user?.sUserName}`,
+        });
+        router.replace('/(tabs)');
+      })
+      .catch((res) => {
+        setFormError('root', {
+          type: 'manual',
+          message: res || 'Invalid credentials. Please try again.',
+        });
       });
-    } else {
-      showToast({
-        type: 'success',
-        message: 'Login successful!',
-      });
-      router.replace('/(tabs)');
-    }
   };
 
   const navigateToRegister = () => {
@@ -79,11 +141,7 @@ export default function LoginScreen() {
   return (
     <AuthLayout>
       {header()}
-      <MotiView
-        from={{ opacity: 0, translateY: 50 }}
-        animate={{ opacity: 1, translateY: 0 }}
-        transition={{ type: 'timing', duration: 500, delay: 100 }}
-      >
+      <Animated.View style={[styles.cardContainer, cardAnimation]}>
         <Card style={styles.card}>
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Sign in to your account</Text>
@@ -148,37 +206,17 @@ export default function LoginScreen() {
             style={styles.button}
           />
 
-          <MotiView
-            from={{ opacity: 0, translateY: 20 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'timing', duration: 500, delay: 200 }}
-            style={styles.registerContainer}
-          >
+          <Animated.View style={[styles.registerContainer, registerAnimation]}>
             <Text style={styles.registerText}>Don't have an account? </Text>
             <TouchableOpacity onPress={navigateToRegister}>
               <Text style={styles.registerLink}>Register</Text>
             </TouchableOpacity>
-          </MotiView>
+          </Animated.View>
         </Card>
-      </MotiView>
+      </Animated.View>
     </AuthLayout>
   );
 }
-
-const header = () => (
-  <MotiView
-    style={styles.logoContainer}
-    from={{ opacity: 0, translateY: -50 }}
-    animate={{ opacity: 1, translateY: 0 }}
-    transition={{ type: 'timing', duration: 500 }}
-  >
-    <Image
-      source={require('../../assets/images/logo.png')}
-      style={styles.logoImage}
-    />
-    <Text style={styles.logoText}>Supervisor/Manager Activity Tracking</Text>
-  </MotiView>
-);
 
 const styles = StyleSheet.create({
   logoContainer: {
@@ -201,6 +239,10 @@ const styles = StyleSheet.create({
     color: Colors.light.primaryLight,
     marginTop: Layout.spacing.m,
   },
+  cardContainer: {
+    opacity: 0,
+    transform: [{ translateY: 50 }],
+  },
   card: {
     margin: Layout.spacing.m,
   },
@@ -220,6 +262,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontFamily: 'Inter-Regular',
+    fontWeight: 'bold',
     fontSize: 14,
     color: Colors.light.error,
     marginBottom: Layout.spacing.m,

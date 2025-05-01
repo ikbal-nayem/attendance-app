@@ -42,10 +42,7 @@ const popoverContent = (handleLogout: () => void) => (
 );
 
 export default function DashboardScreen() {
-  const { user, logout } = useAuth() as {
-    user: IUser | null;
-    logout: () => Promise<void>;
-  };
+  const { user, logout } = useAuth();
   const [fadeAnim] = useState(new Animated.Value(0));
 
   useFocusEffect(
@@ -88,7 +85,7 @@ export default function DashboardScreen() {
           <Popover content={popoverContent(handleLogout)}>
             <Image
               source={{
-                uri: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png', // Placeholder
+                uri: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png',
               }}
               style={styles.avatar}
             />
@@ -109,31 +106,23 @@ export default function DashboardScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Animated View for Content */}
         <Animated.View style={{ opacity: fadeAnim }}>
-          {/* Profile Card */}
           <LinearGradient
-            colors={['#E0F7FA', '#B2EBF2']} // Light blue gradient
+            colors={['#E0F7FA', '#B2EBF2']}
             style={styles.profileCard}
           >
             <View style={styles.profileCardContent}>
               <View style={styles.profileDetails}>
                 <Text style={styles.userRole}>
-                  {/* Use sDesignation for Role */}
                   {user.sDesignation || 'Asst. Admin Officer'}
                 </Text>
                 <Text style={styles.userDepartment}>
-                  {/* Use sDepartment for Department */}
                   {user.sDepartment || 'Admission Office'}
                 </Text>
-                {/* status does not exist on IUser */}
-                {/* <Text style={styles.detailText}>
-                {user.status || 'Full Time'}
-              </Text> */}
                 <Text style={styles.detailText}>
-                  {/* Use sDepartment */}
                   Dept: {user.sDepartment || 'Administration'}
                 </Text>
+                <Text style={styles.detailText}>{user.sCompanyName}</Text>
                 {/* joiningDate does not exist on IUser */}
                 {/* <Text style={styles.detailText}>
                 Joining Date: {user.joiningDate || '12-2-2020'}
