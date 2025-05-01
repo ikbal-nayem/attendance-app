@@ -43,7 +43,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       try {
         const userJson = await localData.get('user');
         if (userJson) {
-          console.log('User found: ', userJson)
+          console.log('User found: ', userJson);
           setUser(userJson);
           router.replace('/(tabs)');
         }
@@ -80,9 +80,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = async () => {
     setIsLoading(true);
+    axiosIns
+      .post(API_CONSTANTS.AUTH.LOG_OUT, {
+        sUserID: user?.sUserID,
+        sSessionID: user?.sSessionID,
+        sCompanyID: user?.sCompanyID,
+      })
+      .finally(() => setIsLoading(false));
     await localData.remove('user');
-    setUser(null);
     setIsLoading(false);
+    setUser(null);
   };
 
   const register = async (userData: any): Promise<boolean> => {
