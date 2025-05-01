@@ -1,3 +1,4 @@
+import Button from '@/components/Button';
 import Popover from '@/components/Popover';
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
@@ -6,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, router, useFocusEffect } from 'expo-router';
 import {
+  ArrowLeftCircle,
   ArrowRightCircle,
   Bell,
   CalendarDays,
@@ -39,6 +41,68 @@ const popoverContent = (handleLogout: () => void) => (
       <Text>Logout</Text>
     </View>
   </TouchableOpacity>
+);
+
+const header = (user: IUser, handleLogout: () => void) => (
+  <View style={styles.header}>
+    <View style={styles.userInfo}>
+      <Popover content={popoverContent(handleLogout)}>
+        <Image
+          source={{
+            uri: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png',
+          }}
+          style={styles.avatar}
+        />
+      </Popover>
+      <View>
+        <Text style={styles.userId}>{user.sEmployeeCode || '710002945'}</Text>
+        <Text style={styles.userName}>{user.sUserName}</Text>
+      </View>
+    </View>
+    <TouchableOpacity style={styles.iconButton}>
+      <Bell size={26} color={Colors.light.text} />
+    </TouchableOpacity>
+  </View>
+);
+
+const userCard = (user: IUser) => (
+  <LinearGradient colors={['#E0F7FA', '#B2EBF2']} style={styles.profileCard}>
+    <View style={styles.profileCardContent}>
+      <View style={styles.profileDetails}>
+        <Text style={styles.userRole}>
+          {user.sDesignation || 'Asst. Admin Officer'}
+        </Text>
+        <Text style={styles.userDepartment}>
+          {user.sDepartment || 'Admission Office'}
+        </Text>
+        <Text style={styles.detailText}>
+          Dept: {user.sDepartment || 'Administration'}
+        </Text>
+        <Text style={styles.detailText}>{user.sCompanyName}</Text>
+        {/* joiningDate does not exist on IUser */}
+        {/* <Text style={styles.detailText}>
+                Joining Date: {user.joiningDate || '12-2-2020'}
+              </Text> */}
+        {/* tenure relies on joiningDate */}
+        {/* <Text style={styles.detailText}>{tenure}</Text> */}
+      </View>
+
+      <View style={styles.profileActions}>
+        <TouchableOpacity style={styles.updateButton}>
+          <Edit size={16} color={Colors.light.primary} />
+          <Text style={styles.updateButtonText}>Update Profile</Text>
+        </TouchableOpacity>
+        <View style={styles.qrSection}>
+          <Text style={styles.virtualCardText}>Virtual Card</Text>
+          <View style={styles.qrCodeContainer}>
+            <QrCode size={60} color={Colors.light.text} />
+            {/* Replace with actual QR code component if needed */}
+            {/* <Image source={{ uri: 'QR_CODE_URI' }} style={styles.qrCodeImage} /> */}
+          </View>
+        </View>
+      </View>
+    </View>
+  </LinearGradient>
 );
 
 export default function DashboardScreen() {
@@ -80,78 +144,22 @@ export default function DashboardScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
-      <View style={styles.header}>
-        <View style={styles.userInfo}>
-          <Popover content={popoverContent(handleLogout)}>
-            <Image
-              source={{
-                uri: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png',
-              }}
-              style={styles.avatar}
-            />
-          </Popover>
-          <View>
-            <Text style={styles.userId}>
-              {user.sEmployeeCode || '710002945'}
-            </Text>
-            <Text style={styles.userName}>{user.sUserName}</Text>
-          </View>
-        </View>
-        <TouchableOpacity style={styles.iconButton}>
-          <Bell size={26} color={Colors.light.text} />
-        </TouchableOpacity>
-      </View>
+      {header(user, handleLogout)}
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
         <Animated.View style={{ opacity: fadeAnim }}>
-          <LinearGradient
-            colors={['#E0F7FA', '#B2EBF2']}
-            style={styles.profileCard}
-          >
-            <View style={styles.profileCardContent}>
-              <View style={styles.profileDetails}>
-                <Text style={styles.userRole}>
-                  {user.sDesignation || 'Asst. Admin Officer'}
-                </Text>
-                <Text style={styles.userDepartment}>
-                  {user.sDepartment || 'Admission Office'}
-                </Text>
-                <Text style={styles.detailText}>
-                  Dept: {user.sDepartment || 'Administration'}
-                </Text>
-                <Text style={styles.detailText}>{user.sCompanyName}</Text>
-                {/* joiningDate does not exist on IUser */}
-                {/* <Text style={styles.detailText}>
-                Joining Date: {user.joiningDate || '12-2-2020'}
-              </Text> */}
-                {/* tenure relies on joiningDate */}
-                {/* <Text style={styles.detailText}>{tenure}</Text> */}
-              </View>
-
-              <View style={styles.profileActions}>
-                <TouchableOpacity style={styles.updateButton}>
-                  <Edit size={16} color={Colors.light.primary} />
-                  <Text style={styles.updateButtonText}>Update Profile</Text>
-                </TouchableOpacity>
-                <View style={styles.qrSection}>
-                  <Text style={styles.virtualCardText}>Virtual Card</Text>
-                  <View style={styles.qrCodeContainer}>
-                    <QrCode size={60} color={Colors.light.text} />
-                    {/* Replace with actual QR code component if needed */}
-                    {/* <Image source={{ uri: 'QR_CODE_URI' }} style={styles.qrCodeImage} /> */}
-                  </View>
-                </View>
-              </View>
-            </View>
-          </LinearGradient>
+          {userCard(user)}
 
           {/* Check Out Button */}
-          <TouchableOpacity style={styles.checkOutButton}>
-            <Text style={styles.checkOutButtonText}>Tap to Check Out</Text>
-          </TouchableOpacity>
+          <Button
+            title="Check Out"
+            icon={<ArrowLeftCircle size={20} color="#FFFFFF" />}
+            onPress={() => {}}
+            style={styles.checkOutButton}
+          />
 
           {/* Punch Info */}
           <View style={styles.punchInfoCard}>
@@ -298,14 +306,12 @@ const styles = StyleSheet.create({
     paddingBottom: Layout.spacing.xl * 2, // Extra padding at bottom for scroll
   },
   header: {
-    // Styles for header outside scrollview
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Layout.spacing.m, // Use main padding
     paddingTop: Layout.spacing.s, // Adjust as needed
     paddingBottom: Layout.spacing.m,
-    // Removed marginBottom as it's outside scroll
   },
   userInfo: {
     flexDirection: 'row',
@@ -403,17 +409,10 @@ const styles = StyleSheet.create({
   //   height: 60,
   // },
   checkOutButton: {
-    backgroundColor: '#EF5350', // Red color from image
-    paddingVertical: Layout.spacing.m,
-    borderRadius: Layout.borderRadius.large * 2, // Very rounded
+    backgroundColor: Colors.light.error,
     alignItems: 'center',
     marginBottom: Layout.spacing.l,
     ...Layout.shadow.medium,
-  },
-  checkOutButtonText: {
-    fontSize: 16,
-    fontFamily: 'Inter-SemiBold',
-    color: 'white',
   },
   punchInfoCard: {
     backgroundColor: 'white',
