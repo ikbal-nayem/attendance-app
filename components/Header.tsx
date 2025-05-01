@@ -2,14 +2,56 @@ import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useNavigation } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 type HeaderProps = {
   title: string;
   withBackButton?: boolean;
   bg?: 'primary' | 'default';
+};
+
+const FadeInView = ({
+  children,
+  duration = 500,
+}: {
+  children: React.ReactNode;
+  duration?: number;
+}) => {
+  const [isVisible, setVisible] = React.useState(false);
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(-50);
+
+  useEffect(() => {
+    opacity.value = withTiming(isVisible ? 1 : 0, {
+      duration,
+      easing: Easing.linear,
+    });
+    translateY.value = withTiming(isVisible ? 0 : 50, {
+      duration,
+      easing: Easing.linear,
+    });
+  }, [isVisible]);
+
+  React.useEffect(() => {
+    setVisible(true);
+    return () => {
+      setVisible(false);
+    };
+  }, []);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateY: translateY.value }],
+  }));
+
+  return <Animated.View style={animatedStyle}>{children}</Animated.View>;
 };
 
 const AppHeader = ({
@@ -20,9 +62,7 @@ const AppHeader = ({
   const navigation = useNavigation();
 
   return (
-    <Animated.View
-      entering={FadeInDown.duration(500).delay(100)}
-    >
+    <FadeInView duration={300}>
       <View
         style={[
           styles.headerWrapStyle,
@@ -46,7 +86,7 @@ const AppHeader = ({
           {title}
         </Text>
       </View>
-    </Animated.View>
+    </FadeInView>
   );
 };
 

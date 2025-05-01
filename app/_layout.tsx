@@ -71,11 +71,11 @@ export default function RootLayout() {
           <NotificationProvider>
             <ToastProvider>
               <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen
                   name="auth/login"
                   options={{ headerShown: false }}
                 />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen name="+not-found" />
               </Stack>
               <StatusBar style="auto" />

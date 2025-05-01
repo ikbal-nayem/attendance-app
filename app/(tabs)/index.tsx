@@ -70,13 +70,10 @@ const userCard = (user: IUser) => (
     <View style={styles.profileCardContent}>
       <View style={styles.profileDetails}>
         <Text style={styles.userRole}>
-          {user.sDesignation || 'Asst. Admin Officer'}
+          {user.sDesignation}
         </Text>
         <Text style={styles.userDepartment}>
-          {user.sDepartment || 'Admission Office'}
-        </Text>
-        <Text style={styles.detailText}>
-          Dept: {user.sDepartment || 'Administration'}
+          {user.sDepartment}
         </Text>
         <Text style={styles.detailText}>{user.sCompanyName}</Text>
         {/* joiningDate does not exist on IUser */}
@@ -152,14 +149,6 @@ export default function DashboardScreen() {
       >
         <Animated.View style={{ opacity: fadeAnim }}>
           {userCard(user)}
-
-          {/* Check Out Button */}
-          <Button
-            title="Check Out"
-            icon={<ArrowLeftCircle size={20} color="#FFFFFF" />}
-            onPress={() => {}}
-            style={styles.checkOutButton}
-          />
 
           {/* Punch Info */}
           <View style={styles.punchInfoCard}>
@@ -408,12 +397,6 @@ const styles = StyleSheet.create({
   //   width: 60,
   //   height: 60,
   // },
-  checkOutButton: {
-    backgroundColor: Colors.light.error,
-    alignItems: 'center',
-    marginBottom: Layout.spacing.l,
-    ...Layout.shadow.medium,
-  },
   punchInfoCard: {
     backgroundColor: 'white',
     borderRadius: Layout.borderRadius.large,

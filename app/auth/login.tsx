@@ -9,7 +9,7 @@ import { useToast } from '@/context/ToastContext';
 import AuthLayout from '@/layout/AuthLayout';
 import { makeFormData } from '@/utils/form-actions';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Lock, MoveRight, User } from 'lucide-react-native';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -65,6 +65,7 @@ const header = () => {
 };
 
 export default function LoginScreen() {
+  const router = useRouter();
   const cardOpacity = useSharedValue(0);
   const cardTranslateY = useSharedValue(50);
   const cardAnimation = useAnimatedStyle(() => ({

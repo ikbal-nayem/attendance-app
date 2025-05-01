@@ -52,23 +52,12 @@ const registerSchema = z.object({
     .string()
     .min(1, 'Email is required')
     .email('Please enter a valid email'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  // confirmPassword: z.string().min(1, 'Please confirm your password'),
+  // password: z.string().min(8, 'Password must be at least 8 characters'),
   photo: z.string().optional(),
   isCompanyDevice: z.boolean(),
 });
-// .refine((data) => data.password === data.confirmPassword, {
-//   message: "Passwords don't match",
-//   path: ['confirmPassword'],
-// });
 
 type FormData = z.infer<typeof registerSchema>;
-
-type FieldProps = {
-  onChange: (value: string) => void;
-  onBlur: () => void;
-  value: string;
-};
 
 export default function RegisterScreen() {
   const { register, isLoading } = useAuth();
@@ -322,28 +311,6 @@ export default function RegisterScreen() {
                 )}
               />
 
-              <Controller
-                control={control}
-                name="password"
-                render={({
-                  field: { onChange, onBlur, value },
-                }: {
-                  field: FieldProps;
-                }) => (
-                  <Input
-                    label="Password"
-                    placeholder="Enter password"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    secureTextEntry
-                    showPasswordToggle
-                    leftIcon={<Lock size={20} color={Colors.light.subtext} />}
-                    error={errors.password?.message}
-                  />
-                )}
-              />
-
               <Switch
                 value={isCompanyDevice}
                 onChange={(value) => setValue('isCompanyDevice', value)}
@@ -361,7 +328,6 @@ export default function RegisterScreen() {
                   iconPosition="right"
                   loading={isLoading}
                   fullWidth
-                  size="small"
                 />
               </Animated.View>
 
