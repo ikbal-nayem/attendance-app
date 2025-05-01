@@ -11,13 +11,22 @@ import AuthLayout from '@/layout/AuthLayout'; // Import AuthLayout
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useNavigation } from 'expo-router';
-import { Briefcase, Lock, Mail, MoveRight, Phone, User, User2 } from 'lucide-react-native';
+import {
+  Briefcase,
+  Lock,
+  Mail,
+  MoveRight,
+  Phone,
+  User,
+  User2,
+} from 'lucide-react-native';
 import { MotiView } from 'moti';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   Alert,
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -193,187 +202,189 @@ export default function RegisterScreen() {
     <>
       <AuthLayout>
         <AppHeader title="Create New Account" bg="primary" />
-        <MotiView
-          from={{ opacity: 0, translateY: 50 }}
-          animate={{ opacity: 1, translateY: 0 }}
-          transition={{ type: 'timing', duration: 500, delay: 100 }}
-        >
-          <Card style={styles.card}>
-            <Text style={styles.subtitle}>Register to get started</Text>
+        <ScrollView keyboardShouldPersistTaps="handled">
+          <MotiView
+            from={{ opacity: 0, translateY: 50 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{ type: 'timing', duration: 500, delay: 100 }}
+          >
+            <Card style={styles.card}>
+              <Text style={styles.subtitle}>Register to get started</Text>
 
-            {errors.root && (
-              <Text style={styles.errorText}>{errors.root.message}</Text>
-            )}
+              {errors.root && (
+                <Text style={styles.errorText}>{errors.root.message}</Text>
+              )}
 
-            <MotiView
-              from={{ opacity: 0, translateY: 20 }}
-              animate={{ opacity: 1, translateY: 0 }}
-              transition={{ type: 'timing', duration: 500, delay: 200 }}
-              style={styles.photoContainer}
-            >
-              <TouchableOpacity
-                style={styles.photoButton}
-                onPress={() =>
-                  pickImage().then((uri) => {
-                    if (uri) setValue('photo', uri);
-                  })
-                }
+              <MotiView
+                from={{ opacity: 0, translateY: 20 }}
+                animate={{ opacity: 1, translateY: 0 }}
+                transition={{ type: 'timing', duration: 500, delay: 200 }}
+                style={styles.photoContainer}
               >
-                {photo ? (
-                  <Image
-                    source={{ uri: watch('photo') }}
-                    style={styles.photoPreview}
-                  />
-                ) : (
-                  <View style={styles.photoPlaceholder}>
-                    <User2 size={24} color={Colors.light.primary} />
-                    <Text style={styles.photoPlaceholderText}>Photo</Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-            </MotiView>
-
-            <Controller
-              control={control}
-              name="title"
-              render={({ field: { onChange, value } }) => (
-                <Radio
-                  label="Title"
-                  options={titleOptions}
-                  value={value}
-                  onChange={onChange}
-                  error={errors.title?.message}
-                />
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="name"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label="Name"
-                  placeholder="Enter your full name"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  leftIcon={<User size={20} color={Colors.light.subtext} />}
-                  error={errors.name?.message}
-                />
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="staffId"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label="Staff ID"
-                  placeholder="Enter your staff ID"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  leftIcon={
-                    <Briefcase size={20} color={Colors.light.subtext} />
+                <TouchableOpacity
+                  style={styles.photoButton}
+                  onPress={() =>
+                    pickImage().then((uri) => {
+                      if (uri) setValue('photo', uri);
+                    })
                   }
-                  error={errors.staffId?.message}
-                />
-              )}
-            />
+                >
+                  {photo ? (
+                    <Image
+                      source={{ uri: watch('photo') }}
+                      style={styles.photoPreview}
+                    />
+                  ) : (
+                    <View style={styles.photoPlaceholder}>
+                      <User2 size={24} color={Colors.light.primary} />
+                      <Text style={styles.photoPlaceholderText}>Photo</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+              </MotiView>
 
-            <Controller
-              control={control}
-              name="mobile"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label="Mobile Number"
-                  placeholder="Enter your mobile number"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  keyboardType="phone-pad"
-                  leftIcon={<Phone size={20} color={Colors.light.subtext} />}
-                  error={errors.mobile?.message}
-                />
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="email"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <Input
-                  label="Email Address"
-                  placeholder="Enter your email address"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  leftIcon={<Mail size={20} color={Colors.light.subtext} />}
-                  error={errors.email?.message}
-                />
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="password"
-              render={({
-                field: { onChange, onBlur, value },
-              }: {
-                field: FieldProps;
-              }) => (
-                <Input
-                  label="Password"
-                  placeholder="Enter password"
-                  value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  secureTextEntry
-                  showPasswordToggle
-                  leftIcon={<Lock size={20} color={Colors.light.subtext} />}
-                  error={errors.password?.message}
-                />
-              )}
-            />
-
-            <Switch
-              value={isCompanyDevice}
-              onChange={(value) => setValue('isCompanyDevice', value)}
-              label="Is Company Device"
-            />
-
-            <MotiView
-              from={{ opacity: 0, translateY: 20 }}
-              animate={{ opacity: 1, translateY: 0 }}
-              transition={{ type: 'timing', duration: 500, delay: 400 }}
-              style={styles.button}
-            >
-              <Button
-                title="Register"
-                onPress={handleSubmit(onSubmitHandler)}
-                icon={<MoveRight size={20} color={Colors.light.background} />}
-                iconPosition="right"
-                loading={isLoading}
-                fullWidth
-                size="small"
+              <Controller
+                control={control}
+                name="title"
+                render={({ field: { onChange, value } }) => (
+                  <Radio
+                    label="Title"
+                    options={titleOptions}
+                    value={value}
+                    onChange={onChange}
+                    error={errors.title?.message}
+                  />
+                )}
               />
-            </MotiView>
 
-            <MotiView
-              from={{ opacity: 0, translateY: 20 }}
-              animate={{ opacity: 1, translateY: 0 }}
-              transition={{ type: 'timing', duration: 500, delay: 500 }}
-              style={styles.loginContainer}
-            >
-              <Text style={styles.loginText}>Already have an account? </Text>
-              <TouchableOpacity onPress={() => router.replace('/auth/login')}>
-                <Text style={styles.loginLink}>Sign In</Text>
-              </TouchableOpacity>
-            </MotiView>
-          </Card>
-        </MotiView>
+              <Controller
+                control={control}
+                name="name"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    label="Name"
+                    placeholder="Enter your full name"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    leftIcon={<User size={20} color={Colors.light.subtext} />}
+                    error={errors.name?.message}
+                  />
+                )}
+              />
+
+              <Controller
+                control={control}
+                name="staffId"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    label="Staff ID"
+                    placeholder="Enter your staff ID"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    leftIcon={
+                      <Briefcase size={20} color={Colors.light.subtext} />
+                    }
+                    error={errors.staffId?.message}
+                  />
+                )}
+              />
+
+              <Controller
+                control={control}
+                name="mobile"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    label="Mobile Number"
+                    placeholder="Enter your mobile number"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    keyboardType="phone-pad"
+                    leftIcon={<Phone size={20} color={Colors.light.subtext} />}
+                    error={errors.mobile?.message}
+                  />
+                )}
+              />
+
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    label="Email Address"
+                    placeholder="Enter your email address"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    leftIcon={<Mail size={20} color={Colors.light.subtext} />}
+                    error={errors.email?.message}
+                  />
+                )}
+              />
+
+              <Controller
+                control={control}
+                name="password"
+                render={({
+                  field: { onChange, onBlur, value },
+                }: {
+                  field: FieldProps;
+                }) => (
+                  <Input
+                    label="Password"
+                    placeholder="Enter password"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    secureTextEntry
+                    showPasswordToggle
+                    leftIcon={<Lock size={20} color={Colors.light.subtext} />}
+                    error={errors.password?.message}
+                  />
+                )}
+              />
+
+              <Switch
+                value={isCompanyDevice}
+                onChange={(value) => setValue('isCompanyDevice', value)}
+                label="Is Company Device"
+              />
+
+              <MotiView
+                from={{ opacity: 0, translateY: 20 }}
+                animate={{ opacity: 1, translateY: 0 }}
+                transition={{ type: 'timing', duration: 500, delay: 400 }}
+                style={styles.button}
+              >
+                <Button
+                  title="Register"
+                  onPress={handleSubmit(onSubmitHandler)}
+                  icon={<MoveRight size={20} color={Colors.light.background} />}
+                  iconPosition="right"
+                  loading={isLoading}
+                  fullWidth
+                  size="small"
+                />
+              </MotiView>
+
+              <MotiView
+                from={{ opacity: 0, translateY: 20 }}
+                animate={{ opacity: 1, translateY: 0 }}
+                transition={{ type: 'timing', duration: 500, delay: 500 }}
+                style={styles.loginContainer}
+              >
+                <Text style={styles.loginText}>Already have an account? </Text>
+                <TouchableOpacity onPress={() => router.replace('/auth/login')}>
+                  <Text style={styles.loginLink}>Sign In</Text>
+                </TouchableOpacity>
+              </MotiView>
+            </Card>
+          </MotiView>
+        </ScrollView>
       </AuthLayout>
     </>
   );

@@ -5,10 +5,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
-  ScrollView,
   StyleProp,
   StyleSheet,
-  View,
   ViewStyle,
 } from 'react-native';
 
@@ -25,12 +23,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children, style }) => {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoidingView}
       >
-        <ScrollView
-          contentContainerStyle={styles.scrollViewContent}
-          keyboardShouldPersistTaps="handled" // Dismiss keyboard on tap outside inputs
-        >
-          <View style={[styles.container, style]}>{children}</View>
-        </ScrollView>
+        {children}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -42,13 +35,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.background,
   },
   keyboardAvoidingView: {
-    flex: 1,
-  },
-  scrollViewContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-  },
-  container: {
     flex: 1,
   },
 });
