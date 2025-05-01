@@ -1,6 +1,6 @@
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
-import { AuthProvider } from '@/context/AuthContext';
+import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { LocationProvider } from '@/context/LocationContext';
 import { NotificationProvider } from '@/context/NotificationContext';
 import { ToastProvider } from '@/context/ToastContext';
@@ -11,7 +11,7 @@ import {
   Inter_600SemiBold,
 } from '@expo-google-fonts/inter';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
@@ -20,6 +20,35 @@ import Animated, { FadeOut } from 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 SplashScreen.preventAutoHideAsync();
+
+function RootLayoutNav() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (isAuthenticated) {
+        router.replace('/(tabs)');
+      } else {
+        router.replace('/auth/login');
+      }
+    }
+  }, [isAuthenticated, isLoading]);
+
+  // if (isLoading) {
+  //   return null;
+  // }
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+      {/* Add other auth screens if needed */}
+      <Stack.Screen name="auth/register" options={{ headerShown: false }} />
+      <Stack.Screen name="auth/verify-otp" options={{ headerShown: false }} />
+      <Stack.Screen name="+not-found" />
+    </Stack>
+  );
+}
 
 export default function RootLayout() {
   useFrameworkReady();
@@ -70,14 +99,7 @@ export default function RootLayout() {
         <LocationProvider>
           <NotificationProvider>
             <ToastProvider>
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen
-                  name="auth/login"
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen name="+not-found" />
-              </Stack>
+              <RootLayoutNav />
               <StatusBar style="auto" />
             </ToastProvider>
           </NotificationProvider>
@@ -90,7 +112,7 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   splashContainer: {
     flex: 1,
-    backgroundColor: Colors.light.background, // Use background color from new theme
+    backgroundColor: Colors.light.background,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -100,10 +122,10 @@ const styles = StyleSheet.create({
     marginBottom: Layout.spacing.m,
   },
   splashText: {
-    fontFamily: 'Inter-SemiBold', // Use a font from your loaded fonts
+    fontFamily: 'Inter-SemiBold',
     fontSize: 24,
     textAlign: 'center',
-    color: Colors.light.text, // Use text color from new theme
+    color: Colors.light.text,
     marginBottom: Layout.spacing.l,
   },
   loadingIndicator: {
