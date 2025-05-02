@@ -1,6 +1,7 @@
 import Button from '@/components/Button';
 import Card from '@/components/Card';
 import AppHeader from '@/components/Header';
+import { ImagePicker } from '@/components/ImagePicker';
 import Input from '@/components/Input';
 import Radio from '@/components/Radio';
 import Switch from '@/components/Switch';
@@ -12,27 +13,11 @@ import AuthLayout from '@/layout/AuthLayout';
 import { getDeviceInfo } from '@/utils/deviceInfo';
 import { makeFormData } from '@/utils/form-actions';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
-import {
-  Briefcase,
-  Mail,
-  MoveRight,
-  Phone,
-  User,
-  User2,
-} from 'lucide-react-native';
+import { Briefcase, Mail, MoveRight, Phone, User } from 'lucide-react-native';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import {
-  Alert,
-  Image,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { z } from 'zod';
 
@@ -54,12 +39,7 @@ const registerSchema = z.object({
     .string()
     .min(1, 'Email is required')
     .email('Please enter a valid email'),
-  sPhoto: z
-    .instanceof(File)
-    .refine(
-      (file) => ['image/png', 'image/jpeg', 'image/jpg'].includes(file.type),
-      { message: 'Invalid image file type' }
-    ),
+  sPhoto: z.string().min(1, 'Photo is required'),
   sDeviceFlag: z.boolean(),
 });
 
@@ -71,8 +51,6 @@ export default function RegisterScreen() {
     control,
     handleSubmit,
     formState: { errors },
-    watch,
-    setValue,
     setError: setFormError,
   } = useForm<FormData>({
     resolver: zodResolver(registerSchema),
@@ -82,97 +60,6 @@ export default function RegisterScreen() {
     },
   });
   const { currentLocation, getAddressFromCoordinates } = useLocation();
-
-  const photo = watch('sPhoto');
-
-  const pickImage = async (): Promise<string | undefined> => {
-    const result = await new Promise<string | undefined>((resolve) => {
-      Alert.alert(
-        'Select Photo',
-        'Choose an option',
-        [
-          {
-            text: 'Take Photo',
-            onPress: async () => {
-              const uri = await takePhoto();
-              resolve(uri);
-            },
-          },
-          {
-            text: 'Choose from Gallery',
-            onPress: async () => {
-              const uri = await chooseFromGallery();
-              resolve(uri);
-            },
-          },
-          {
-            text: 'Cancel',
-            style: 'cancel',
-            onPress: () => resolve(undefined),
-          },
-        ],
-        { cancelable: true }
-      );
-    });
-    return result;
-  };
-
-  const takePhoto = async (): Promise<string | undefined> => {
-    try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-
-      if (status !== 'granted') {
-        Alert.alert(
-          'Permission Denied',
-          'Camera permission is required to take photos'
-        );
-        return undefined;
-      }
-
-      const result = await ImagePicker.launchCameraAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-
-      console.log(result)
-
-      return result.canceled ? undefined : result.assets[0].uri;
-    } catch (error) {
-      console.error('Error taking photo:', error);
-      Alert.alert('Error', 'Failed to take photo');
-      return undefined;
-    }
-  };
-
-  const chooseFromGallery = async (): Promise<string | undefined> => {
-    try {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-      if (status !== 'granted') {
-        Alert.alert(
-          'Permission Denied',
-          'Media library permission is required to select photos'
-        );
-        return undefined;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.7,
-      });
-
-      return result.canceled ? undefined : result.assets[0].uri;
-    } catch (error) {
-      console.error('Error selecting photo:', error);
-      Alert.alert('Error', 'Failed to select photo');
-      return undefined;
-    }
-  };
 
   const onSubmitHandler = async (data: FormData) => {
     const deviceInfo = getDeviceInfo();
@@ -218,31 +105,13 @@ export default function RegisterScreen() {
             <Card style={styles.card}>
               <Text style={styles.subtitle}>Register to get started</Text>
 
-              <Animated.View
-                entering={FadeInDown.duration(500).delay(200)}
-                style={styles.photoContainer}
-              >
-                <TouchableOpacity
-                  style={styles.photoButton}
-                  onPress={() =>
-                    pickImage().then((uri) => {
-                      if (uri) setValue('sPhoto', uri);
-                    })
-                  }
-                >
-                  {photo ? (
-                    <Image
-                      source={{ uri: photo }}
-                      style={styles.photoPreview}
-                    />
-                  ) : (
-                    <View style={styles.photoPlaceholder}>
-                      <User2 size={24} color={Colors.light.primary} />
-                      <Text style={styles.photoPlaceholderText}>Photo</Text>
-                    </View>
-                  )}
-                </TouchableOpacity>
-              </Animated.View>
+              <Controller
+                control={control}
+                name="sPhoto"
+                render={({ field: { onChange, value } }) => (
+                  <ImagePicker photo={value} setPhoto={onChange} />
+                )}
+              />
 
               <Controller
                 control={control}
@@ -399,37 +268,6 @@ const styles = StyleSheet.create({
     color: Colors.light.error,
     marginBottom: Layout.spacing.m,
     textAlign: 'center',
-  },
-  photoContainer: {
-    alignSelf: 'center',
-    marginBottom: Layout.spacing.m,
-  },
-  photoButton: {
-    width: 120,
-    height: 120,
-    borderWidth: 1,
-    borderColor: Colors.light.inputBorder,
-    borderRadius: 60,
-    backgroundColor: Colors.light.inputBackground,
-    justifyContent: 'center',
-    alignItems: 'center',
-    overflow: 'hidden',
-  },
-  photoPlaceholder: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  photoPlaceholderText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 16,
-    color: Colors.light.primary,
-    marginLeft: Layout.spacing.s,
-  },
-  photoPreview: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
   },
   button: {
     marginBottom: Layout.spacing.l,
