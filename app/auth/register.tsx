@@ -19,7 +19,7 @@ import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { object, z } from 'zod';
+import { z } from 'zod';
 
 const titleOptions = [
   { label: 'Mr.', value: 'M' },
@@ -46,7 +46,7 @@ const registerSchema = z.object({
 type FormData = z.infer<typeof registerSchema>;
 
 export default function RegisterScreen() {
-  const { register, isLoading } = useAuth();
+  const { registerRequest, isLoading } = useAuth();
   const {
     control,
     handleSubmit,
@@ -77,11 +77,9 @@ export default function RegisterScreen() {
       sDeviceVersion: deviceInfo.osVersion,
       sDeviceID: deviceInfo.deviceId,
     };
-    console.log(reqData)
-    return
-    register(makeFormData(reqData))
-      .then((success) => {
-        if (success) {
+    registerRequest(makeFormData(reqData))
+      .then((res) => {
+        if (res === true) {
           router.push('/auth/verify-otp');
           return;
         }

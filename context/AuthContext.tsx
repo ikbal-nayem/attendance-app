@@ -11,10 +11,10 @@ type AuthContextType = {
   isLoading: boolean;
   login: (data: FormData) => Promise<boolean | string>;
   logout: () => Promise<void>;
-  register: (userData: any) => Promise<boolean | string>;
-  verifyOtp: (otp: string) => Promise<boolean>;
-  tempUserData: Partial<IUser> | null;
-  setTempUserData: (data: Partial<IUser> | null) => void;
+  registerRequest: (userData: FormData) => Promise<boolean | string>;
+  verifyOtp: (otp: string) => Promise<boolean | string>;
+  tempUserData: FormData | null;
+  setTempUserData: (data: any) => void;
 };
 
 const defaultContext: AuthContextType = {
@@ -23,7 +23,7 @@ const defaultContext: AuthContextType = {
   isLoading: true,
   login: async () => false,
   logout: async () => {},
-  register: async () => false,
+  registerRequest: async () => false,
   verifyOtp: async () => false,
   tempUserData: null,
   setTempUserData: () => {},
@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<IUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [tempUserData, setTempUserData] = useState<Partial<IUser> | null>(null);
+  const [tempUserData, setTempUserData] = useState<FormData | null>(null);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -69,7 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             setUser(response.data);
             resolve(true);
           }
-          reject(response.data.messageInfo);
+          reject(response.data?.messageDesc);
         })
         .catch((error) => {
           console.error(error);
@@ -93,15 +93,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser(null);
   };
 
-  const register = async (userData: FormData): Promise<boolean | string> => {
+  const registerRequest = async (
+    userData: FormData
+  ): Promise<boolean | string> => {
     setIsLoading(true);
     try {
       const response = await axiosIns.post(
-        API_CONSTANTS.AUTH.REGISTER,
+        API_CONSTANTS.AUTH.REGISTER_REQUEST,
         userData
       );
-      console.log(response);
-      if (response.data?.success && response.data?.messageCode === '0') {
+      if (response.data?.messageCode === '0') {
+        userData.append('requestNo', response.data?.requestNo);
+        setTempUserData(userData);
         return true;
       }
       return response.data.messageDesc;
@@ -113,17 +116,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const verifyOtp = async (otp: string): Promise<boolean> => {
+  const verifyOtp = async (otp: string): Promise<boolean | string> => {
     setIsLoading(true);
-
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Simple dummy validation - any 6-digit OTP is accepted
-    const isValid = /^\d{6}$/.test(otp);
-
-    setIsLoading(false);
-    return isValid;
+    try {
+      tempUserData?.append('sInfoOPT', otp);
+      const response = await axiosIns.post(
+        API_CONSTANTS.AUTH.REGISTER_REQUEST,
+        tempUserData
+      );
+      if (response.data?.messageCode === '0') {
+        setTempUserData(null);
+        return true;
+      }
+      return response.data.messageDesc;
+    } catch (error) {
+      console.error(error);
+      return 'An error occurred during verification. Please try again.';
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const value = {
@@ -132,7 +143,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     isLoading,
     login,
     logout,
-    register,
+    registerRequest,
     verifyOtp,
     tempUserData,
     setTempUserData,

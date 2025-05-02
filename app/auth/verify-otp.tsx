@@ -19,6 +19,7 @@ import {
   View,
 } from 'react-native';
 import { z } from 'zod';
+import { MoveRight } from 'lucide-react-native';
 
 const OTP_LENGTH = 6;
 
@@ -39,9 +40,7 @@ export default function VerifyOTPScreen() {
   const {
     control,
     handleSubmit,
-    watch,
     formState: { errors },
-    setError: setFormError, // Use setError from useForm
     setValue,
   } = useForm<FormData>({
     resolver: zodResolver(otpSchema),
@@ -74,8 +73,6 @@ export default function VerifyOTPScreen() {
       .padStart(2, '0')}`;
   };
 
-  // handleOtpChange is now managed by Controller's onChange
-
   const handleResendOtp = () => {
     if (!canResend) return;
 
@@ -87,7 +84,6 @@ export default function VerifyOTPScreen() {
     // TODO: Add logic here to actually call the resend OTP API endpoint
     console.log('Resend OTP requested');
 
-    // Reset timer logic remains the same
     const timer = setInterval(() => {
       setRemainingTime((prevTime) => {
         if (prevTime <= 1) {
@@ -103,33 +99,27 @@ export default function VerifyOTPScreen() {
   const onSubmit = async (data: FormData) => {
     Keyboard.dismiss();
     setApiError('');
-    const success = await verifyOtp(data.otp);
+    const res = await verifyOtp(data.otp);
 
-    if (success) {
+    if (res === true) {
       router.replace('/auth/login');
     } else {
-      setApiError('Invalid OTP. Please try again.');
+      setApiError(res || 'Invalid OTP. Please try again.');
     }
   };
 
-  const navigateBack = () => {
-    router.back();
-  };
+  const email = tempUserData?.get('sEmail')?.toString();
 
   return (
     <AuthLayout>
       <AppHeader title="Verify Your Email" bg="primary" />
-      <Animated.View
-        entering={FadeInDown.duration(500).delay(100)}
-      >
+      <Animated.View entering={FadeInDown.duration(500).delay(100)}>
         <Card style={styles.card}>
           <View style={{ marginTop: Layout.spacing.xl }}>
             <Text style={styles.subtitle}>
               We have sent a verification code to the email address &nbsp;
-              <Text style={{ fontWeight: 'bold' }}>
-                '{tempUserData?.sEmailAddress}'
-              </Text>
             </Text>
+            <Text style={styles.email}>'{email}'</Text>
           </View>
 
           {/* OTP Input managed by Controller */}
@@ -219,15 +209,16 @@ export default function VerifyOTPScreen() {
           >
             <Button
               title="Verify"
-              size="small"
               onPress={handleSubmit(onSubmit)}
               loading={isLoading}
               fullWidth
+              icon={<MoveRight size={20} color={Colors.light.background} />}
+              iconPosition="right"
               // disabled={otpValue.length !== OTP_LENGTH}
             />
           </Animated.View>
 
-          <Animated.View
+          {/* <Animated.View
             entering={FadeInDown.duration(500).delay(400)}
           >
             <Button
@@ -237,7 +228,7 @@ export default function VerifyOTPScreen() {
               variant="outline"
               fullWidth
             />
-          </Animated.View>
+          </Animated.View> */}
         </Card>
       </Animated.View>
     </AuthLayout>
@@ -246,12 +237,11 @@ export default function VerifyOTPScreen() {
 
 const styles = StyleSheet.create({
   card: {
-    padding: Layout.spacing.l,
-    marginTop: Layout.spacing.xl,
+    margin: Layout.spacing.m,
   },
-  title: {
+  email: {
     fontFamily: 'Inter-SemiBold',
-    fontSize: 24,
+    fontSize: 17,
     color: Colors.light.text,
     marginBottom: Layout.spacing.xs,
     textAlign: 'center',

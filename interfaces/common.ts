@@ -4,5 +4,5 @@ interface IObject {
 
 interface IResponse {
   messageCode: '0' | '1',
-  messageInfo: string,
+  messageDesc: string,
 }
