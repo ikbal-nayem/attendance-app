@@ -1,8 +1,8 @@
 import Button from '@/components/Button';
 import Card from '@/components/Card';
 import AppHeader from '@/components/Header';
-import { ImagePicker } from '@/components/ImagePicker';
 import Input from '@/components/Input';
+import { ProfileImagePicker } from '@/components/ProfileImagePicker';
 import Radio from '@/components/Radio';
 import Switch from '@/components/Switch';
 import Colors from '@/constants/Colors';
@@ -19,7 +19,7 @@ import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { z } from 'zod';
+import { object, z } from 'zod';
 
 const titleOptions = [
   { label: 'Mr.', value: 'M' },
@@ -39,7 +39,7 @@ const registerSchema = z.object({
     .string()
     .min(1, 'Email is required')
     .email('Please enter a valid email'),
-  sPhoto: z.string().min(1, 'Photo is required'),
+  sPhoto: z.any(),
   sDeviceFlag: z.boolean(),
 });
 
@@ -77,6 +77,8 @@ export default function RegisterScreen() {
       sDeviceVersion: deviceInfo.osVersion,
       sDeviceID: deviceInfo.deviceId,
     };
+    console.log(reqData)
+    return
     register(makeFormData(reqData))
       .then((success) => {
         if (success) {
@@ -109,7 +111,7 @@ export default function RegisterScreen() {
                 control={control}
                 name="sPhoto"
                 render={({ field: { onChange, value } }) => (
-                  <ImagePicker photo={value} setPhoto={onChange} />
+                  <ProfileImagePicker photo={value} setPhoto={onChange} />
                 )}
               />
 

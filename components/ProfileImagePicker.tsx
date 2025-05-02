@@ -1,5 +1,6 @@
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
+import { isNull } from '@/utils/validation';
 import * as picker from 'expo-image-picker';
 import { User2 } from 'lucide-react-native';
 import {
@@ -20,44 +21,46 @@ const imagePickerOptions: any = {
 };
 
 type ImagePickerProps = {
-  photo: string | undefined;
-  setPhoto: (photo: string | undefined) => void;
+  photo: picker.ImagePickerAsset | undefined;
+  setPhoto: (photo: picker.ImagePickerAsset | undefined) => void;
 };
 
-export const ImagePicker = ({ photo, setPhoto }: ImagePickerProps) => {
-  const pickImage = async (): Promise<string | undefined> => {
-    const result = await new Promise<string | undefined>((resolve) => {
-      Alert.alert(
-        'Select Photo',
-        'Choose an option',
-        [
-          {
-            text: 'Take Photo',
-            onPress: async () => {
-              const uri = await takePhoto();
-              resolve(uri);
+export const ProfileImagePicker = ({ photo, setPhoto }: ImagePickerProps) => {
+  const pickImage = async (): Promise<picker.ImagePickerAsset | undefined> => {
+    const result = await new Promise<picker.ImagePickerAsset | undefined>(
+      (resolve) => {
+        Alert.alert(
+          'Select Photo',
+          'Choose an option',
+          [
+            {
+              text: 'Take Photo',
+              onPress: async () => {
+                const uri = await takePhoto();
+                resolve(uri);
+              },
             },
-          },
-          {
-            text: 'Choose from Gallery',
-            onPress: async () => {
-              const uri = await chooseFromGallery();
-              resolve(uri);
+            {
+              text: 'Choose from Gallery',
+              onPress: async () => {
+                const uri = await chooseFromGallery();
+                resolve(uri);
+              },
             },
-          },
-          {
-            text: 'Cancel',
-            style: 'cancel',
-            onPress: () => resolve(undefined),
-          },
-        ],
-        { cancelable: true }
-      );
-    });
+            {
+              text: 'Cancel',
+              style: 'cancel',
+              onPress: () => resolve(undefined),
+            },
+          ],
+          { cancelable: true }
+        );
+      }
+    );
     return result;
   };
 
-  const takePhoto = async (): Promise<string | undefined> => {
+  const takePhoto = async (): Promise<picker.ImagePickerAsset | undefined> => {
     try {
       const { status } = await picker.requestCameraPermissionsAsync();
 
@@ -71,7 +74,7 @@ export const ImagePicker = ({ photo, setPhoto }: ImagePickerProps) => {
 
       const result = await picker.launchCameraAsync(imagePickerOptions);
 
-      return result.canceled ? undefined : result.assets[0].uri;
+      return result.canceled ? undefined : result.assets[0];
     } catch (error) {
       console.error('Error taking photo:', error);
       Alert.alert('Error', 'Failed to take photo');
@@ -79,7 +82,9 @@ export const ImagePicker = ({ photo, setPhoto }: ImagePickerProps) => {
     }
   };
 
-  const chooseFromGallery = async (): Promise<string | undefined> => {
+  const chooseFromGallery = async (): Promise<
+    picker.ImagePickerAsset | undefined
+  > => {
     try {
       const { status } = await picker.requestMediaLibraryPermissionsAsync();
 
@@ -93,7 +98,7 @@ export const ImagePicker = ({ photo, setPhoto }: ImagePickerProps) => {
 
       const result = await picker.launchImageLibraryAsync(imagePickerOptions);
 
-      return result.canceled ? undefined : result.assets[0].uri;
+      return result.canceled ? undefined : result.assets[0];
     } catch (error) {
       console.error('Error selecting photo:', error);
       Alert.alert('Error', 'Failed to select photo');
@@ -114,8 +119,8 @@ export const ImagePicker = ({ photo, setPhoto }: ImagePickerProps) => {
           })
         }
       >
-        {photo ? (
-          <Image source={{ uri: photo }} style={styles.photoPreview} />
+        {!isNull(photo) ? (
+          <Image source={{ uri: photo?.uri }} style={styles.photoPreview} />
         ) : (
           <View style={styles.photoPlaceholder}>
             <User2 size={24} color={Colors.light.primary} />

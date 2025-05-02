@@ -1,6 +1,7 @@
 import { axiosIns } from '@/api/config';
 import { API_CONSTANTS } from '@/constants/api';
 import { localData } from '@/services/storage';
+import { AxiosResponse } from 'axios';
 import { router } from 'expo-router';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
@@ -62,13 +63,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return new Promise((resolve, reject) => {
       axiosIns
         .post(API_CONSTANTS.AUTH.SIGN_IN, data)
-        .then(async (response) => {
-          if (response.data?.success && response.data?.sMessageCode === '0') {
+        .then(async (response: AxiosResponse<IResponse & IUser>) => {
+          if (response.data?.messageCode === '0') {
             await localData.set('user', response.data);
             setUser(response.data);
             resolve(true);
           }
-          reject(response.data.sMessageInfo);
+          reject(response.data.messageInfo);
         })
         .catch((error) => {
           console.error(error);

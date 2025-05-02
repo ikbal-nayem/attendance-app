@@ -55,8 +55,8 @@ const header = (user: IUser, handleLogout: () => void) => (
         />
       </Popover>
       <View>
-        <Text style={styles.userId}>{user.sEmployeeCode || '710002945'}</Text>
-        <Text style={styles.userName}>{user.sUserName}</Text>
+        <Text style={styles.userId}>{user.employeeCode}</Text>
+        <Text style={styles.userName}>{user.userName}</Text>
       </View>
     </View>
     <TouchableOpacity style={styles.iconButton}>
@@ -69,9 +69,9 @@ const userCard = (user: IUser) => (
   <LinearGradient colors={['#E0F7FA', '#B2EBF2']} style={styles.profileCard}>
     <View style={styles.profileCardContent}>
       <View style={styles.profileDetails}>
-        <Text style={styles.userRole}>{user.sDesignation}</Text>
-        <Text style={styles.userDepartment}>{user.sDepartment}</Text>
-        <Text style={styles.detailText}>{user.sCompanyName}</Text>
+        <Text style={styles.userRole}>{user.designation}</Text>
+        <Text style={styles.userDepartment}>{user.department}</Text>
+        <Text style={styles.detailText}>{user.companyName}</Text>
         {/* joiningDate does not exist on IUser */}
         {/* <Text style={styles.detailText}>
                 Joining Date: {user.joiningDate || '12-2-2020'}

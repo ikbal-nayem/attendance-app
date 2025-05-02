@@ -123,7 +123,7 @@ export default function LoginScreen() {
         if (res !== true) return;
         showToast({
           type: 'success',
-          message: `Welcome back, ${user?.sUserName}`,
+          message: `Welcome back, ${user?.userName}`,
         });
         router.replace('/(tabs)');
       })
