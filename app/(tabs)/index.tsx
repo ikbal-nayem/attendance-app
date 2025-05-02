@@ -1,4 +1,3 @@
-import Button from '@/components/Button';
 import Popover from '@/components/Popover';
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
@@ -7,9 +6,9 @@ import { useAuth } from '@/context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, router, useFocusEffect } from 'expo-router';
 import {
-  ArrowLeftCircle,
   ArrowRightCircle,
   Bell,
+  Calendar,
   CalendarDays,
   Clock,
   Edit,
@@ -20,6 +19,7 @@ import {
   Map,
   MapPin,
   QrCode,
+  ScanSearch,
   SendHorizontal as SendHorizonal,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
@@ -69,12 +69,8 @@ const userCard = (user: IUser) => (
   <LinearGradient colors={['#E0F7FA', '#B2EBF2']} style={styles.profileCard}>
     <View style={styles.profileCardContent}>
       <View style={styles.profileDetails}>
-        <Text style={styles.userRole}>
-          {user.sDesignation}
-        </Text>
-        <Text style={styles.userDepartment}>
-          {user.sDepartment}
-        </Text>
+        <Text style={styles.userRole}>{user.sDesignation}</Text>
+        <Text style={styles.userDepartment}>{user.sDepartment}</Text>
         <Text style={styles.detailText}>{user.sCompanyName}</Text>
         {/* joiningDate does not exist on IUser */}
         {/* <Text style={styles.detailText}>
@@ -102,6 +98,51 @@ const userCard = (user: IUser) => (
   </LinearGradient>
 );
 
+const menu1 = [
+  {
+    name: 'Attendance',
+    icon: <Clock size={30} color="#00ACC1" />,
+    route: '/(tabs)/attendance',
+  },
+  {
+    name: 'Activity',
+    icon: <ListTodo size={24} color={Colors.light.accent} />,
+    route: '/(tabs)/activity',
+  },
+  {
+    name: 'notification',
+    icon: <SendHorizonal size={24} color={Colors.light.secondary} />,
+    route: '/notifications/send',
+  },
+  {
+    name: 'Enquiry',
+    icon: <ScanSearch size={24} color={Colors.light.secondary} />,
+    route: '/enquiry',
+  },
+];
+
+const menu2 = [
+  {
+    name: 'Daily Activity',
+    icon: <Calendar size={24} color={Colors.light.accent} />,
+    route: '/(tabs)/daily-activity',
+  },
+  {
+    name: 'Clock In/Out history',
+    icon: <Clock size={24} color={Colors.light.accent} />,
+    route: '/(tabs)/clock-history',
+  },
+  {
+    name: 'Geolocation & Territory',
+    icon: <MapPin size={24} color={Colors.light.accent} />,
+    route: '/(tabs)/geolocation',
+  },
+  {
+    name: 'Live Tracking',
+    icon: <MapPin size={24} color={Colors.light.accent} />,
+    route: '/(tabs)/live-tracking',
+  },
+];
 export default function DashboardScreen() {
   const { user, logout } = useAuth();
   const [fadeAnim] = useState(new Animated.Value(0));

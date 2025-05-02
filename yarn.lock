@@ -3253,6 +3253,11 @@ execa@^5.0.0, execa@^5.1.1:
     signal-exit "^3.0.3"
     strip-final-newline "^2.0.0"
 
+expo-application@~6.0.2:
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/expo-application/-/expo-application-6.0.2.tgz#4384299f0518958e2fb18b8b029af5583c642479"
+  integrity sha512-qcj6kGq3mc7x5yIb5KxESurFTJCoEKwNEL34RdPEvTB/xhl7SeVZlu05sZBqxB1V4Ryzq/LsCb7NHNfBbb3L7A==
+
 expo-asset@~11.0.5:
   version "11.0.5"
   resolved "https://registry.yarnpkg.com/expo-asset/-/expo-asset-11.0.5.tgz#9d0ad28da3af220d25c001cd6e4a80cc669ee18b"
@@ -3282,6 +3287,13 @@ expo-constants@~17.0.5, expo-constants@~17.0.8:
   dependencies:
     "@expo/config" "~10.0.11"
     "@expo/env" "~0.4.2"
+
+expo-device@~7.0.3:
+  version "7.0.3"
+  resolved "https://registry.yarnpkg.com/expo-device/-/expo-device-7.0.3.tgz#e8d502ac5ff7644dd617fa38a71fe49e7508856b"
+  integrity sha512-uNGhDYmpDj/3GySWZmRiYSt52Phdim11p0pXfgpCq/nMks0+UPZwl3D0vin5N8/gpVe5yzb13GYuFxiVoDyniw==
+  dependencies:
+    ua-parser-js "^0.7.33"
 
 expo-file-system@~18.0.12:
   version "18.0.12"
@@ -3383,11 +3395,6 @@ expo-splash-screen@~0.29.24:
   integrity sha512-k2rdjbb3Qeg4g104Sdz6+qXXYba8QgiuZRSxHX8IpsSYiiTU48BmCCGy12sN+O1B+sD1/+WPL4duCa1Fy6+Y4g==
   dependencies:
     "@expo/prebuild-config" "~8.2.0"
-
-expo-status-bar@~2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/expo-status-bar/-/expo-status-bar-2.0.1.tgz#fc07726346dc30fbb68aadb0d7890b34fba42eee"
-  integrity sha512-AkIPX7jWHRPp83UBZ1iXtVvyr0g+DgBVvIXTtlmPtmUsm8Vq9Bb5IGj86PW8osuFlgoTVAg7HI/+Ok7yEYwiRg==
 
 expo-symbols@^0.2.2:
   version "0.2.2"
@@ -6579,6 +6586,11 @@ typescript@^5.3.3:
   version "5.8.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.8.3.tgz#92f8a3e5e3cf497356f4178c34cd65a7f5e8440e"
   integrity sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==
+
+ua-parser-js@^0.7.33:
+  version "0.7.40"
+  resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-0.7.40.tgz#c87d83b7bb25822ecfa6397a0da5903934ea1562"
+  integrity sha512-us1E3K+3jJppDBa3Tl0L3MOJiGhe1C6P0+nIvQAFYbxlMAx0h81eOwLmU57xgqToduDDPx3y5QsdjPfDu+FgOQ==
 
 ua-parser-js@^1.0.35:
   version "1.0.40"

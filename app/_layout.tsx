@@ -1,3 +1,4 @@
+import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
@@ -11,9 +12,8 @@ import {
   Inter_600SemiBold,
 } from '@expo-google-fonts/inter';
 import { useFonts } from 'expo-font';
-import { Stack, router } from 'expo-router';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, StyleSheet, Text } from 'react-native';
 import Animated, { FadeOut } from 'react-native-reanimated';
@@ -22,29 +22,19 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
 
-  useEffect(() => {
-    if (!isLoading) {
-      if (isAuthenticated) {
-        router.replace('/(tabs)');
-      } else {
-        router.replace('/auth/login');
-      }
-    }
-  }, [isAuthenticated, isLoading]);
-
-  // if (isLoading) {
-  //   return null;
-  // }
+  if (!isAuthenticated)
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+      <Stack.Screen name="auth/register" options={{ headerShown: false }} />
+      <Stack.Screen name="auth/verify-otp" options={{ headerShown: false }} />
+      <Stack.Screen name="+not-found" />
+    </Stack>;
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="auth/login" options={{ headerShown: false }} />
-      {/* Add other auth screens if needed */}
-      <Stack.Screen name="auth/register" options={{ headerShown: false }} />
-      <Stack.Screen name="auth/verify-otp" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );
@@ -100,7 +90,7 @@ export default function RootLayout() {
           <NotificationProvider>
             <ToastProvider>
               <RootLayoutNav />
-              <StatusBar style="auto" />
+              <AppStatusBar />
             </ToastProvider>
           </NotificationProvider>
         </LocationProvider>

@@ -7,13 +7,15 @@ import Switch from '@/components/Switch';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
-import AuthLayout from '@/layout/AuthLayout'; // Import AuthLayout
+import { useLocation } from '@/context/LocationContext';
+import AuthLayout from '@/layout/AuthLayout';
+import { getDeviceInfo } from '@/utils/deviceInfo';
+import { makeFormData } from '@/utils/form-actions';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as ImagePicker from 'expo-image-picker';
-import { router, useNavigation } from 'expo-router';
+import { router } from 'expo-router';
 import {
   Briefcase,
-  Lock,
   Mail,
   MoveRight,
   Phone,
@@ -22,7 +24,6 @@ import {
 } from 'lucide-react-native';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import {
   Alert,
   Image,
@@ -32,29 +33,34 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { z } from 'zod';
 
 const titleOptions = [
-  { label: 'Mr.', value: 'Mr.' },
-  { label: 'Mrs.', value: 'Mrs.' },
+  { label: 'Mr.', value: 'M' },
+  { label: 'Mrs.', value: 'F' },
 ];
 
 const registerSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  name: z.string().min(1, 'Name is required'),
-  staffId: z.string().min(1, 'Staff ID is required'),
-  mobile: z
+  sTitle: z.string().min(1, 'Title is required'),
+  sUserName: z.string().min(1, 'Name is required'),
+  sStaffID: z.string().min(1, 'Staff ID is required'),
+  sMobileNo: z
     .string()
     .min(10, 'Mobile number must be at least 10 digits')
-    .max(15, 'Mobile number cannot exceed 15 digits')
+    .max(13, 'Mobile number cannot exceed 13 digits')
     .regex(/^[0-9]+$/, 'Mobile number must contain only digits'),
-  email: z
+  sEmail: z
     .string()
     .min(1, 'Email is required')
     .email('Please enter a valid email'),
-  // password: z.string().min(8, 'Password must be at least 8 characters'),
-  photo: z.string().optional(),
-  isCompanyDevice: z.boolean(),
+  sPhoto: z
+    .instanceof(File)
+    .refine(
+      (file) => ['image/png', 'image/jpeg', 'image/jpg'].includes(file.type),
+      { message: 'Invalid image file type' }
+    ),
+  sDeviceFlag: z.boolean(),
 });
 
 type FormData = z.infer<typeof registerSchema>;
@@ -71,14 +77,13 @@ export default function RegisterScreen() {
   } = useForm<FormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      isCompanyDevice: false,
-      title: titleOptions[0].value,
+      sDeviceFlag: false,
+      sTitle: titleOptions[0].value,
     },
   });
-  const navigation = useNavigation();
+  const { currentLocation, getAddressFromCoordinates } = useLocation();
 
-  const photo = watch('photo');
-  const isCompanyDevice = watch('isCompanyDevice');
+  const photo = watch('sPhoto');
 
   const pickImage = async (): Promise<string | undefined> => {
     const result = await new Promise<string | undefined>((resolve) => {
@@ -128,8 +133,10 @@ export default function RegisterScreen() {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 0.7,
+        quality: 0.8,
       });
+
+      console.log(result)
 
       return result.canceled ? undefined : result.assets[0].uri;
     } catch (error) {
@@ -168,23 +175,38 @@ export default function RegisterScreen() {
   };
 
   const onSubmitHandler = async (data: FormData) => {
-    console.log(data);
-    try {
-      const success = await register(data);
-      if (!success) {
+    const deviceInfo = getDeviceInfo();
+    const reqData = {
+      ...data,
+      sLatitude: currentLocation?.latitude,
+      sLongitude: currentLocation?.longitude,
+      sLocation: await getAddressFromCoordinates(
+        currentLocation?.latitude,
+        currentLocation?.longitude
+      ),
+      sDeviceInfo: deviceInfo.deviceBrand,
+      sDeviceModel: deviceInfo.deviceModel,
+      sDevicePlatForm: deviceInfo.platform,
+      sDeviceVersion: deviceInfo.osVersion,
+      sDeviceID: deviceInfo.deviceId,
+    };
+    register(makeFormData(reqData))
+      .then((success) => {
+        if (success) {
+          router.push('/auth/verify-otp');
+          return;
+        }
         setFormError('root', {
           type: 'manual',
           message: 'Registration failed. Please try again.',
         });
-      } else {
-        router.push('/auth/verify-otp');
-      }
-    } catch (error) {
-      setFormError('root', {
-        type: 'manual',
-        message: 'An error occurred. Please try again later.',
+      })
+      .catch((error) => {
+        setFormError('root', {
+          type: 'manual',
+          message: 'An error occurred. Please try again later.',
+        });
       });
-    }
   };
 
   return (
@@ -192,15 +214,9 @@ export default function RegisterScreen() {
       <AuthLayout>
         <AppHeader title="Create New Account" bg="primary" />
         <ScrollView keyboardShouldPersistTaps="handled">
-          <Animated.View
-            entering={FadeInDown.duration(500).delay(100)}
-          >
+          <Animated.View entering={FadeInDown.duration(500).delay(100)}>
             <Card style={styles.card}>
               <Text style={styles.subtitle}>Register to get started</Text>
-
-              {errors.root && (
-                <Text style={styles.errorText}>{errors.root.message}</Text>
-              )}
 
               <Animated.View
                 entering={FadeInDown.duration(500).delay(200)}
@@ -210,13 +226,13 @@ export default function RegisterScreen() {
                   style={styles.photoButton}
                   onPress={() =>
                     pickImage().then((uri) => {
-                      if (uri) setValue('photo', uri);
+                      if (uri) setValue('sPhoto', uri);
                     })
                   }
                 >
                   {photo ? (
                     <Image
-                      source={{ uri: watch('photo') }}
+                      source={{ uri: photo }}
                       style={styles.photoPreview}
                     />
                   ) : (
@@ -230,21 +246,21 @@ export default function RegisterScreen() {
 
               <Controller
                 control={control}
-                name="title"
+                name="sTitle"
                 render={({ field: { onChange, value } }) => (
                   <Radio
                     label="Title"
                     options={titleOptions}
                     value={value}
                     onChange={onChange}
-                    error={errors.title?.message}
+                    error={errors.sTitle?.message}
                   />
                 )}
               />
 
               <Controller
                 control={control}
-                name="name"
+                name="sUserName"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <Input
                     label="Name"
@@ -253,14 +269,14 @@ export default function RegisterScreen() {
                     onChangeText={onChange}
                     onBlur={onBlur}
                     leftIcon={<User size={20} color={Colors.light.subtext} />}
-                    error={errors.name?.message}
+                    error={errors.sUserName?.message}
                   />
                 )}
               />
 
               <Controller
                 control={control}
-                name="staffId"
+                name="sStaffID"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <Input
                     label="Staff ID"
@@ -271,14 +287,14 @@ export default function RegisterScreen() {
                     leftIcon={
                       <Briefcase size={20} color={Colors.light.subtext} />
                     }
-                    error={errors.staffId?.message}
+                    error={errors.sStaffID?.message}
                   />
                 )}
               />
 
               <Controller
                 control={control}
-                name="mobile"
+                name="sMobileNo"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <Input
                     label="Mobile Number"
@@ -288,14 +304,14 @@ export default function RegisterScreen() {
                     onBlur={onBlur}
                     keyboardType="phone-pad"
                     leftIcon={<Phone size={20} color={Colors.light.subtext} />}
-                    error={errors.mobile?.message}
+                    error={errors.sMobileNo?.message}
                   />
                 )}
               />
 
               <Controller
                 control={control}
-                name="email"
+                name="sEmail"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <Input
                     label="Email Address"
@@ -306,16 +322,26 @@ export default function RegisterScreen() {
                     keyboardType="email-address"
                     autoCapitalize="none"
                     leftIcon={<Mail size={20} color={Colors.light.subtext} />}
-                    error={errors.email?.message}
+                    error={errors.sEmail?.message}
                   />
                 )}
               />
 
-              <Switch
-                value={isCompanyDevice}
-                onChange={(value) => setValue('isCompanyDevice', value)}
-                label="Is Company Device"
+              <Controller
+                control={control}
+                name="sDeviceFlag"
+                render={({ field: { onChange, value } }) => (
+                  <Switch
+                    value={value}
+                    onChange={onChange}
+                    label="Is Company Device"
+                  />
+                )}
               />
+
+              {errors.root && (
+                <Text style={styles.errorText}>{errors.root.message}</Text>
+              )}
 
               <Animated.View
                 entering={FadeInDown.duration(500).delay(400)}
@@ -368,6 +394,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontFamily: 'Inter-Regular',
+    fontWeight: 'bold',
     fontSize: 14,
     color: Colors.light.error,
     marginBottom: Layout.spacing.m,

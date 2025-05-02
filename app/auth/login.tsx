@@ -130,7 +130,7 @@ export default function LoginScreen() {
       .catch((res) => {
         setFormError('root', {
           type: 'manual',
-          message: res || 'Invalid credentials. Please try again.',
+          message: res || 'Something went wrong. Please try again.',
         });
       });
   };
@@ -146,10 +146,6 @@ export default function LoginScreen() {
         <Card style={styles.card}>
           <Text style={styles.title}>Welcome Back</Text>
           <Text style={styles.subtitle}>Sign in to your account</Text>
-
-          {errors.root && (
-            <Text style={styles.errorText}>{errors.root?.message}</Text>
-          )}
 
           <Controller
             name="sUserID"
@@ -196,6 +192,10 @@ export default function LoginScreen() {
               />
             )}
           />
+
+          {errors.root && (
+            <Text style={styles.errorText}>{errors.root?.message}</Text>
+          )}
 
           <Button
             title="Sign In"

@@ -12,7 +12,6 @@ export type LocationData = {
   altitude?: number | null;
   heading?: number | null;
   speed?: number | null;
-  address?: string;
 };
 
 type LocationContextType = {

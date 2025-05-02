@@ -10,7 +10,7 @@ type AuthContextType = {
   isLoading: boolean;
   login: (data: FormData) => Promise<boolean | string>;
   logout: () => Promise<void>;
-  register: (userData: any) => Promise<boolean>;
+  register: (userData: any) => Promise<boolean | string>;
   verifyOtp: (otp: string) => Promise<boolean>;
   tempUserData: Partial<IUser> | null;
   setTempUserData: (data: Partial<IUser> | null) => void;
@@ -63,7 +63,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       axiosIns
         .post(API_CONSTANTS.AUTH.SIGN_IN, data)
         .then(async (response) => {
-          if (response.data?.success) {
+          if (response.data?.success && response.data?.sMessageCode === '0') {
             await localData.set('user', response.data);
             setUser(response.data);
             resolve(true);
@@ -82,9 +82,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(true);
     axiosIns
       .post(API_CONSTANTS.AUTH.LOG_OUT, {
-        sUserID: user?.sUserID,
-        sSessionID: user?.sSessionID,
-        sCompanyID: user?.sCompanyID,
+        sUserID: user?.userID,
+        sSessionID: user?.sessionID,
+        sCompanyID: user?.companyID,
       })
       .finally(() => setIsLoading(false));
     await localData.remove('user');
@@ -92,17 +92,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser(null);
   };
 
-  const register = async (userData: any): Promise<boolean> => {
+  const register = async (userData: FormData): Promise<boolean | string> => {
     setIsLoading(true);
-
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-    // Store the registration data temporarily
-    setTempUserData(userData);
-
-    setIsLoading(false);
-    return true;
+    try {
+      const response = await axiosIns.post(
+        API_CONSTANTS.AUTH.REGISTER,
+        userData
+      );
+      console.log(response);
+      if (response.data?.success && response.data?.messageCode === '0') {
+        return true;
+      }
+      return response.data.messageDesc;
+    } catch (error) {
+      console.error(error);
+      return 'An error occurred during registration. Please try again.';
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const verifyOtp = async (otp: string): Promise<boolean> => {
