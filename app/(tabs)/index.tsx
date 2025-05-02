@@ -4,12 +4,11 @@ import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Link, router, useFocusEffect } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   ArrowRightCircle,
   Bell,
-  Calendar,
-  CalendarDays,
+  ChevronsLeft,
   Clock,
   Edit,
   Layers,
@@ -102,50 +101,60 @@ const menu1 = [
   {
     name: 'Attendance',
     icon: <Clock size={30} color="#00ACC1" />,
-    route: '/(tabs)/attendance',
+    onPress: () => {
+      router.push('/(tabs)/attendance');
+    },
   },
   {
     name: 'Activity',
     icon: <ListTodo size={24} color={Colors.light.accent} />,
-    route: '/(tabs)/activity',
+    onPress: () => {
+      router.push('/(tabs)/activity');
+    },
   },
   {
     name: 'notification',
     icon: <SendHorizonal size={24} color={Colors.light.secondary} />,
-    route: '/notifications/send',
+    onPress: () => {
+      router.push('/notifications/send');
+    },
   },
   {
     name: 'Enquiry',
-    icon: <ScanSearch size={24} color={Colors.light.secondary} />,
-    route: '/enquiry',
+    icon: <ScanSearch size={24} color={Colors.light.info} />,
+    onPress: () => {
+      router.setParams({ screen: 'enquiry' });
+    },
   },
 ];
 
 const menu2 = [
   {
     name: 'Daily Activity',
-    icon: <Calendar size={24} color={Colors.light.accent} />,
-    route: '/(tabs)/daily-activity',
+    icon: <Layers size={24} color="#8E44AD" />,
+    onPress: () => router.push('/enquiry/activities'),
   },
   {
     name: 'Clock In/Out history',
-    icon: <Clock size={24} color={Colors.light.accent} />,
-    route: '/(tabs)/clock-history',
+    icon: <ListChecks size={24} color="#2980B9" />,
+    onPress: () => router.push('/enquiry/attendance-history'),
   },
   {
     name: 'Geolocation & Territory',
-    icon: <MapPin size={24} color={Colors.light.accent} />,
-    route: '/(tabs)/geolocation',
+    icon: <MapPin size={24} color="#16A085" />,
+    onPress: () => router.push('/enquiry/geolocation'),
   },
   {
     name: 'Live Tracking',
-    icon: <MapPin size={24} color={Colors.light.accent} />,
-    route: '/(tabs)/live-tracking',
+    icon: <Map size={24} color="#E74C3C" />,
+    onPress: () => router.push('/enquiry/live-tracking'),
   },
 ];
+
 export default function DashboardScreen() {
   const { user, logout } = useAuth();
   const [fadeAnim] = useState(new Animated.Value(0));
+  const params = useLocalSearchParams<{ screen?: string }>();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -195,7 +204,7 @@ export default function DashboardScreen() {
           <View style={styles.punchInfoCard}>
             <View style={styles.punchHeader}>
               <ArrowRightCircle size={20} color="#4CAF50" />
-              <Text style={styles.punchHeaderText}>Punch In at</Text>
+              <Text style={styles.punchHeaderText}>Check In at</Text>
             </View>
             <Text style={styles.punchTime}>
               {lastPunchTime} |{' '}
@@ -204,117 +213,31 @@ export default function DashboardScreen() {
             <Text style={styles.todaysTime}>Today's Time: {todaysTime}</Text>
           </View>
 
-          {/* Action Grid */}
-          <View style={styles.actionGrid}>
-            {/* Removed onPress for Leave as '/(tabs)/leave' route doesn't exist */}
-            <TouchableOpacity
-              style={styles.actionCard}
-              // onPress={() => router.push('/(tabs)/leave')}
-            >
-              <View
-                style={[
-                  styles.actionIconContainer,
-                  { backgroundColor: '#E3F2FD' },
-                ]}
-              >
-                <CalendarDays size={30} color="#2196F3" />
-              </View>
-              <Text style={styles.actionText}>Leave</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.actionCard}
-              onPress={() => router.push('/(tabs)/attendance')}
-            >
-              <View
-                style={[
-                  styles.actionIconContainer,
-                  { backgroundColor: '#E0F2F7' },
-                ]}
-              >
-                <Clock size={30} color="#00ACC1" />
-              </View>
-              <Text style={styles.actionText}>Attendance</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Quick Actions Section (Restored & Adapted) */}
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-          <View style={styles.quickActionsContainer}>
-            {/* Attendance already in grid above, keep others */}
-            <Link href="/(tabs)/activity" asChild>
-              <TouchableOpacity style={styles.quickActionButton}>
-                <View
-                  style={[
-                    styles.quickActionIcon,
-                    { backgroundColor: '#FFF9C4' },
-                  ]}
-                >
-                  <ListTodo size={24} color={Colors.light.accent} />
-                </View>
-                <Text style={styles.quickActionText}>Activity</Text>
-              </TouchableOpacity>
-            </Link>
-
-            <Link href="/notifications/send" asChild>
-              <TouchableOpacity style={styles.quickActionButton}>
-                <View
-                  style={[
-                    styles.quickActionIcon,
-                    { backgroundColor: '#E1F5FE' },
-                  ]}
-                >
-                  <SendHorizonal size={24} color={Colors.light.secondary} />
-                </View>
-                <Text style={styles.quickActionText}>Send Notification</Text>
-              </TouchableOpacity>
-            </Link>
-
-            {/* Add a placeholder or another action if needed for 3 items */}
-            <View style={styles.quickActionButton} />
-          </View>
-
-          {/* Enquiry Section (Restored & Adapted) */}
-          <Text style={styles.sectionTitle}>Enquiry</Text>
           <View style={styles.enquiryContainer}>
-            <Link href="/enquiry/activities" asChild>
-              <TouchableOpacity style={styles.enquiryCard}>
-                <View style={styles.enquiryIconContainer}>
-                  <Layers size={24} color="#8E44AD" />
-                </View>
-                <Text style={styles.enquiryTitle}>Daily Activities</Text>
-              </TouchableOpacity>
-            </Link>
-
-            <Link href="/enquiry/attendance-history" asChild>
-              <TouchableOpacity style={styles.enquiryCard}>
-                <View style={styles.enquiryIconContainer}>
-                  <ListChecks size={24} color="#2980B9" />
-                </View>
-                <Text style={styles.enquiryTitle}>
-                  Clock-in/Clock-out History
-                </Text>
-              </TouchableOpacity>
-            </Link>
-
-            <Link href="/enquiry/geolocation" asChild>
-              <TouchableOpacity style={styles.enquiryCard}>
-                <View style={styles.enquiryIconContainer}>
-                  <MapPin size={24} color="#16A085" />
-                </View>
-                <Text style={styles.enquiryTitle}>Geolocation History</Text>
-              </TouchableOpacity>
-            </Link>
-
-            <Link href="/enquiry/live-tracking" asChild>
-              <TouchableOpacity style={styles.enquiryCard}>
-                <View style={styles.enquiryIconContainer}>
-                  <Map size={24} color="#E74C3C" />
-                </View>
-                <Text style={styles.enquiryTitle}>Live Tracking</Text>
-              </TouchableOpacity>
-            </Link>
+            {(params.screen === 'enquiry' ? menu2 : menu1).map(
+              (item, index) => (
+                <TouchableOpacity
+                  style={styles.enquiryCard}
+                  onPress={item.onPress}
+                  key={item.name}
+                >
+                  <View style={styles.enquiryIconContainer}>{item.icon}</View>
+                  <Text style={styles.enquiryTitle}>{item?.name}</Text>
+                </TouchableOpacity>
+              )
+            )}
           </View>
+
+          {params.screen === 'enquiry' && (
+            <TouchableOpacity
+              onPress={() => router.setParams({ screen: 'home' })}
+            >
+              <ChevronsLeft
+                style={{ alignSelf: 'center' }}
+                color={Colors.light.primary}
+              />
+            </TouchableOpacity>
+          )}
         </Animated.View>
       </ScrollView>
     </SafeAreaView>
@@ -472,64 +395,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     color: Colors.light.subtext,
   },
-  actionGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  actionCard: {
-    backgroundColor: 'white',
-    borderRadius: Layout.borderRadius.large,
-    padding: Layout.spacing.m,
-    width: '48%', // Two cards side-by-side with a small gap
-    alignItems: 'center',
-    ...Layout.shadow.light,
-  },
-  actionIconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: Layout.borderRadius.medium, // Slightly less rounded than avatar
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: Layout.spacing.m,
-  },
-  actionText: {
-    fontSize: 16,
-    fontFamily: 'Inter-Medium',
-    color: Colors.light.text,
-  },
-  // Styles for restored sections (adapted)
-  sectionTitle: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 18,
-    color: Colors.light.text,
-    marginBottom: Layout.spacing.m,
-    marginTop: Layout.spacing.l, // Add margin top for separation
-  },
-  quickActionsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: Layout.spacing.xl,
-  },
-  quickActionButton: {
-    alignItems: 'center',
-    width: '30%', // Keep 3 items layout
-  },
-  quickActionIcon: {
-    width: 60,
-    height: 60,
-    borderRadius: 30, // Circular icons
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: Layout.spacing.s,
-    ...Layout.shadow.medium, // Use consistent shadow
-    backgroundColor: 'white', // Default background
-  },
-  quickActionText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 14,
-    color: Colors.light.text,
-    textAlign: 'center',
-  },
   enquiryContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -547,13 +412,6 @@ const styles = StyleSheet.create({
   enquiryIconContainer: {
     // Container for icon
     marginBottom: Layout.spacing.m,
-    // Add background/styling if needed, e.g., colored circle
-    // width: 50,
-    // height: 50,
-    // borderRadius: 25,
-    // justifyContent: 'center',
-    // alignItems: 'center',
-    // backgroundColor: '#f0f0f0',
   },
   enquiryTitle: {
     fontFamily: 'Inter-Medium',
