@@ -3,6 +3,7 @@ import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
+import { getDuration, parseDate } from '@/utils/date-time';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
@@ -21,7 +22,7 @@ import {
   ScanSearch,
   SendHorizontal as SendHorizonal,
 } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Animated,
   Image,
@@ -96,6 +97,23 @@ const userCard = (user: IUser) => (
     </View>
   </LinearGradient>
 );
+
+const CheckinDuration = ({ checkInTime }: { checkInTime: Date }) => {
+  const [duration, setDuration] = useState<IObject>(
+    getDuration(checkInTime, new Date())
+  );
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDuration(getDuration(checkInTime, new Date()));
+    }, 60 * 1000);
+    return () => clearInterval(interval);
+  }, [checkInTime]);
+
+  return `${duration?.hours?.toString().padStart(2, '0')}:${duration?.minutes
+    ?.toString()
+    .padStart(2, '0')} hrs`;
+};
 
 const menu1 = [
   {
@@ -184,9 +202,17 @@ export default function DashboardScreen() {
     );
   }
 
-  const lastPunchTime = '07:33 AM';
-  const punchDate = 'Wed, 11th Mar. 2020';
-  const todaysTime = '04:33hr';
+  const checkIn = parseDate(user?.todayCheckIn);
+  const lastCheckinTime = checkIn.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  const lastCheckinDate = checkIn.toLocaleDateString('en-US', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -207,10 +233,12 @@ export default function DashboardScreen() {
               <Text style={styles.punchHeaderText}>Check In at</Text>
             </View>
             <Text style={styles.punchTime}>
-              {lastPunchTime} |{' '}
-              <Text style={styles.punchDate}>{punchDate}</Text>
+              {lastCheckinTime} |{' '}
+              <Text style={styles.punchDate}>{lastCheckinDate}</Text>
             </Text>
-            <Text style={styles.todaysTime}>Today's Time: {todaysTime}</Text>
+            <Text style={styles.todaysTime}>
+              Duration: <CheckinDuration checkInTime={checkIn} />
+            </Text>
           </View>
 
           <View style={styles.enquiryContainer}>

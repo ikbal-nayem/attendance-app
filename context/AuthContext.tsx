@@ -4,6 +4,7 @@ import { localData } from '@/services/storage';
 import { AxiosResponse } from 'axios';
 import { router } from 'expo-router';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Alert } from 'react-native';
 
 type AuthContextType = {
   user: IUser | null;

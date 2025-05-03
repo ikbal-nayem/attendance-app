@@ -7,9 +7,10 @@
     "icon": "./assets/images/logo.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
+    "jsEngine": "hermes",
     "splash": {
       "image": "./assets/images/logo.png",
-      "resizeMode": "contain",
+      "resizeMode": "content",
       "backgroundColor": "#04696d"
     },
     "newArchEnabled": true,
