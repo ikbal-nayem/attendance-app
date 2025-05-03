@@ -4,7 +4,7 @@ import Colors from '@/constants/Colors';
 
 const AppStatusBar = () => {
   return (
-    <SafeAreaView style={{backgroundColor: Colors.dark.primary}}>
+    <SafeAreaView style={{backgroundColor: Colors.light.primary}}>
       <StatusBar
         translucent={false}
         backgroundColor={Colors.light.primary}

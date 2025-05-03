@@ -16,6 +16,7 @@ type HeaderProps = {
   withBackButton?: boolean;
   bg?: 'primary' | 'default';
   rightContent?: React.ReactNode;
+  leftContent?: React.ReactNode;
 };
 
 const FadeInView = ({
@@ -60,6 +61,7 @@ const AppHeader = ({
   withBackButton = true,
   bg = 'default',
   rightContent,
+  leftContent,
 }: HeaderProps) => {
   const navigation = useNavigation();
 
@@ -68,9 +70,7 @@ const AppHeader = ({
       <View
         style={[
           styles.headerWrapStyle,
-          bg === 'primary'
-            ? styles.primaryHeaderWrapper
-            : styles.defaultHeaderWrapper,
+          bg === 'primary' ? styles.primaryHeaderWrapper : styles.defaultHeaderWrapper,
         ]}
       >
         <View style={styles.leftView}>
@@ -82,6 +82,7 @@ const AppHeader = ({
               />
             </TouchableOpacity>
           )}
+          {leftContent}
         </View>
         <View style={styles.centerView}>
           <Text
@@ -91,9 +92,7 @@ const AppHeader = ({
             {title}
           </Text>
         </View>
-        <View style={styles.rightView}>
-          {rightContent}
-        </View>
+        <View style={styles.rightView}>{rightContent}</View>
       </View>
     </FadeInView>
   );
@@ -120,7 +119,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.primary,
     color: Colors.dark.text,
   },
-  leftView: {},
+  leftView: { flexDirection: 'row', alignItems: 'center', gap: Layout.spacing.m },
   rightView: {},
   centerView: { flex: 1, alignItems: 'center' },
 
