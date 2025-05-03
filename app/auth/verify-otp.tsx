@@ -33,7 +33,7 @@ type FormData = z.infer<typeof otpSchema>;
 
 export default function VerifyOTPScreen() {
   const { verifyOtp, tempUserData, isLoading } = useAuth();
-  const [remainingTime, setRemainingTime] = useState(60);
+  const [remainingTime, setRemainingTime] = useState(120);
   const [canResend, setCanResend] = useState(false);
   const [apiError, setApiError] = useState('');
   const { showToast } = useToast();

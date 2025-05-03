@@ -132,7 +132,7 @@ const menu1 = [
     },
   },
   {
-    name: 'notification',
+    name: 'Notification',
     icon: <SendHorizonal size={24} color={Colors.light.secondary} />,
     onPress: () => {
       router.push('/notifications/send');

@@ -102,6 +102,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         API_CONSTANTS.AUTH.REGISTER_REQUEST,
         userData
       );
+      console.log(response)
       if (response.data?.messageCode === '0') {
         userData.append('requestNo', response.data?.requestNo);
         setTempUserData(userData);

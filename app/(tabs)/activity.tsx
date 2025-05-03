@@ -175,7 +175,7 @@ export default function ActivityScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <Text style={styles.backButton}>Back</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Activity Log</Text>
+        <Text style={styles.headerTitle}>Activity</Text>
         <TouchableOpacity onPress={() => router.push('/enquiry/activities')}>
           <Text style={styles.historyText}>History</Text>
         </TouchableOpacity>
