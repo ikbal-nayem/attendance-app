@@ -8,7 +8,7 @@ export const makeFormData = (data: IObject) => {
         uri: data[key].uri,
         name: data[key].fileName,
         type,
-      });
+      } as unknown as Blob);
       continue;
     }
     formData.append(key, data[key]);
