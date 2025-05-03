@@ -35,11 +35,8 @@ const registerSchema = z.object({
     .min(10, 'Mobile number must be at least 10 digits')
     .max(13, 'Mobile number cannot exceed 13 digits')
     .regex(/^[0-9]+$/, 'Mobile number must contain only digits'),
-  sEmail: z
-    .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email'),
-  sPhoto: z.any(),
+  sEmail: z.string().min(1, 'Email is required').email('Please enter a valid email'),
+  sPhoto: z.string().optional(),
   sDeviceFlag: z.boolean(),
 });
 
@@ -108,7 +105,11 @@ export default function RegisterScreen() {
               control={control}
               name="sPhoto"
               render={({ field: { onChange, value } }) => (
-                <SingleImagePicker photo={value} setPhoto={onChange} />
+                <SingleImagePicker
+                  photoUri={value}
+                  setPhotoUri={(uri) => onChange(uri ?? '')}
+                  source="both"
+                />
               )}
             />
 
@@ -132,6 +133,7 @@ export default function RegisterScreen() {
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
                   label="Name"
+                  required
                   placeholder="Enter your full name"
                   value={value}
                   onChangeText={onChange}
@@ -148,13 +150,12 @@ export default function RegisterScreen() {
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
                   label="Staff ID"
+                  required
                   placeholder="Enter your staff ID"
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  leftIcon={
-                    <Briefcase size={20} color={Colors.light.subtext} />
-                  }
+                  leftIcon={<Briefcase size={20} color={Colors.light.subtext} />}
                   error={errors.sStaffID?.message}
                 />
               )}
@@ -166,6 +167,7 @@ export default function RegisterScreen() {
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
                   label="Mobile Number"
+                  required
                   placeholder="Enter your mobile number"
                   value={value}
                   onChangeText={onChange}
@@ -183,6 +185,7 @@ export default function RegisterScreen() {
               render={({ field: { onChange, onBlur, value } }) => (
                 <Input
                   label="Email Address"
+                  required
                   placeholder="Enter your email address"
                   value={value}
                   onChangeText={onChange}
@@ -199,17 +202,11 @@ export default function RegisterScreen() {
               control={control}
               name="sDeviceFlag"
               render={({ field: { onChange, value } }) => (
-                <Switch
-                  value={value}
-                  onChange={onChange}
-                  label="Is Company Device"
-                />
+                <Switch value={value} onChange={onChange} label="Is Company Device" />
               )}
             />
 
-            {errors.root && (
-              <Text style={styles.errorText}>{errors.root.message}</Text>
-            )}
+            {errors.root && <Text style={styles.errorText}>{errors.root.message}</Text>}
 
             <Animated.View
               entering={FadeInDown.duration(500).delay(400)}

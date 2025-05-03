@@ -31,6 +31,7 @@ type SelectProps = {
   selectStyle?: StyleProp<ViewStyle>; // Style for the touchable area
   modalTitle?: string;
   disabled?: boolean;
+  required?: boolean;
 };
 
 const Select: React.FC<SelectProps> = ({
@@ -47,6 +48,7 @@ const Select: React.FC<SelectProps> = ({
   selectStyle,
   modalTitle = 'Select an option',
   disabled = false,
+  required = false,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const selectedOption = options.find((option) => option?.[keyProp] == value);
@@ -73,7 +75,11 @@ const Select: React.FC<SelectProps> = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && (
+        <Text style={styles.label}>
+          {label} {required && <Text style={{ color: Colors.light.error }}>*</Text>}
+        </Text>
+      )}
 
       <TouchableOpacity
         style={[

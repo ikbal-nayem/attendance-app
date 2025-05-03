@@ -1,19 +1,21 @@
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
-import { isNull } from '@/utils/validation';
 import * as picker from 'expo-image-picker';
-import { User2 } from 'lucide-react-native';
+import { Camera } from 'lucide-react-native';
+import React from 'react';
 import {
   Alert,
   Image,
+  StyleProp,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  ViewStyle,
 } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
-const imagePickerOptions: any = {
+const imagePickerOptions: picker.ImagePickerOptions = {
   mediaTypes: picker.MediaTypeOptions.Images,
   allowsEditing: true,
   aspect: [1, 1],
@@ -21,111 +23,106 @@ const imagePickerOptions: any = {
 };
 
 type ImagePickerProps = {
-  photo: picker.ImagePickerAsset | undefined;
-  setPhoto: (photo: picker.ImagePickerAsset | undefined) => void;
+  photoUri: string | undefined | null;
+  setPhotoUri: (uri: string | undefined) => void;
+  source?: 'camera' | 'gallery' | 'both';
+  previewContainerStyle?: StyleProp<ViewStyle>;
+  placeholder?: React.ReactNode;
 };
 
-const SingleImagePicker = ({ photo, setPhoto }: ImagePickerProps) => {
-  const pickImage = async (): Promise<picker.ImagePickerAsset | undefined> => {
-    const result = await new Promise<picker.ImagePickerAsset | undefined>(
-      (resolve) => {
-        Alert.alert(
-          'Select Photo',
-          'Choose an option',
-          [
-            {
-              text: 'Take Photo',
-              onPress: async () => {
-                const uri = await takePhoto();
-                resolve(uri);
-              },
-            },
-            {
-              text: 'Choose from Gallery',
-              onPress: async () => {
-                const uri = await chooseFromGallery();
-                resolve(uri);
-              },
-            },
-            {
-              text: 'Cancel',
-              style: 'cancel',
-              onPress: () => resolve(undefined),
-            },
-          ],
-          { cancelable: true }
-        );
-      }
-    );
-    return result;
+const SingleImagePicker = ({
+  photoUri,
+  setPhotoUri,
+  source = 'both',
+  previewContainerStyle,
+  placeholder,
+}: ImagePickerProps) => {
+  const handlePickImage = async () => {
+    let resultAsset: picker.ImagePickerAsset | undefined;
+
+    if (source === 'camera') {
+      resultAsset = await takePhoto();
+    } else if (source === 'gallery') {
+      resultAsset = await chooseFromGallery();
+    } else {
+      resultAsset = await showSourceSelection();
+    }
+
+    if (resultAsset?.uri) {
+      setPhotoUri(resultAsset.uri);
+    }
+  };
+
+  const showSourceSelection = async (): Promise<picker.ImagePickerAsset | undefined> => {
+    return new Promise<picker.ImagePickerAsset | undefined>((resolve) => {
+      Alert.alert(
+        'Select Photo',
+        'Choose an option',
+        [
+          { text: 'Take Photo', onPress: async () => resolve(await takePhoto()) },
+          {
+            text: 'Choose from Gallery',
+            onPress: async () => resolve(await chooseFromGallery()),
+          },
+          { text: 'Cancel', style: 'cancel', onPress: () => resolve(undefined) },
+        ],
+        { cancelable: true }
+      );
+    });
   };
 
   const takePhoto = async (): Promise<picker.ImagePickerAsset | undefined> => {
     try {
       const { status } = await picker.requestCameraPermissionsAsync();
-
       if (status !== 'granted') {
-        Alert.alert(
-          'Permission Denied',
-          'Camera permission is required to take photos'
-        );
+        Alert.alert('Permission Denied', 'Camera permission is required.');
         return undefined;
       }
-
       const result = await picker.launchCameraAsync(imagePickerOptions);
-
-      return result.canceled ? undefined : result.assets[0];
+      return result.canceled ? undefined : result.assets?.[0];
     } catch (error) {
       console.error('Error taking photo:', error);
-      Alert.alert('Error', 'Failed to take photo');
+      Alert.alert('Error', 'Failed to take photo.');
       return undefined;
     }
   };
 
-  const chooseFromGallery = async (): Promise<
-    picker.ImagePickerAsset | undefined
-  > => {
+  const chooseFromGallery = async (): Promise<picker.ImagePickerAsset | undefined> => {
     try {
       const { status } = await picker.requestMediaLibraryPermissionsAsync();
-
       if (status !== 'granted') {
-        Alert.alert(
-          'Permission Denied',
-          'Media library permission is required to select photos'
-        );
+        Alert.alert('Permission Denied', 'Media library permission is required.');
         return undefined;
       }
-
       const result = await picker.launchImageLibraryAsync(imagePickerOptions);
-
-      return result.canceled ? undefined : result.assets[0];
+      return result.canceled ? undefined : result.assets?.[0];
     } catch (error) {
       console.error('Error selecting photo:', error);
-      Alert.alert('Error', 'Failed to select photo');
+      Alert.alert('Error', 'Failed to select photo.');
       return undefined;
     }
   };
+
+  const defaultPlaceholder = (
+    <View style={styles.photoPlaceholder}>
+      <Camera size={24} color={Colors.light.primary} />
+      <Text style={styles.photoPlaceholderText}>Photo</Text>
+    </View>
+  );
 
   return (
     <Animated.View
       entering={FadeInDown.duration(500).delay(200)}
-      style={styles.photoContainer}
+      style={styles.container}
     >
       <TouchableOpacity
-        style={styles.photoButton}
-        onPress={() =>
-          pickImage().then((uri) => {
-            if (uri) setPhoto(uri);
-          })
-        }
+        style={[styles.photoButton, previewContainerStyle]}
+        onPress={handlePickImage}
       >
-        {!isNull(photo) ? (
-          <Image source={{ uri: photo?.uri }} style={styles.photoPreview} />
+        {photoUri ? (
+          <Image source={{ uri: photoUri }} style={styles.photoPreview} />
         ) : (
-          <View style={styles.photoPlaceholder}>
-            <User2 size={24} color={Colors.light.primary} />
-            <Text style={styles.photoPlaceholderText}>Photo</Text>
-          </View>
+          placeholder ?? defaultPlaceholder
         )}
       </TouchableOpacity>
     </Animated.View>
@@ -133,9 +130,8 @@ const SingleImagePicker = ({ photo, setPhoto }: ImagePickerProps) => {
 };
 
 const styles = StyleSheet.create({
-  photoContainer: {
-    alignSelf: 'center',
-    marginBottom: Layout.spacing.m,
+  container: {
+    alignItems: 'center',
   },
   photoButton: {
     width: 120,
@@ -165,6 +161,5 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
 });
-
 
 export default SingleImagePicker;

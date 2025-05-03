@@ -13,7 +13,7 @@ import { useRouter } from 'expo-router';
 import { Lock, MoveRight, User } from 'lucide-react-native';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -55,10 +55,7 @@ const header = () => {
 
   return (
     <Animated.View style={[styles.logoContainer, logoAnimation]}>
-      <Image
-        source={require('../../assets/images/logo.png')}
-        style={styles.logoImage}
-      />
+      <Image source={require('../../assets/images/logo.png')} style={styles.logoImage} />
       <Text style={styles.logoText}>Supervisor/Manager Activity Tracking</Text>
     </Animated.View>
   );
@@ -142,79 +139,71 @@ export default function LoginScreen() {
   return (
     <AuthLayout>
       {header()}
-      <Animated.View style={[styles.cardContainer, cardAnimation]}>
-        <Card style={styles.card}>
-          <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Sign in to your account</Text>
+      <ScrollView keyboardShouldPersistTaps="handled">
+        <Animated.View style={[styles.cardContainer, cardAnimation]}>
+          <Card style={styles.card}>
+            <Text style={styles.title}>Welcome Back</Text>
+            <Text style={styles.subtitle}>Sign in to your account</Text>
 
-          <Controller
-            name="sUserID"
-            control={control}
-            render={({
-              field: { onChange, onBlur, value },
-            }: {
-              field: FieldProps;
-            }) => (
-              <Input
-                label="Staff ID or Email"
-                placeholder="Staff ID or Email"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                editable={!isLoading}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                leftIcon={<User size={20} color={Colors.light.subtext} />}
-                error={errors.sUserID?.message}
-              />
-            )}
-          />
+            <Controller
+              name="sUserID"
+              control={control}
+              render={({ field: { onChange, onBlur, value } }: { field: FieldProps }) => (
+                <Input
+                  label="Staff ID or Email"
+                  placeholder="Staff ID or Email"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  editable={!isLoading}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  leftIcon={<User size={20} color={Colors.light.subtext} />}
+                  error={errors.sUserID?.message}
+                />
+              )}
+            />
 
-          <Controller
-            name="sPassword"
-            control={control}
-            render={({
-              field: { onChange, onBlur, value },
-            }: {
-              field: FieldProps;
-            }) => (
-              <Input
-                label="Password"
-                placeholder="Password"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                editable={!isLoading}
-                secureTextEntry
-                showPasswordToggle
-                leftIcon={<Lock size={20} color={Colors.light.subtext} />}
-                error={errors.sPassword?.message}
-              />
-            )}
-          />
+            <Controller
+              name="sPassword"
+              control={control}
+              render={({ field: { onChange, onBlur, value } }: { field: FieldProps }) => (
+                <Input
+                  label="Password"
+                  placeholder="Password"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  editable={!isLoading}
+                  secureTextEntry
+                  showPasswordToggle
+                  leftIcon={<Lock size={20} color={Colors.light.subtext} />}
+                  error={errors.sPassword?.message}
+                />
+              )}
+            />
 
-          {errors.root && (
-            <Text style={styles.errorText}>{errors.root?.message}</Text>
-          )}
+            {errors.root && <Text style={styles.errorText}>{errors.root?.message}</Text>}
 
-          <Button
-            title="Sign In"
-            onPress={handleSubmit(onSubmit)}
-            icon={<MoveRight size={20} color={Colors.light.background} />}
-            iconPosition="right"
-            loading={isLoading}
-            fullWidth
-            style={styles.button}
-          />
+            <Button
+              title="Sign In"
+              onPress={handleSubmit(onSubmit)}
+              icon={<MoveRight size={20} color={Colors.light.background} />}
+              iconPosition="right"
+              loading={isLoading}
+              fullWidth
+              style={styles.button}
+            />
 
-          <Animated.View style={[styles.registerContainer, registerAnimation]}>
-            <Text style={styles.registerText}>Don't have an account? </Text>
-            <TouchableOpacity onPress={navigateToRegister}>
-              <Text style={styles.registerLink}>Register</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        </Card>
-      </Animated.View>
+            <Animated.View style={[styles.registerContainer, registerAnimation]}>
+              <Text style={styles.registerText}>Don't have an account? </Text>
+              <TouchableOpacity onPress={navigateToRegister}>
+                <Text style={styles.registerLink}>Register</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </Card>
+        </Animated.View>
+      </ScrollView>
     </AuthLayout>
   );
 }

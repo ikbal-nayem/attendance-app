@@ -10,6 +10,6 @@ export const API_CONSTANTS = {
 
   ATTENDANCE: {
     INIT: '/AttendanceEntryService/firstLoad',
-    DATA: '/AttendanceEntryService/attendanceData',
+    SUBMIT: '/AttendanceEntryService/attendanceEntry',
   },
 };

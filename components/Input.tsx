@@ -28,6 +28,7 @@ type InputProps = TextInputProps & {
   onRightIconPress?: () => void;
   onLeftIconPress?: () => void;
   showPasswordToggle?: boolean;
+  required?: boolean;
 };
 
 const Input: React.FC<InputProps> = ({
@@ -44,6 +45,7 @@ const Input: React.FC<InputProps> = ({
   onRightIconPress,
   onLeftIconPress,
   showPasswordToggle = false,
+  required = false,
   ...rest
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -56,7 +58,7 @@ const Input: React.FC<InputProps> = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {label && <Text style={[styles.label, labelStyle]}>{label}</Text>}
+      {label && <Text style={[styles.label, labelStyle]}>{label} {required && <Text style={{ color: Colors.light.error }}>*</Text>}</Text>}
 
       <View
         style={[

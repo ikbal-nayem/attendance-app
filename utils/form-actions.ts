@@ -1,17 +1,22 @@
 export const makeFormData = (data: IObject) => {
   const formData = new FormData();
   for (const key in data) {
-    if (data[key] instanceof Object && data[key].uri) {
-      const match = /\.(\w+)$/.exec(data[key].fileName);
-      const type = match ? `image/${match[1]}` : 'image';
-      formData.append(key, {
-        uri: data[key].uri,
-        name: data[key].fileName,
-        type,
-      } as unknown as Blob);
-      continue;
+    try {
+      if (typeof data[key] === 'string' && data[key]?.startsWith('file:///')) {
+        const fileName = data[key].split('/').pop();
+        const match = /\.(\w+)$/.exec(fileName || '');
+        const type = match ? `image/${match[1]}` : 'image';
+        formData.append(key, {
+          uri: data[key],
+          name: fileName,
+          type,
+        } as unknown as Blob);
+        continue;
+      }
+      formData.append(key, data[key]);
+    } catch (e) {
+      console.error('Error in makeFormData', e);
     }
-    formData.append(key, data[key]);
   }
   return formData;
 };

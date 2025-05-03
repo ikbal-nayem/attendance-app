@@ -21,18 +21,12 @@ export const useAttendanceData = (companyId: string, staffId: string) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const req1 = axiosIns.post(
-      API_CONSTANTS.ATTENDANCE.INIT,
-      makeFormData({ sCompanyID: companyId })
-    );
-    const req2 = axiosIns.post(
-      API_CONSTANTS.ATTENDANCE.DATA,
-      makeFormData({ sCompanyID: companyId, sStaffID: staffId })
-    );
-    Promise.all([req1, req2])
-      .then(([response1, response2]) => {
-        setAttendanceData({ ...response1.data, ...response2.data });
-      })
+    axiosIns
+      .post(
+        API_CONSTANTS.ATTENDANCE.INIT,
+        makeFormData({ sCompanyID: companyId, sStaffID: staffId })
+      )
+      .then((response) => setAttendanceData(response.data))
       .catch((err) => {
         console.log(err);
         setError(err.message);
@@ -41,4 +35,18 @@ export const useAttendanceData = (companyId: string, staffId: string) => {
   }, [companyId]);
 
   return { attendanceData, isLoading, error };
+};
+
+export const submitAttendance = async (data: FormData) => {
+  try {
+    const req = await axiosIns.post(API_CONSTANTS.ATTENDANCE.SUBMIT, data);
+    console.log(req.data);
+    if (req.data?.messageCode === '0') {
+      return { success: true, data: req.data };
+    }
+    return { success: false, message: req.data?.messageDesc };
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 };
