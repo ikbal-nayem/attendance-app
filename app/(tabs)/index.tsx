@@ -4,6 +4,7 @@ import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
 import { getDuration, parseDate } from '@/utils/date-time';
+import { generateUserImage } from '@/utils/generator';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
@@ -49,7 +50,7 @@ const header = (user: IUser, handleLogout: () => void) => (
       <Popover content={popoverContent(handleLogout)}>
         <Image
           source={{
-            uri: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png',
+            uri: generateUserImage(user.userID, user.sessionID, user.companyID),
           }}
           style={styles.avatar}
         />
