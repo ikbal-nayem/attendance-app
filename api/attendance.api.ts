@@ -15,7 +15,7 @@ type AttendanceData = {
   userName: string;
 };
 
-export const useAttendanceData = (companyId: string, staffId: string) => {
+export const useAttendanceData = (companyId: string, employeeCode: string) => {
   const [attendanceData, setAttendanceData] = useState<AttendanceData>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +24,7 @@ export const useAttendanceData = (companyId: string, staffId: string) => {
     axiosIns
       .post(
         API_CONSTANTS.ATTENDANCE.INIT,
-        makeFormData({ sCompanyID: companyId, sStaffID: staffId })
+        makeFormData({ sCompanyID: companyId, sEmployeeCode: employeeCode })
       )
       .then((response) => setAttendanceData(response.data))
       .catch((err) => {
