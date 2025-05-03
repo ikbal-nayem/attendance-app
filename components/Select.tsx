@@ -1,6 +1,6 @@
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
-import { ChevronDown, X } from 'lucide-react-native';
+import { Check, ChevronDown, X } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
   FlatList,
@@ -12,19 +12,16 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
   ViewStyle,
-  TouchableWithoutFeedback, // Import TouchableWithoutFeedback
 } from 'react-native';
-
-type SelectOption = {
-  label: string;
-  value: string;
-};
 
 type SelectProps = {
   label?: string;
-  options: SelectOption[];
+  options: IObject[];
+  keyProp: string;
+  valueProp: string;
   value?: string;
   placeholder?: string;
   onChange: (value: string) => void;
@@ -39,6 +36,8 @@ type SelectProps = {
 const Select: React.FC<SelectProps> = ({
   label,
   options,
+  keyProp,
+  valueProp,
   value,
   placeholder = 'Select an option',
   onChange,
@@ -50,7 +49,7 @@ const Select: React.FC<SelectProps> = ({
   disabled = false,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const selectedOption = options.find((option) => option.value === value);
+  const selectedOption = options.find((option) => option?.[keyProp] == value);
   const hasError = !!error;
 
   const handleSelect = (selectedValue: string) => {
@@ -58,12 +57,17 @@ const Select: React.FC<SelectProps> = ({
     setModalVisible(false);
   };
 
-  const renderItem = ({ item }: { item: SelectOption }) => (
+  const renderItem = ({ item }: { item: IObject }) => (
     <TouchableOpacity
       style={styles.optionItem}
-      onPress={() => handleSelect(item.value)}
+      onPress={() => handleSelect(item?.[keyProp])}
     >
-      <Text style={styles.optionText}>{item.label}</Text>
+      <Text
+        style={[styles.optionText, item?.[keyProp] == value && styles.selectedOption]}
+      >
+        {item?.[valueProp]}
+      </Text>
+      {item?.[keyProp] == value && <Check size={20} color={Colors.light.primary} />}
     </TouchableOpacity>
   );
 
@@ -90,7 +94,7 @@ const Select: React.FC<SelectProps> = ({
           ]}
           numberOfLines={1}
         >
-          {selectedOption ? selectedOption.label : placeholder}
+          {selectedOption ? selectedOption?.[valueProp] : placeholder}
         </Text>
         <ChevronDown
           size={20}
@@ -111,10 +115,8 @@ const Select: React.FC<SelectProps> = ({
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        {/* Wrap with TouchableWithoutFeedback to detect taps outside the modal content */}
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
           <SafeAreaView style={styles.modalOverlay}>
-            {/* Wrap content with another Touchable to prevent closing when tapping inside */}
             <TouchableWithoutFeedback>
               <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
@@ -129,7 +131,7 @@ const Select: React.FC<SelectProps> = ({
                 <FlatList
                   data={options}
                   renderItem={renderItem}
-                  keyExtractor={(item) => item.value}
+                  keyExtractor={(item) => item?.[keyProp]}
                   style={styles.optionsList}
                 />
               </View>
@@ -151,7 +153,6 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
     marginBottom: Layout.spacing.xs,
   },
-  // Mimics Input component's container
   selectContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -169,13 +170,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.border,
     opacity: 0.6,
   },
-  // Mimics Input component's text style
   selectText: {
     flex: 1,
     fontFamily: 'Inter-Regular',
     fontSize: 16,
     color: Colors.light.text,
-    marginRight: Layout.spacing.m, // Space for the chevron
+    marginRight: Layout.spacing.m,
   },
   selectTextDisabled: {
     color: Colors.light.subtext,
@@ -195,7 +195,6 @@ const styles = StyleSheet.create({
   errorText: {
     color: Colors.light.error,
   },
-  // Modal Styles
   modalOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -206,8 +205,8 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.background,
     borderTopLeftRadius: Layout.borderRadius.large,
     borderTopRightRadius: Layout.borderRadius.large,
-    maxHeight: '60%', // Limit modal height
-    paddingBottom: Layout.spacing.l, // Padding at the bottom
+    maxHeight: '60%',
+    paddingBottom: Layout.spacing.l,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -224,7 +223,7 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
   },
   closeButton: {
-    padding: Layout.spacing.xs, // Make it easier to tap
+    padding: Layout.spacing.xs,
   },
   optionsList: {
     // Takes remaining space
@@ -234,11 +233,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: Layout.spacing.l,
     borderBottomWidth: 1,
     borderBottomColor: Colors.light.border,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   optionText: {
     fontFamily: 'Inter-Regular',
     fontSize: 16,
     color: Colors.light.text,
+  },
+  selectedOption: {
+    color: Colors.light.primary,
+    fontFamily: 'Inter-SemiBold',
   },
 });
 

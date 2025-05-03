@@ -6,5 +6,10 @@ export const API_CONSTANTS = {
     REGISTER_REQUEST: '/RegistrationService/registrationRequest',
     REGISTER_SUBMIT: '/RegistrationService/registrationSubmit',
   },
-  USER_IMAGE: '/SignInService/userImage'
+  USER_IMAGE: '/SignInService/userImage',
+
+  ATTENDANCE: {
+    INIT: '/AttendanceEntryService/firstLoad',
+    DATA: '/AttendanceEntryService/attendanceData',
+  },
 };

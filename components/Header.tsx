@@ -127,6 +127,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 18,
     color: Colors.light.text,
+    fontWeight: 'bold',
   },
   textWithPrimary: {
     color: Colors.dark.text,

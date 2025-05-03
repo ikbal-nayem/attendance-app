@@ -1,26 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
-  Dimensions,
-} from 'react-native';
-import { router } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
-import { useLocation } from '@/context/LocationContext';
+import Card from '@/components/Card';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
-import Card from '@/components/Card';
+import { router } from 'expo-router';
+import { ChevronLeft } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  Dimensions,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 // import Map from '@/components/Map';
 
 const { width } = Dimensions.get('window');
 
 export default function AttandanceHistryScreen() {
-  const { userLocations } = useLocation();
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [region, setRegion] = useState({
     latitude: 37.78825,
@@ -28,6 +26,37 @@ export default function AttandanceHistryScreen() {
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   });
+
+  const userLocations = [
+    {
+      userId: '1',
+      userName: 'John Doe',
+      location: {
+        latitude: 37.78825,
+        longitude: -122.4324,
+        timestamp: Date.now(),
+      },
+      timestamp: Date.now(),
+    },
+    {
+      userId: '2',
+      location: {
+        latitude: 37.78825,
+        longitude: -122.4324,
+        timestamp: Date.now(),
+      },
+      timestamp: Date.now(),
+    },
+    {
+      userId: '3',
+      location: {
+        latitude: 37.78825,
+        longitude: -122.4324,
+        timestamp: Date.now(),
+      },
+      timestamp: Date.now(),
+    },
+  ];
 
   useEffect(() => {
     if (userLocations.length > 0) {
@@ -58,12 +87,12 @@ export default function AttandanceHistryScreen() {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  const mapMarkers = filteredLocations.map((user) => ({
-    id: user.userId,
-    title: user.userName,
-    location: user.location,
-    color: getPinColor(user.userId),
-  }));
+  // const mapMarkers = filteredLocations.map((user) => ({
+  //   id: user.userId,
+  //   title: user.userName,
+  //   location: user.location,
+  //   color: getPinColor(user.userId),
+  // }));
 
   return (
     <SafeAreaView style={styles.container}>

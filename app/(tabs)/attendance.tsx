@@ -1,10 +1,12 @@
+import { useAttendanceData } from '@/api/attendance.api';
 import Button from '@/components/Button';
 import Card from '@/components/Card';
+import AppHeader from '@/components/Header';
 import Input from '@/components/Input';
 import Select from '@/components/Select';
+import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
-import { useAttendance } from '@/context/AttendanceContext';
 import { useAuth } from '@/context/AuthContext';
 import { useLocation } from '@/context/LocationContext';
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
@@ -16,27 +18,16 @@ import {
   Image,
   SafeAreaView,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 
-const statusOptions = [
-  { label: 'Work Day', value: 'Work Day' },
-  { label: 'Off Day', value: 'Off Day' },
-];
-
 export default function AttendanceScreen() {
   const { user } = useAuth();
-  const { currentEntry, isCheckedIn, checkIn, checkOut, getTodayEntries } =
-    useAttendance();
-  const {
-    currentLocation,
-    getAddressFromCoordinates,
-    requestLocationPermission,
-  } = useLocation();
+  const { currentLocation, getAddressFromCoordinates, requestLocationPermission } =
+    useLocation();
 
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [showCamera, setShowCamera] = useState(false);
@@ -45,11 +36,15 @@ export default function AttendanceScreen() {
 
   const [address, setAddress] = useState('Fetching location...');
   const [note, setNote] = useState('');
-  const [status, setStatus] = useState('Work Day');
+  const [status, setStatus] = useState('W');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { attendanceData, isLoading } = useAttendanceData(
+    user?.companyID || '',
+    user?.employeeCode || ''
+  );
 
-  const todayEntries = getTodayEntries();
-  const entryNumber = todayEntries.length + (isCheckedIn ? 0 : 1);
+  const todayEntries = [];
+  const entryNumber = todayEntries.length;
 
   useEffect(() => {
     const initialize = async () => {
@@ -71,10 +66,7 @@ export default function AttendanceScreen() {
     const { status } = await requestCameraPermission();
 
     if (status !== 'granted') {
-      Alert.alert(
-        'Permission Denied',
-        'Camera permission is required to take photos'
-      );
+      Alert.alert('Permission Denied', 'Camera permission is required to take photos');
       return;
     }
 
@@ -112,28 +104,28 @@ export default function AttendanceScreen() {
       return;
     }
 
-    setIsSubmitting(true);
+    // setIsSubmitting(true);
 
-    try {
-      const success = await checkIn(
-        capturedPhoto,
-        note,
-        status as 'Work Day' | 'Off Day'
-      );
+    // try {
+    //   const success = await checkIn(
+    //     capturedPhoto,
+    //     note,
+    //     status as 'Work Day' | 'Off Day'
+    //   );
 
-      if (success) {
-        Alert.alert('Success', 'You have successfully checked in');
-        setCapturedPhoto(null);
-        setNote('');
-      } else {
-        Alert.alert('Error', 'Failed to check in. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error during check-in:', error);
-      Alert.alert('Error', 'Failed to check in');
-    } finally {
-      setIsSubmitting(false);
-    }
+    //   if (success) {
+    //     Alert.alert('Success', 'You have successfully checked in');
+    //     setCapturedPhoto(null);
+    //     setNote('');
+    //   } else {
+    //     Alert.alert('Error', 'Failed to check in. Please try again.');
+    //   }
+    // } catch (error) {
+    //   console.error('Error during check-in:', error);
+    //   Alert.alert('Error', 'Failed to check in');
+    // } finally {
+    //   setIsSubmitting(false);
+    // }
   };
 
   const handleCheckOut = async () => {
@@ -150,24 +142,24 @@ export default function AttendanceScreen() {
       return;
     }
 
-    setIsSubmitting(true);
+    // setIsSubmitting(true);
 
-    try {
-      const success = await checkOut(capturedPhoto, note);
+    // try {
+    //   const success = await checkOut(capturedPhoto, note);
 
-      if (success) {
-        Alert.alert('Success', 'You have successfully checked out');
-        setCapturedPhoto(null);
-        setNote('');
-      } else {
-        Alert.alert('Error', 'Failed to check out. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error during check-out:', error);
-      Alert.alert('Error', 'Failed to check out');
-    } finally {
-      setIsSubmitting(false);
-    }
+    //   if (success) {
+    //     Alert.alert('Success', 'You have successfully checked out');
+    //     setCapturedPhoto(null);
+    //     setNote('');
+    //   } else {
+    //     Alert.alert('Error', 'Failed to check out. Please try again.');
+    //   }
+    // } catch (error) {
+    //   console.error('Error during check-out:', error);
+    //   Alert.alert('Error', 'Failed to check out');
+    // } finally {
+    //   setIsSubmitting(false);
+    // }
   };
 
   const formatTime = (date: Date) => {
@@ -193,10 +185,7 @@ export default function AttendanceScreen() {
               <View style={styles.captureButtonInner} />
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.flipButton}
-              onPress={toggleCameraType}
-            >
+            <TouchableOpacity style={styles.flipButton} onPress={toggleCameraType}>
               <Text style={styles.flipButtonText}>Flip</Text>
             </TouchableOpacity>
           </View>
@@ -207,36 +196,24 @@ export default function AttendanceScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor={Colors.light.background}
-      />
-
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={styles.backButton}>Back</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Attendance</Text>
-        <View style={styles.placeholder} />
-      </View>
+      <AppStatusBar />
+      <AppHeader title="Attendance" withBackButton={false} bg="primary" />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
         <Card variant="elevated" style={styles.attendanceCard}>
-          <Text style={styles.attendanceTitle}>
-            {isCheckedIn ? 'Check-out' : 'Check-in'}: Entry {entryNumber}
-          </Text>
+          <Text style={styles.attendanceTitle}>Entry {entryNumber}</Text>
 
-          {isCheckedIn && (
+          {/* {isCheckedIn && (
             <View style={styles.checkinInfo}>
               <Text style={styles.checkinInfoLabel}>Checked in at:</Text>
               <Text style={styles.checkinInfoValue}>
                 {formatTime(new Date(currentEntry?.checkInTime || Date.now()))}
               </Text>
             </View>
-          )}
+          )} */}
 
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Location</Text>
@@ -246,11 +223,7 @@ export default function AttendanceScreen() {
                 color={Colors.light.subtext}
                 style={styles.locationIcon}
               />
-              <Text
-                style={styles.locationText}
-                numberOfLines={2}
-                ellipsizeMode="tail"
-              >
+              <Text style={styles.locationText} numberOfLines={2} ellipsizeMode="tail">
                 {address}
               </Text>
             </View>
@@ -260,10 +233,7 @@ export default function AttendanceScreen() {
             <Text style={styles.inputLabel}>Face Photo</Text>
             <TouchableOpacity style={styles.photoButton} onPress={takePicture}>
               {capturedPhoto ? (
-                <Image
-                  source={{ uri: capturedPhoto }}
-                  style={styles.capturedPhoto}
-                />
+                <Image source={{ uri: capturedPhoto }} style={styles.capturedPhoto} />
               ) : (
                 <View style={styles.photoPlaceholder}>
                   <Camera size={24} color={Colors.light.primary} />
@@ -283,18 +253,18 @@ export default function AttendanceScreen() {
             leftIcon={<FileText size={20} color={Colors.light.subtext} />}
           />
 
-          {!isCheckedIn && (
-            <Select
-              label="Status"
-              options={statusOptions}
-              value={status}
-              onChange={setStatus}
-            />
-          )}
+          <Select
+            label="Status"
+            options={attendanceData?.entryTypeList ?? []}
+            keyProp="code"
+            valueProp="name"
+            value={status}
+            onChange={setStatus}
+          />
 
           <Button
-            title={isCheckedIn ? 'Check Out' : 'Check In'}
-            onPress={isCheckedIn ? handleCheckOut : handleCheckIn}
+            title={'Check In'}
+            onPress={handleCheckIn}
             loading={isSubmitting}
             fullWidth
             style={styles.actionButton}
