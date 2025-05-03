@@ -82,7 +82,7 @@ export default function RegisterScreen() {
         }
         setFormError('root', {
           type: 'manual',
-          message: 'Registration failed. Please try again.',
+          message: res || 'Registration failed. Please try again.',
         });
       })
       .catch((error) => {
