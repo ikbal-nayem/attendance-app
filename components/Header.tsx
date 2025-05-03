@@ -3,7 +3,7 @@ import Layout from '@/constants/Layout';
 import { useNavigation } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -15,6 +15,7 @@ type HeaderProps = {
   title: string;
   withBackButton?: boolean;
   bg?: 'primary' | 'default';
+  rightContent?: React.ReactNode;
 };
 
 const FadeInView = ({
@@ -58,6 +59,7 @@ const AppHeader = ({
   title,
   withBackButton = true,
   bg = 'default',
+  rightContent,
 }: HeaderProps) => {
   const navigation = useNavigation();
 
@@ -71,20 +73,27 @@ const AppHeader = ({
             : styles.defaultHeaderWrapper,
         ]}
       >
-        {withBackButton && (
-          <ChevronLeft
-            size={22}
-            color={bg === 'primary' ? Colors.dark.text : Colors.light.text}
-            onPress={() => navigation.goBack()}
-            style={styles.navigator}
-          />
-        )}
-        <Text
-          numberOfLines={1}
-          style={[styles.text, bg === 'primary' && styles.textWithPrimary]}
-        >
-          {title}
-        </Text>
+        <View style={styles.leftView}>
+          {withBackButton && (
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <ChevronLeft
+                size={22}
+                color={bg === 'primary' ? Colors.dark.text : Colors.light.text}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
+        <View style={styles.centerView}>
+          <Text
+            numberOfLines={1}
+            style={[styles.text, bg === 'primary' && styles.textWithPrimary]}
+          >
+            {title}
+          </Text>
+        </View>
+        <View style={styles.rightView}>
+          {rightContent}
+        </View>
       </View>
     </FadeInView>
   );
@@ -95,6 +104,7 @@ export default AppHeader;
 const styles = StyleSheet.create({
   headerWrapStyle: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Layout.spacing.m,
     paddingVertical: Layout.spacing.m,
@@ -110,11 +120,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.primary,
     color: Colors.dark.text,
   },
-  navigator: {
-    marginRight: Layout.spacing.m,
-  },
+  leftView: {},
+  rightView: {},
+  centerView: { flex: 1, alignItems: 'center' },
+
   text: {
     fontSize: 18,
+    color: Colors.light.text,
   },
   textWithPrimary: {
     color: Colors.dark.text,

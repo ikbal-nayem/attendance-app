@@ -25,7 +25,7 @@ type ImagePickerProps = {
   setPhoto: (photo: picker.ImagePickerAsset | undefined) => void;
 };
 
-export const ProfileImagePicker = ({ photo, setPhoto }: ImagePickerProps) => {
+const SingleImagePicker = ({ photo, setPhoto }: ImagePickerProps) => {
   const pickImage = async (): Promise<picker.ImagePickerAsset | undefined> => {
     const result = await new Promise<picker.ImagePickerAsset | undefined>(
       (resolve) => {
@@ -165,3 +165,6 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
 });
+
+
+export default SingleImagePicker;

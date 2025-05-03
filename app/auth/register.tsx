@@ -2,8 +2,8 @@ import Button from '@/components/Button';
 import Card from '@/components/Card';
 import AppHeader from '@/components/Header';
 import Input from '@/components/Input';
-import { ProfileImagePicker } from '@/components/ProfileImagePicker';
 import Radio from '@/components/Radio';
+import SingleImagePicker from '@/components/SingleImagePicker';
 import Switch from '@/components/Switch';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
@@ -97,149 +97,147 @@ export default function RegisterScreen() {
   };
 
   return (
-    <>
-      <AuthLayout>
-        <AppHeader title="Create New Account" bg="primary" />
-        <ScrollView keyboardShouldPersistTaps="handled">
-          <Animated.View entering={FadeInDown.duration(500).delay(100)}>
-            <Card style={styles.card}>
-              <Text style={styles.subtitle}>Register to get started</Text>
+    <AuthLayout>
+      <AppHeader title="Create New Account" bg="primary" />
+      <ScrollView keyboardShouldPersistTaps="handled">
+        <Animated.View entering={FadeInDown.duration(500).delay(100)}>
+          <Card style={styles.card}>
+            <Text style={styles.subtitle}>Register to get started</Text>
 
-              <Controller
-                control={control}
-                name="sPhoto"
-                render={({ field: { onChange, value } }) => (
-                  <ProfileImagePicker photo={value} setPhoto={onChange} />
-                )}
-              />
-
-              <Controller
-                control={control}
-                name="sTitle"
-                render={({ field: { onChange, value } }) => (
-                  <Radio
-                    label="Title"
-                    options={titleOptions}
-                    value={value}
-                    onChange={onChange}
-                    error={errors.sTitle?.message}
-                  />
-                )}
-              />
-
-              <Controller
-                control={control}
-                name="sUserName"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    label="Name"
-                    placeholder="Enter your full name"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    leftIcon={<User size={20} color={Colors.light.subtext} />}
-                    error={errors.sUserName?.message}
-                  />
-                )}
-              />
-
-              <Controller
-                control={control}
-                name="sStaffID"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    label="Staff ID"
-                    placeholder="Enter your staff ID"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    leftIcon={
-                      <Briefcase size={20} color={Colors.light.subtext} />
-                    }
-                    error={errors.sStaffID?.message}
-                  />
-                )}
-              />
-
-              <Controller
-                control={control}
-                name="sMobileNo"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    label="Mobile Number"
-                    placeholder="Enter your mobile number"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    keyboardType="phone-pad"
-                    leftIcon={<Phone size={20} color={Colors.light.subtext} />}
-                    error={errors.sMobileNo?.message}
-                  />
-                )}
-              />
-
-              <Controller
-                control={control}
-                name="sEmail"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    label="Email Address"
-                    placeholder="Enter your email address"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    leftIcon={<Mail size={20} color={Colors.light.subtext} />}
-                    error={errors.sEmail?.message}
-                  />
-                )}
-              />
-
-              <Controller
-                control={control}
-                name="sDeviceFlag"
-                render={({ field: { onChange, value } }) => (
-                  <Switch
-                    value={value}
-                    onChange={onChange}
-                    label="Is Company Device"
-                  />
-                )}
-              />
-
-              {errors.root && (
-                <Text style={styles.errorText}>{errors.root.message}</Text>
+            <Controller
+              control={control}
+              name="sPhoto"
+              render={({ field: { onChange, value } }) => (
+                <SingleImagePicker photo={value} setPhoto={onChange} />
               )}
+            />
 
-              <Animated.View
-                entering={FadeInDown.duration(500).delay(400)}
-                style={styles.button}
-              >
-                <Button
-                  title="Register"
-                  onPress={handleSubmit(onSubmitHandler)}
-                  icon={<MoveRight size={20} color={Colors.light.background} />}
-                  iconPosition="right"
-                  loading={isLoading}
-                  fullWidth
+            <Controller
+              control={control}
+              name="sTitle"
+              render={({ field: { onChange, value } }) => (
+                <Radio
+                  label="Title"
+                  options={titleOptions}
+                  value={value}
+                  onChange={onChange}
+                  error={errors.sTitle?.message}
                 />
-              </Animated.View>
+              )}
+            />
 
-              <Animated.View
-                entering={FadeInDown.duration(500).delay(500)}
-                style={styles.loginContainer}
-              >
-                <Text style={styles.loginText}>Already have an account? </Text>
-                <TouchableOpacity onPress={() => router.replace('/auth/login')}>
-                  <Text style={styles.loginLink}>Sign In</Text>
-                </TouchableOpacity>
-              </Animated.View>
-            </Card>
-          </Animated.View>
-        </ScrollView>
-      </AuthLayout>
-    </>
+            <Controller
+              control={control}
+              name="sUserName"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="Name"
+                  placeholder="Enter your full name"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  leftIcon={<User size={20} color={Colors.light.subtext} />}
+                  error={errors.sUserName?.message}
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="sStaffID"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="Staff ID"
+                  placeholder="Enter your staff ID"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  leftIcon={
+                    <Briefcase size={20} color={Colors.light.subtext} />
+                  }
+                  error={errors.sStaffID?.message}
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="sMobileNo"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="Mobile Number"
+                  placeholder="Enter your mobile number"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  keyboardType="phone-pad"
+                  leftIcon={<Phone size={20} color={Colors.light.subtext} />}
+                  error={errors.sMobileNo?.message}
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="sEmail"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <Input
+                  label="Email Address"
+                  placeholder="Enter your email address"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  leftIcon={<Mail size={20} color={Colors.light.subtext} />}
+                  error={errors.sEmail?.message}
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="sDeviceFlag"
+              render={({ field: { onChange, value } }) => (
+                <Switch
+                  value={value}
+                  onChange={onChange}
+                  label="Is Company Device"
+                />
+              )}
+            />
+
+            {errors.root && (
+              <Text style={styles.errorText}>{errors.root.message}</Text>
+            )}
+
+            <Animated.View
+              entering={FadeInDown.duration(500).delay(400)}
+              style={styles.button}
+            >
+              <Button
+                title="Register"
+                onPress={handleSubmit(onSubmitHandler)}
+                icon={<MoveRight size={20} color={Colors.light.background} />}
+                iconPosition="right"
+                loading={isLoading}
+                fullWidth
+              />
+            </Animated.View>
+
+            <Animated.View
+              entering={FadeInDown.duration(500).delay(500)}
+              style={styles.loginContainer}
+            >
+              <Text style={styles.loginText}>Already have an account? </Text>
+              <TouchableOpacity onPress={() => router.replace('/auth/login')}>
+                <Text style={styles.loginLink}>Sign In</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </Card>
+        </Animated.View>
+      </ScrollView>
+    </AuthLayout>
   );
 }
 

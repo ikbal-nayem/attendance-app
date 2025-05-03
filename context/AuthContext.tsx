@@ -4,7 +4,6 @@ import { localData } from '@/services/storage';
 import { AxiosResponse } from 'axios';
 import { router } from 'expo-router';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Alert } from 'react-native';
 
 type AuthContextType = {
   user: IUser | null;
@@ -13,7 +12,7 @@ type AuthContextType = {
   login: (data: FormData) => Promise<boolean | string>;
   logout: () => Promise<void>;
   registerRequest: (userData: FormData) => Promise<boolean | string>;
-  verifyOtp: (otp: string) => Promise<boolean | string>;
+  verifyOtp: (otp: string) => Promise<{ success: boolean; message: string }>;
   tempUserData: FormData | null;
   setTempUserData: (data: any) => void;
 };
@@ -25,7 +24,7 @@ const defaultContext: AuthContextType = {
   login: async () => false,
   logout: async () => {},
   registerRequest: async () => false,
-  verifyOtp: async () => false,
+  verifyOtp: async () => ({ success: false, message: '' }),
   tempUserData: null,
   setTempUserData: () => {},
 };
@@ -117,22 +116,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const verifyOtp = async (otp: string): Promise<boolean | string> => {
+  const verifyOtp = async (
+    otp: string
+  ): Promise<{ success: boolean; message: string }> => {
     setIsLoading(true);
     try {
       tempUserData?.append('sInfoOPT', otp);
       const response = await axiosIns.post(
-        API_CONSTANTS.AUTH.REGISTER_REQUEST,
+        API_CONSTANTS.AUTH.REGISTER_SUBMIT,
         tempUserData
       );
       if (response.data?.messageCode === '0') {
         setTempUserData(null);
-        return true;
+        return { success: true, message: response.data.messageDesc };
       }
-      return response.data.messageDesc;
+      return { success: false, message: response.data.messageDesc };
     } catch (error) {
       console.error(error);
-      return 'An error occurred during verification. Please try again.';
+      return {
+        success: false,
+        message: 'An error occurred during verification. Please try again.',
+      };
     } finally {
       setIsLoading(false);
     }

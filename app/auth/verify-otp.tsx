@@ -4,12 +4,14 @@ import AppHeader from '@/components/Header';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import AuthLayout from '@/layout/AuthLayout';
+import { isNull } from '@/utils/validation';
 import { zodResolver } from '@hookform/resolvers/zod'; // Import zodResolver
 import { router } from 'expo-router';
+import { MailCheck } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form'; // Import react-hook-form
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import {
   Keyboard,
   StyleSheet,
@@ -18,8 +20,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { z } from 'zod';
-import { MoveRight } from 'lucide-react-native';
 
 const OTP_LENGTH = 6;
 
@@ -33,7 +35,8 @@ export default function VerifyOTPScreen() {
   const { verifyOtp, tempUserData, isLoading } = useAuth();
   const [remainingTime, setRemainingTime] = useState(60);
   const [canResend, setCanResend] = useState(false);
-  const [apiError, setApiError] = useState(''); // For API errors
+  const [apiError, setApiError] = useState('');
+  const { showToast } = useToast();
 
   const inputRef = useRef<TextInput>(null);
 
@@ -101,10 +104,16 @@ export default function VerifyOTPScreen() {
     setApiError('');
     const res = await verifyOtp(data.otp);
 
-    if (res === true) {
+    if (res?.success === true) {
+      showToast({
+        type: 'success',
+        message: !isNull(res?.message)
+          ? res?.message
+          : 'Registration successful',
+      });
       router.replace('/auth/login');
     } else {
-      setApiError(res || 'Invalid OTP. Please try again.');
+      setApiError(res.message || 'Something went wrong. Please try again.');
     }
   };
 
@@ -212,7 +221,7 @@ export default function VerifyOTPScreen() {
               onPress={handleSubmit(onSubmit)}
               loading={isLoading}
               fullWidth
-              icon={<MoveRight size={20} color={Colors.light.background} />}
+              icon={<MailCheck size={20} color={Colors.light.background} />}
               iconPosition="right"
               // disabled={otpValue.length !== OTP_LENGTH}
             />

@@ -87,7 +87,7 @@ export default function ActivityScreen() {
     try {
       const success = await addActivity({
         ...formData,
-        userId: user?.sUserID || '1',
+        userId: user?.userID || '',
       });
 
       if (success) {
