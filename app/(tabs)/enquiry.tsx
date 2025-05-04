@@ -1,4 +1,3 @@
-import Card from '@/components/Card';
 import AppHeader from '@/components/Header';
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
