@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "employee-attendance",
-    "slug": "employee-attendance",
+    "name": "IPS-SMAT",
+    "slug": "IPS-SMAT",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
