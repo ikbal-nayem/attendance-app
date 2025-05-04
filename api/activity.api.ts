@@ -3,25 +3,24 @@ import { makeFormData } from '@/utils/form-actions';
 import { useEffect, useState } from 'react';
 import { axiosIns } from './config';
 
-type AttendanceData = {
+type ActivityData = {
   entryTime: string;
-  entryTypeList: { code: string; name: string }[];
+  activityTypeList: { code: string; name: string }[];
+  clientList: { code: string; name: string }[];
+  territoryList: { code: string; name: string }[];
   imagePhoto: Array<any>;
   noOfEntry: string;
 };
 
-export const useAttendanceData = (companyId: string, employeeCode: string) => {
-  const [attendanceData, setAttendanceData] = useState<AttendanceData>();
+export const useActivityData = (companyId: string) => {
+  const [activityData, setActivityData] = useState<ActivityData>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     axiosIns
-      .post(
-        API_CONSTANTS.ATTENDANCE.INIT,
-        makeFormData({ sCompanyID: companyId, sEmployeeCode: employeeCode })
-      )
-      .then((response) => setAttendanceData(response.data))
+      .post(API_CONSTANTS.ACTIVITY.INIT, makeFormData({ sCompanyID: companyId }))
+      .then((response) => setActivityData(response.data))
       .catch((err) => {
         console.log(err);
         setError(err.message);
@@ -29,12 +28,12 @@ export const useAttendanceData = (companyId: string, employeeCode: string) => {
       .finally(() => setIsLoading(false));
   }, [companyId]);
 
-  return { attendanceData, isLoading, error };
+  return { activityData, isLoading, error };
 };
 
-export const submitAttendance = async (data: FormData) => {
+export const submitActivity = async (data: FormData) => {
   try {
-    const req = await axiosIns.post(API_CONSTANTS.ATTENDANCE.SUBMIT, data);
+    const req = await axiosIns.post(API_CONSTANTS.ACTIVITY.SUBMIT, data);
     console.log(req.data);
     if (req.data?.messageCode === '0') {
       return { success: true, data: req.data };

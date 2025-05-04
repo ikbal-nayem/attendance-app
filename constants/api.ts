@@ -12,4 +12,8 @@ export const API_CONSTANTS = {
     INIT: '/AttendanceEntryService/firstLoad',
     SUBMIT: '/AttendanceEntryService/attendanceEntry',
   },
+  ACTIVITY: {
+    INIT: '/ActivityEntryService/firstLoad',
+    SUBMIT: '/ActivityEntryService/activityEntry',
+  },
 };

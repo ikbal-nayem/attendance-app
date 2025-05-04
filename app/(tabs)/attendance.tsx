@@ -21,7 +21,7 @@ import {
   History,
   MapPin,
 } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
   Alert,
@@ -53,6 +53,12 @@ export default function AttendanceScreen() {
     user?.employeeCode || ''
   );
   const [entryNo, setEntryNo] = useState(+(attendanceData?.noOfEntry || '0'));
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const defaultValuesRef = useRef({
+    sEntryNote: '',
+    sEntryType: '',
+    sPhoto: '',
+  });
 
   const { showToast } = useToast();
 
@@ -61,19 +67,16 @@ export default function AttendanceScreen() {
     handleSubmit,
     setValue,
     reset,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<AttendanceFormData>({
     resolver: zodResolver(attendanceSchema),
-    defaultValues: {
-      sEntryNote: '',
-      sEntryType: '',
-      sPhoto: '',
-    },
+    defaultValues: defaultValuesRef.current,
   });
 
   useEffect(() => {
     if (attendanceData?.entryTypeList?.[1]?.code) {
       setValue('sEntryType', attendanceData.entryTypeList[1].code);
+      defaultValuesRef.current.sEntryType = attendanceData.entryTypeList[1].code;
     }
     setEntryNo(+(attendanceData?.noOfEntry || '0'));
   }, [attendanceData, setValue]);
@@ -107,6 +110,7 @@ export default function AttendanceScreen() {
       );
       return;
     }
+    setIsSubmitting(true);
     const reqData = {
       ...data,
       sLatitude: currentLocation.latitude,
@@ -126,7 +130,7 @@ export default function AttendanceScreen() {
             message: `Check-in successfully`,
           });
           setEntryNo((prev) => prev + 1);
-          reset();
+          reset(defaultValuesRef.current);
         } else {
           Alert.alert('Error', res.message || 'Failed to submit check-in');
         }
@@ -134,7 +138,8 @@ export default function AttendanceScreen() {
       .catch((err) => {
         console.error('Error submitting check-in:', err);
         Alert.alert('Error', 'An unexpected error occurred');
-      });
+      })
+      .finally(() => setIsSubmitting(false));
   };
 
   let isCheckIn = entryNo % 2 === 1;
@@ -161,7 +166,7 @@ export default function AttendanceScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <Card variant="elevated" style={styles.attendanceCard}>
+        <Card variant="outlined" style={styles.attendanceCard}>
           {/* Location Display */}
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Location</Text>
@@ -261,7 +266,6 @@ export default function AttendanceScreen() {
               )
             }
             iconPosition="right"
-            // color={isCheckIn ? Colors.light.danger : Colors.light.success}
           />
         </Card>
       </ScrollView>

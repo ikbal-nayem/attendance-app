@@ -105,7 +105,6 @@ const Select: React.FC<SelectProps> = ({
         <ChevronDown
           size={20}
           color={disabled ? Colors.light.subtext : Colors.light.text}
-          style={styles.chevron}
         />
       </TouchableOpacity>
 
@@ -134,11 +133,13 @@ const Select: React.FC<SelectProps> = ({
                     <X size={24} color={Colors.light.text} />
                   </TouchableOpacity>
                 </View>
+                {options.length === 0 && (
+                  <Text style={styles.noOptionsText}>No options available</Text>
+                )}
                 <FlatList
                   data={options}
                   renderItem={renderItem}
                   keyExtractor={(item) => item?.[keyProp]}
-                  style={styles.optionsList}
                 />
               </View>
             </TouchableWithoutFeedback>
@@ -189,9 +190,6 @@ const styles = StyleSheet.create({
   placeholderText: {
     color: Colors.light.subtext,
   },
-  chevron: {
-    // Position handled by flex alignment in container
-  },
   helperText: {
     fontFamily: 'Inter-Regular',
     fontSize: 12,
@@ -231,9 +229,6 @@ const styles = StyleSheet.create({
   closeButton: {
     padding: Layout.spacing.xs,
   },
-  optionsList: {
-    // Takes remaining space
-  },
   optionItem: {
     paddingVertical: Layout.spacing.m,
     paddingHorizontal: Layout.spacing.l,
@@ -250,6 +245,13 @@ const styles = StyleSheet.create({
   selectedOption: {
     color: Colors.light.primary,
     fontFamily: 'Inter-SemiBold',
+  },
+  noOptionsText: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 16,
+    color: Colors.light.subtext,
+    textAlign: 'center',
+    padding: Layout.spacing.l,
   },
 });
 

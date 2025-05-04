@@ -1,18 +1,19 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
-} from 'react-native';
-import { router } from 'expo-router';
-import { Layers, ListChecks, MapPin, Map } from 'lucide-react-native';
+import Card from '@/components/Card';
+import AppHeader from '@/components/Header';
+import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
-import Card from '@/components/Card';
+import { router } from 'expo-router';
+import { Layers, ListChecks, Map, MapPin } from 'lucide-react-native';
+import React from 'react';
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function EnquiryScreen() {
   const enquiryOptions = [
@@ -44,34 +45,25 @@ export default function EnquiryScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.light.background} />
-      
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Enquiry</Text>
-      </View>
-      
+      <AppStatusBar />
+      <AppHeader title="Enquiry" withBackButton={false} bg="primary" />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        <Card variant="elevated" style={styles.card}>
-          <Text style={styles.cardTitle}>Select an option to view</Text>
-          
-          <View style={styles.optionsContainer}>
-            {enquiryOptions.map((option) => (
-              <TouchableOpacity
-                key={option.id}
-                style={styles.optionButton}
-                onPress={() => router.push(option.route)}
-              >
-                <View style={styles.optionIconContainer}>
-                  {option.icon}
-                </View>
-                <Text style={styles.optionTitle}>{option.title}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </Card>
+        <View style={styles.optionsContainer}>
+          {enquiryOptions.map((option) => (
+            <TouchableOpacity
+              key={option.id}
+              style={styles.optionButton}
+              onPress={() => router.push(option?.route as any)}
+            >
+              <View style={styles.optionIconContainer}>{option.icon}</View>
+              <Text style={styles.optionTitle}>{option.title}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -82,32 +74,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.light.background,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: Layout.spacing.l,
-    paddingTop: Layout.spacing.l,
-    paddingBottom: Layout.spacing.m,
-  },
-  headerTitle: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 18,
-    color: Colors.light.text,
-  },
   scrollContent: {
     padding: Layout.spacing.l,
     paddingBottom: Layout.spacing.xxl,
-  },
-  card: {
-    marginBottom: Layout.spacing.m,
-  },
-  cardTitle: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 18,
-    color: Colors.light.text,
-    marginBottom: Layout.spacing.l,
-    textAlign: 'center',
   },
   optionsContainer: {
     rowGap: Layout.spacing.l,
@@ -116,7 +85,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'white',
-    borderRadius: Layout.borderRadius.medium,
+    borderRadius: Layout.borderRadius.large,
     padding: Layout.spacing.m,
     ...Layout.shadow.light,
   },

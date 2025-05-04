@@ -1,5 +1,4 @@
 import Colors from '@/constants/Colors';
-import { ActivityProvider } from '@/context/ActivityContext';
 import { Tabs } from 'expo-router';
 import { Clock, Home, ListTodo, ScanSearch } from 'lucide-react-native';
 import React, { useEffect, useRef } from 'react';
@@ -31,73 +30,71 @@ const AnimatedIcon = ({
 
 export default function TabLayout() {
   return (
-    <ActivityProvider>
-      <Tabs
-        screenOptions={{
-          tabBarActiveTintColor: Colors.light.primary,
-          tabBarInactiveTintColor: Colors.light.tabIconDefault,
-          tabBarLabelStyle: {
-            fontFamily: 'Inter-Medium',
-            fontSize: 12,
-            marginBottom: 5,
-          },
-          tabBarShowLabel: true,
-          tabBarStyle: {
-            borderTopWidth: 1,
-            borderTopColor: Colors.light.border,
-            height: 65,
-            paddingTop: 5,
-            backgroundColor: 'white',
-          },
-          headerShown: false,
-          // header: ({ options }) => <Header title={options.title || ''} withBackButton={false} />,
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: Colors.light.primary,
+        tabBarInactiveTintColor: Colors.light.tabIconDefault,
+        tabBarLabelStyle: {
+          fontFamily: 'Inter-Medium',
+          fontSize: 12,
+          marginBottom: 5,
+        },
+        tabBarShowLabel: true,
+        tabBarStyle: {
+          borderTopWidth: 1,
+          borderTopColor: Colors.light.border,
+          height: 65,
+          paddingTop: 5,
+          backgroundColor: 'white',
+        },
+        headerShown: false,
+        // header: ({ options }) => <Header title={options.title || ''} withBackButton={false} />,
+      }}
+    >
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Home',
+          tabBarIcon: ({ color, size, focused }) => (
+            <AnimatedIcon focused={focused}>
+              <Home size={size * 1.1} color={color} />
+            </AnimatedIcon>
+          ),
         }}
-      >
-        <Tabs.Screen
-          name="index"
-          options={{
-            title: 'Home',
-            tabBarIcon: ({ color, size, focused }) => (
-              <AnimatedIcon focused={focused}>
-                <Home size={size * 1.1} color={color} />
-              </AnimatedIcon>
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="attendance"
-          options={{
-            title: 'Attendance',
-            tabBarIcon: ({ color, size, focused }) => (
-              <AnimatedIcon focused={focused}>
-                <Clock size={size * 1.1} color={color} />
-              </AnimatedIcon>
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="activity"
-          options={{
-            title: 'Activity',
-            tabBarIcon: ({ color, size, focused }) => (
-              <AnimatedIcon focused={focused}>
-                <ListTodo size={size * 1.1} color={color} />
-              </AnimatedIcon>
-            ),
-          }}
-        />
-        <Tabs.Screen
-          name="enquiry"
-          options={{
-            title: 'Enquiry',
-            tabBarIcon: ({ color, size, focused }) => (
-              <AnimatedIcon focused={focused}>
-                <ScanSearch size={size * 1.1} color={color} />
-              </AnimatedIcon>
-            ),
-          }}
-        />
-      </Tabs>
-    </ActivityProvider>
+      />
+      <Tabs.Screen
+        name="attendance"
+        options={{
+          title: 'Attendance',
+          tabBarIcon: ({ color, size, focused }) => (
+            <AnimatedIcon focused={focused}>
+              <Clock size={size * 1.1} color={color} />
+            </AnimatedIcon>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="activity"
+        options={{
+          title: 'Activity',
+          tabBarIcon: ({ color, size, focused }) => (
+            <AnimatedIcon focused={focused}>
+              <ListTodo size={size * 1.1} color={color} />
+            </AnimatedIcon>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="enquiry"
+        options={{
+          title: 'Enquiry',
+          tabBarIcon: ({ color, size, focused }) => (
+            <AnimatedIcon focused={focused}>
+              <ScanSearch size={size * 1.1} color={color} />
+            </AnimatedIcon>
+          ),
+        }}
+      />
+    </Tabs>
   );
 }
