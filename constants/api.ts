@@ -16,4 +16,8 @@ export const API_CONSTANTS = {
     INIT: '/ActivityEntryService/firstLoad',
     SUBMIT: '/ActivityEntryService/activityEntry',
   },
+  NOTIFICATION: {
+    INIT: '/PushNotificationService/firstLoad',
+    SUBMIT: '/PushNotificationService/pushNotificationEntry',
+  },
 };

@@ -48,7 +48,6 @@ export default function TabLayout() {
           backgroundColor: 'white',
         },
         headerShown: false,
-        // header: ({ options }) => <Header title={options.title || ''} withBackButton={false} />,
       }}
     >
       <Tabs.Screen

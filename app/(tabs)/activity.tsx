@@ -93,13 +93,12 @@ export default function ActivityScreen() {
       sActivityStopTime: data.sActivityStopTime.toTimeString().split(' ')[0],
     };
 
-    console.log(reqData);
     submitActivity(makeFormData(reqData))
       .then((res) => {
         if (res.success) {
           showToast({
             type: 'success',
-            message: `Check-in successfully`,
+            message: res?.message || `Check-in successfully`,
           });
           reset(defaultValues);
           return;

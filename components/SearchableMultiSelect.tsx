@@ -1,4 +1,3 @@
-// components/SearchableMultiSelect.tsx
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { Check, ChevronDown, Search, X } from 'lucide-react-native';
@@ -18,6 +17,8 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
+
+import Chip from './Chip'; // Import the Chip component
 
 interface Option {
   label: string;
@@ -99,7 +100,7 @@ const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
 
       <TouchableOpacity
         style={[
-          styles.selectContainer,
+          styles.selectInputContainer,
           hasError && styles.selectContainerError,
           disabled && styles.selectContainerDisabled,
           selectStyle,
@@ -116,13 +117,36 @@ const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
           ]}
           numberOfLines={1}
         >
-          {selectedLabels.length > 0 ? selectedLabels.join(', ') : placeholder}
+          {selectedLabels.length > 0 ? placeholder : placeholder}
         </Text>
         <ChevronDown
           size={20}
           color={disabled ? Colors.light.subtext : Colors.light.text}
         />
       </TouchableOpacity>
+
+      {/* Display selected options as chips */}
+      {value.length > 0 && (
+        <View style={styles.selectedChipsContainer}>
+          {value.map((selectedValue) => {
+            const selectedOption = options.find(opt => opt.value === selectedValue);
+            if (!selectedOption) return null;
+
+            return (
+              <Chip
+                key={selectedValue}
+                label={selectedOption.label}
+                onClose={() => handleToggleOption(selectedValue)} // Use existing toggle logic to remove
+                variant="light" // Use the light variant
+                color="primary" // Use the primary color
+                // No need to pass style or textStyle if using variant/color props
+                // closeIconColor is handled by the Chip component based on variant/color
+              />
+            );
+          })}
+        </View>
+      )}
+
 
       {(error || helper) && (
         <Text style={[styles.helperText, hasError && styles.errorText]}>
@@ -187,7 +211,7 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
     marginBottom: Layout.spacing.xs,
   },
-  selectContainer: {
+  selectInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
@@ -274,7 +298,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     fontSize: 16,
     color: Colors.light.text,
-    paddingVertical: Platform.OS === 'ios' ? Layout.spacing.s : 0, // Adjust padding for iOS
+    paddingVertical: Platform.OS === 'ios' ? Layout.spacing.s : 0,
   },
   optionItem: {
     paddingVertical: Layout.spacing.m,
@@ -283,14 +307,14 @@ const styles = StyleSheet.create({
     borderBottomColor: Colors.light.border,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center', // Align items vertically
+    alignItems: 'center',
   },
   optionText: {
     fontFamily: 'Inter-Regular',
     fontSize: 16,
     color: Colors.light.text,
-    flex: 1, // Allow text to take available space
-    marginRight: Layout.spacing.s, // Add some space before the checkmark
+    flex: 1,
+    marginRight: Layout.spacing.s,
   },
   selectedOptionText: {
     color: Colors.light.primary,
@@ -302,6 +326,39 @@ const styles = StyleSheet.create({
     color: Colors.light.subtext,
     textAlign: 'center',
     padding: Layout.spacing.l,
+  },
+  selectedChipsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: Layout.spacing.s,
+    paddingHorizontal: Layout.spacing.m,
+  },
+  // Removed selectedChip and selectedChipText styles as they are now handled by the Chip component
+  // selectedChip: { // Keep this style to override default Chip background/text if needed
+  //   backgroundColor: Colors.light.primary,
+  // },
+  // selectedChipText: { // Keep this style to override default Chip text color if needed
+  //   color: Colors.light.background,
+  // },
+  // Removed selectedChip and selectedChipText styles from here as they are now in Chip.tsx
+  // selectedChip: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   backgroundColor: Colors.light.primaryLight,
+  //   borderRadius: Layout.borderRadius.xl,
+  //   paddingVertical: Layout.spacing.xs,
+  //   paddingHorizontal: Layout.spacing.s,
+  //   marginRight: Layout.spacing.s,
+  //   marginBottom: Layout.spacing.s,
+  // },
+  // selectedChipText: {
+  //   fontFamily: 'Inter-Regular',
+  //   fontSize: 14,
+  //   color: Colors.light.primary,
+  //   marginRight: Layout.spacing.xs,
+  // },
+  removeChipButton: { // This style is still needed for the button within the Chip
+    padding: Layout.spacing.xs / 2,
   },
 });
 

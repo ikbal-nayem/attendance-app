@@ -37,6 +37,7 @@ function RootLayoutNav() {
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="enquiry/attendance-history" options={{ headerShown: false }} />
       <Stack.Screen name="enquiry/activities" options={{ headerShown: false }} />
+      <Stack.Screen name="notifications/send" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );

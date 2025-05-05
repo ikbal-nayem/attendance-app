@@ -3,7 +3,7 @@ import { makeFormData } from '@/utils/form-actions';
 import { useEffect, useState } from 'react';
 import { axiosIns } from './config';
 
-type ActivityData = {
+type NotificationData = {
   entryTime: string;
   activityTypeList: { code: string; name: string }[];
   clientList: { code: string; name: string }[];
@@ -12,15 +12,15 @@ type ActivityData = {
   noOfEntry: string;
 };
 
-export const useActivityData = (companyId: string) => {
-  const [activityData, setActivityData] = useState<ActivityData>();
+export const useNotificationData = (companyId: string) => {
+  const [notificationData, setNotificationData] = useState<NotificationData>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     axiosIns
-      .post(API_CONSTANTS.ACTIVITY.INIT, makeFormData({ sCompanyID: companyId }))
-      .then((response) => setActivityData(response.data))
+      .post(API_CONSTANTS.NOTIFICATION.INIT, makeFormData({ sCompanyID: companyId }))
+      .then((response) => setNotificationData(response.data))
       .catch((err) => {
         console.log(err);
         setError(err.message);
@@ -28,12 +28,12 @@ export const useActivityData = (companyId: string) => {
       .finally(() => setIsLoading(false));
   }, [companyId]);
 
-  return { activityData, isLoading, error };
+  return { notificationData, isLoading, error };
 };
 
-export const submitActivity = async (data: FormData) => {
+export const sendNotification = async (data: FormData) => {
   try {
-    const req = await axiosIns.post(API_CONSTANTS.ACTIVITY.SUBMIT, data);
+    const req = await axiosIns.post(API_CONSTANTS.NOTIFICATION.SUBMIT, data);
     console.log(req.data);
     if (req.data?.messageCode === '0') {
       return { success: true, message: req.data?.messageDesc, data: req.data };

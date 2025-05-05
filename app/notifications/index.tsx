@@ -1,19 +1,18 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  FlatList,
-} from 'react-native';
-import { router } from 'expo-router';
-import { ChevronLeft, Trash } from 'lucide-react-native';
-import { useNotifications } from '@/context/NotificationContext';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
-import Card from '@/components/Card';
+import { useNotifications } from '@/context/NotificationContext';
+import { router } from 'expo-router';
+import { ChevronLeft } from 'lucide-react-native';
+import React from 'react';
+import {
+  FlatList,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function NotificationsScreen() {
   const { notifications, markAsRead, markAllAsRead, clearAll } = useNotifications();
@@ -46,22 +45,22 @@ export default function NotificationsScreen() {
 
   const groupNotificationsByDate = () => {
     const groups: { [key: string]: typeof notifications } = {};
-    
-    notifications.forEach(notification => {
+
+    notifications.forEach((notification) => {
       const date = new Date(notification.date);
       let key = 'Today';
-      
+
       const now = new Date();
       const isToday =
         date.getDate() === now.getDate() &&
         date.getMonth() === now.getMonth() &&
         date.getFullYear() === now.getFullYear();
-      
+
       const isYesterday =
         date.getDate() === now.getDate() - 1 &&
         date.getMonth() === now.getMonth() &&
         date.getFullYear() === now.getFullYear();
-      
+
       if (isToday) {
         key = 'Today';
       } else if (isYesterday) {
@@ -69,14 +68,14 @@ export default function NotificationsScreen() {
       } else {
         key = date.toLocaleDateString();
       }
-      
+
       if (!groups[key]) {
         groups[key] = [];
       }
-      
+
       groups[key].push(notification);
     });
-    
+
     return Object.entries(groups).map(([date, items]) => ({
       date,
       data: items,
@@ -125,21 +124,21 @@ export default function NotificationsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.light.background} />
-      
+
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <ChevronLeft size={24} color={Colors.light.text} />
         </TouchableOpacity>
-        
+
         <Text style={styles.headerTitle}>
           Notifications {notifications.length > 0 ? `(${notifications.length})` : ''}
         </Text>
-        
+
         <TouchableOpacity onPress={clearAll} style={styles.clearButton}>
           <Text style={styles.clearButtonText}>Clear All</Text>
         </TouchableOpacity>
       </View>
-      
+
       {notifications.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyMessage}>No notifications yet</Text>
@@ -150,12 +149,14 @@ export default function NotificationsScreen() {
           renderItem={({ item }) => (
             <View>
               <Text style={styles.sectionHeader}>{item.date}</Text>
-              {item.data.map(notification => (
+              {item.data.map((notification) => (
                 <TouchableOpacity
                   key={notification.id}
                   style={[
                     styles.notificationItem,
-                    { backgroundColor: getNotificationBackgroundColor(notification.type) },
+                    {
+                      backgroundColor: getNotificationBackgroundColor(notification.type),
+                    },
                     !notification.read && styles.unreadNotification,
                   ]}
                   onPress={() => handleNotificationPress(notification.id)}
@@ -177,17 +178,14 @@ export default function NotificationsScreen() {
               ))}
             </View>
           )}
-          keyExtractor={item => item.date}
+          keyExtractor={(item) => item.date}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
         />
       )}
-      
+
       {notifications.length > 0 && (
-        <TouchableOpacity
-          style={styles.markAllReadButton}
-          onPress={markAllAsRead}
-        >
+        <TouchableOpacity style={styles.markAllReadButton} onPress={markAllAsRead}>
           <Text style={styles.markAllReadText}>Mark all as read</Text>
         </TouchableOpacity>
       )}
