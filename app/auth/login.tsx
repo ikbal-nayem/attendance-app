@@ -117,10 +117,12 @@ export default function LoginScreen() {
     };
     login(makeFormData(data))
       .then((res) => {
-        if (res !== true) return;
+        if(!(res instanceof Object)) return
+        if (res?.success !== true) return;
+        console.log(res)
         showToast({
           type: 'success',
-          message: `Welcome back, ${user?.userName}`,
+          message: `Welcome back, ${res?.data?.userName}`,
         });
         router.replace('/(tabs)');
       })

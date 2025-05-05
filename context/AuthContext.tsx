@@ -9,7 +9,7 @@ type AuthContextType = {
   user: IUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (data: FormData) => Promise<boolean | string>;
+  login: (data: FormData) => Promise<string | IObject>;
   logout: () => Promise<void>;
   registerRequest: (userData: FormData) => Promise<boolean | string>;
   verifyOtp: (otp: string) => Promise<{ success: boolean; message: string }>;
@@ -21,7 +21,7 @@ const defaultContext: AuthContextType = {
   user: null,
   isAuthenticated: false,
   isLoading: true,
-  login: async () => false,
+  login: async () => '',
   logout: async () => {},
   registerRequest: async () => false,
   verifyOtp: async () => ({ success: false, message: '' }),
@@ -58,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     checkLoginStatus();
   }, []);
 
-  const login = (data: FormData): Promise<boolean | string> => {
+  const login = (data: FormData): Promise<string | IObject> => {
     setIsLoading(true);
     return new Promise((resolve, reject) => {
       axiosIns
@@ -67,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           if (response.data?.messageCode === '0') {
             await localData.set('user', response.data);
             setUser(response.data);
-            resolve(true);
+            resolve({success: true, data: response?.data});
           }
           reject(response.data?.messageDesc);
         })
