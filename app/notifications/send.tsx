@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { FileText, Send } from 'lucide-react-native';
+import { FileText, History, Send } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
 } from 'react-native';
 import { z } from 'zod';
 
@@ -24,6 +25,7 @@ import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { makeFormData } from '@/utils/form-actions';
+import { router } from 'expo-router';
 
 const users = [
   { label: 'All Users', value: 'all' },
@@ -108,7 +110,16 @@ export default function SendNotificationScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
-      <AppHeader title="Send Notification" withBackButton={true} bg="primary" />
+      <AppHeader
+        title="Send Notification"
+        withBackButton={true}
+        bg="primary"
+        rightContent={
+          <TouchableOpacity onPress={() => router.push('/notifications/history')}>
+            <History size={22} color={Colors.dark.text} />
+          </TouchableOpacity>
+        }
+      />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

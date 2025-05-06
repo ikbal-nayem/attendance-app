@@ -51,8 +51,7 @@
     "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "~0.19.6",
     "react-native-webview": "13.12.5",
-    "zod": "^3.24.3",
-    "zustand": "^5.0.4"
+    "zod": "^3.24.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

@@ -60,7 +60,10 @@ const header = (user: IUser, handleLogout: () => void) => (
         <Text style={styles.userName}>{user.userName}</Text>
       </View>
     </View>
-    <TouchableOpacity style={styles.iconButton}>
+    <TouchableOpacity
+      style={styles.iconButton}
+      onPress={() => router.push('/notifications')}
+    >
       <Bell size={26} color={Colors.light.text} />
     </TouchableOpacity>
   </View>
@@ -100,9 +103,7 @@ const userCard = (user: IUser) => (
 );
 
 const CheckinDuration = ({ checkInTime }: { checkInTime: Date }) => {
-  const [duration, setDuration] = useState<IObject>(
-    getDuration(checkInTime, new Date())
-  );
+  const [duration, setDuration] = useState<IObject>(getDuration(checkInTime, new Date()));
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -234,8 +235,7 @@ export default function DashboardScreen() {
               <Text style={styles.punchHeaderText}>Check In at</Text>
             </View>
             <Text style={styles.punchTime}>
-              {lastCheckinTime} |{' '}
-              <Text style={styles.punchDate}>{lastCheckinDate}</Text>
+              {lastCheckinTime} | <Text style={styles.punchDate}>{lastCheckinDate}</Text>
             </Text>
             <Text style={styles.todaysTime}>
               Duration: <CheckinDuration checkInTime={checkIn} />
@@ -243,24 +243,20 @@ export default function DashboardScreen() {
           </View>
 
           <View style={styles.enquiryContainer}>
-            {(params.screen === 'enquiry' ? menu2 : menu1).map(
-              (item, index) => (
-                <TouchableOpacity
-                  style={styles.enquiryCard}
-                  onPress={item.onPress}
-                  key={item.name}
-                >
-                  <View style={styles.enquiryIconContainer}>{item.icon}</View>
-                  <Text style={styles.enquiryTitle}>{item?.name}</Text>
-                </TouchableOpacity>
-              )
-            )}
+            {(params.screen === 'enquiry' ? menu2 : menu1).map((item, index) => (
+              <TouchableOpacity
+                style={styles.enquiryCard}
+                onPress={item.onPress}
+                key={item.name}
+              >
+                <View style={styles.enquiryIconContainer}>{item.icon}</View>
+                <Text style={styles.enquiryTitle}>{item?.name}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
 
           {params.screen === 'enquiry' && (
-            <TouchableOpacity
-              onPress={() => router.setParams({ screen: 'home' })}
-            >
+            <TouchableOpacity onPress={() => router.setParams({ screen: 'home' })}>
               <ChevronsLeft
                 style={{ alignSelf: 'center' }}
                 color={Colors.light.primary}

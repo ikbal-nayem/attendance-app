@@ -1,6 +1,6 @@
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
-import { useNavigation } from 'expo-router';
+import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -63,8 +63,6 @@ const AppHeader = ({
   rightContent,
   leftContent,
 }: HeaderProps) => {
-  const navigation = useNavigation();
-
   return (
     <FadeInView duration={300}>
       <View
@@ -75,7 +73,9 @@ const AppHeader = ({
       >
         <View style={styles.leftView}>
           {withBackButton && (
-            <TouchableOpacity onPress={() => navigation.goBack()}>
+            <TouchableOpacity
+              onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
+            >
               <ChevronLeft
                 size={22}
                 color={bg === 'primary' ? Colors.dark.text : Colors.light.text}
