@@ -4,12 +4,7 @@ import { useEffect, useState } from 'react';
 import { axiosIns } from './config';
 
 type NotificationData = {
-  entryTime: string;
-  activityTypeList: { code: string; name: string }[];
-  clientList: { code: string; name: string }[];
-  territoryList: { code: string; name: string }[];
-  imagePhoto: Array<any>;
-  noOfEntry: string;
+  messageToList: Array<{ code: string; name: string }>;
 };
 
 export const useNotificationData = (companyId: string) => {

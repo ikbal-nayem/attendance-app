@@ -27,14 +27,6 @@ import { useToast } from '@/context/ToastContext';
 import { makeFormData } from '@/utils/form-actions';
 import { router } from 'expo-router';
 
-const users = [
-  { label: 'All Users', value: 'all' },
-  { label: 'John Smith', value: 'john.smith' },
-  { label: 'Emma Johnson', value: 'emma.johnson' },
-  { label: 'Michael Chen', value: 'michael.chen' },
-  { label: 'Sarah Williams', value: 'sarah.williams' },
-];
-
 const notificationSchema = z.object({
   sMessageTo: z.array(z.string()).min(1, 'Please select at least one recipient'),
   sMessageTitle: z.string().min(1, 'Subject is required'),
@@ -140,7 +132,8 @@ export default function SendNotificationScreen() {
                 <SearchableMultiSelect
                   label="To"
                   required
-                  options={users}
+                  options={notificationData?.messageToList || []}
+                  modalTitle="Select Recipients"
                   value={value}
                   onChange={onChange}
                   placeholder="Select recipients"

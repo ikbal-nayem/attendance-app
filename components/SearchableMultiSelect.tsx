@@ -11,7 +11,6 @@ import {
   StyleProp,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
@@ -19,22 +18,23 @@ import {
 } from 'react-native';
 
 import Chip from './Chip'; // Import the Chip component
+import Input from './Input';
 
 interface Option {
-  label: string;
-  value: string;
+  code: string;
+  name: string;
 }
 
 type SearchableMultiSelectProps = {
   label?: string;
   options: Option[];
-  value: string[]; // Array of selected values
+  value: string[];
   onChange: (values: string[]) => void;
   placeholder?: string;
   error?: string;
   helper?: string;
   containerStyle?: StyleProp<ViewStyle>;
-  selectStyle?: StyleProp<ViewStyle>; // Style for the touchable area
+  selectStyle?: StyleProp<ViewStyle>;
   modalTitle?: string;
   disabled?: boolean;
   required?: boolean;
@@ -43,7 +43,7 @@ type SearchableMultiSelectProps = {
 const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
   label,
   options,
-  value = [], // Default to empty array
+  value = [],
   onChange,
   placeholder = 'Select options',
   error,
@@ -59,7 +59,7 @@ const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
   const hasError = !!error;
 
   const filteredOptions = options.filter((option) =>
-    option.label.toLowerCase().includes(searchQuery.toLowerCase())
+    option.code.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleToggleOption = (optionValue: string) => {
@@ -72,14 +72,15 @@ const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
   };
 
   const renderItem = ({ item }: { item: Option }) => {
-    const isSelected = value.includes(item.value);
+    const isSelected = value.includes(item.code);
     return (
       <TouchableOpacity
+        activeOpacity={0.7}
         style={styles.optionItem}
-        onPress={() => handleToggleOption(item.value)}
+        onPress={() => handleToggleOption(item.code)}
       >
         <Text style={[styles.optionText, isSelected && styles.selectedOptionText]}>
-          {item.label}
+          {item.name}
         </Text>
         {isSelected && <Check size={20} color={Colors.light.primary} />}
       </TouchableOpacity>
@@ -87,8 +88,8 @@ const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
   };
 
   const selectedLabels = options
-    .filter((option) => value.includes(option.value))
-    .map((option) => option.label);
+    .filter((option) => value.includes(option.code))
+    .map((option) => option.name);
 
   return (
     <View style={[styles.container, containerStyle]}>
@@ -129,24 +130,21 @@ const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
       {value.length > 0 && (
         <View style={styles.selectedChipsContainer}>
           {value.map((selectedValue) => {
-            const selectedOption = options.find(opt => opt.value === selectedValue);
+            const selectedOption = options.find((opt) => opt.code === selectedValue);
             if (!selectedOption) return null;
 
             return (
               <Chip
                 key={selectedValue}
-                label={selectedOption.label}
-                onClose={() => handleToggleOption(selectedValue)} // Use existing toggle logic to remove
-                variant="light" // Use the light variant
-                color="primary" // Use the primary color
-                // No need to pass style or textStyle if using variant/color props
-                // closeIconColor is handled by the Chip component based on variant/color
+                label={selectedOption.name}
+                onClose={() => handleToggleOption(selectedValue)}
+                variant="light"
+                color="primary"
               />
             );
           })}
         </View>
       )}
-
 
       {(error || helper) && (
         <Text style={[styles.helperText, hasError && styles.errorText]}>
@@ -174,13 +172,11 @@ const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
                   </TouchableOpacity>
                 </View>
                 <View style={styles.searchContainer}>
-                  <Search size={20} color={Colors.light.subtext} style={styles.searchIcon} />
-                  <TextInput
-                    style={styles.searchInput}
+                  <Input
                     placeholder="Search..."
-                    placeholderTextColor={Colors.light.subtext}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
+                    leftIcon={<Search size={20} color={Colors.light.subtext} />}
                   />
                 </View>
                 {filteredOptions.length === 0 && (
@@ -189,7 +185,7 @@ const SearchableMultiSelect: React.FC<SearchableMultiSelectProps> = ({
                 <FlatList
                   data={filteredOptions}
                   renderItem={renderItem}
-                  keyExtractor={(item) => item.value}
+                  keyExtractor={(item) => item.code}
                   keyboardShouldPersistTaps="handled"
                 />
               </View>
@@ -281,30 +277,14 @@ const styles = StyleSheet.create({
     padding: Layout.spacing.xs,
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.light.inputBorder,
-    borderRadius: Layout.borderRadius.medium,
-    marginHorizontal: Layout.spacing.l,
-    marginVertical: Layout.spacing.m,
+    marginVertical: Layout.spacing.s,
     paddingHorizontal: Layout.spacing.s,
-  },
-  searchIcon: {
-    marginRight: Layout.spacing.s,
-  },
-  searchInput: {
-    flex: 1,
-    fontFamily: 'Inter-Regular',
-    fontSize: 16,
-    color: Colors.light.text,
-    paddingVertical: Platform.OS === 'ios' ? Layout.spacing.s : 0,
   },
   optionItem: {
     paddingVertical: Layout.spacing.m,
     paddingHorizontal: Layout.spacing.l,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.light.border,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -331,33 +311,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginTop: Layout.spacing.s,
-    paddingHorizontal: Layout.spacing.m,
   },
-  // Removed selectedChip and selectedChipText styles as they are now handled by the Chip component
-  // selectedChip: { // Keep this style to override default Chip background/text if needed
-  //   backgroundColor: Colors.light.primary,
-  // },
-  // selectedChipText: { // Keep this style to override default Chip text color if needed
-  //   color: Colors.light.background,
-  // },
-  // Removed selectedChip and selectedChipText styles from here as they are now in Chip.tsx
-  // selectedChip: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   backgroundColor: Colors.light.primaryLight,
-  //   borderRadius: Layout.borderRadius.xl,
-  //   paddingVertical: Layout.spacing.xs,
-  //   paddingHorizontal: Layout.spacing.s,
-  //   marginRight: Layout.spacing.s,
-  //   marginBottom: Layout.spacing.s,
-  // },
-  // selectedChipText: {
-  //   fontFamily: 'Inter-Regular',
-  //   fontSize: 14,
-  //   color: Colors.light.primary,
-  //   marginRight: Layout.spacing.xs,
-  // },
-  removeChipButton: { // This style is still needed for the button within the Chip
+  removeChipButton: {
     padding: Layout.spacing.xs / 2,
   },
 });
