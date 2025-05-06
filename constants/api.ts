@@ -19,5 +19,7 @@ export const API_CONSTANTS = {
   NOTIFICATION: {
     INIT: '/PushNotificationService/firstLoad',
     SUBMIT: '/PushNotificationService/pushNotificationEntry',
+    LIST: '/ViewNotificationService/pushNotificationData',
+    READ: '/ViewNotificationService/pushNotificationRead',
   },
 };

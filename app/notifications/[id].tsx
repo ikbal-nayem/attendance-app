@@ -1,26 +1,26 @@
+import Card from '@/components/Card';
+import AppHeader from '@/components/Header';
+import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useNotifications } from '@/context/NotificationContext';
-import { router, useLocalSearchParams } from 'expo-router';
-import { ChevronLeft, Paperclip, Download } from 'lucide-react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { Download, Paperclip } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
+  Linking,
   SafeAreaView,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Linking,
-  ActivityIndicator,
 } from 'react-native';
 
-// Assuming Notification type from context includes attachments
 interface Attachment {
   uri: string;
   name: string;
-  // Add other potential fields like type, size if available
 }
 
 interface Notification {
@@ -30,7 +30,7 @@ interface Notification {
   date: Date;
   read: boolean;
   type?: string;
-  attachments?: Attachment[]; // Based on send.tsx sAttachmentFile01
+  attachments?: Attachment[];
 }
 
 export default function NotificationDetailScreen() {
@@ -64,19 +64,14 @@ export default function NotificationDetailScreen() {
 
   const handleAttachmentPress = async (attachment: Attachment) => {
     try {
-      // For web or local URIs, Linking.openURL might work directly
-      // For other cases (e.g., base64, or requiring download), more complex handling is needed
       const supported = await Linking.canOpenURL(attachment.uri);
       if (supported) {
         await Linking.openURL(attachment.uri);
       } else {
-        // Fallback or error message
         console.warn(`Don't know how to open URI: ${attachment.uri}`);
-        // Potentially show a toast message to the user
       }
     } catch (error) {
       console.error('Failed to open attachment:', error);
-      // Potentially show a toast message to the user
     }
   };
 
@@ -95,7 +90,9 @@ export default function NotificationDetailScreen() {
       <SafeAreaView style={styles.container}>
         <AppHeader title="Notification Not Found" />
         <View style={styles.centered}>
-          <Text style={styles.errorText}>The requested notification could not be found.</Text>
+          <Text style={styles.errorText}>
+            The requested notification could not be found.
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -103,11 +100,16 @@ export default function NotificationDetailScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.light.background} />
-      <AppHeader title="Notification Details" />
+      <AppStatusBar />
+      <AppHeader
+        title="Notification Details"
+        withBackButton={true}
+        bg="primary"
+        rightContent={<View style={{ width: 24 }} />}
+      />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.card}>
+        <Card variant="outlined">
           <Text style={styles.title}>{notification.title}</Text>
           <Text style={styles.date}>{formatDate(new Date(notification.date))}</Text>
           <View style={styles.separator} />
@@ -126,27 +128,20 @@ export default function NotificationDetailScreen() {
                   <Text style={styles.attachmentName} numberOfLines={1}>
                     {att.name}
                   </Text>
-                  <Download size={18} color={Colors.light.primary} style={styles.downloadIcon} />
+                  <Download
+                    size={18}
+                    color={Colors.light.primary}
+                    style={styles.downloadIcon}
+                  />
                 </TouchableOpacity>
               ))}
             </View>
           )}
-        </View>
+        </Card>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-// A simple header component for this screen
-const AppHeader = ({ title }: { title: string }) => (
-  <View style={styles.header}>
-    <TouchableOpacity onPress={() => router.canGoBack() ? router.back() : router.replace('/notifications')} style={styles.backButton}>
-      <ChevronLeft size={24} color={Colors.light.text} />
-    </TouchableOpacity>
-    <Text style={styles.headerTitle}>{title}</Text>
-    <View style={{ width: 24 }} /> 
-  </View>
-);
 
 const styles = StyleSheet.create({
   container: {
@@ -165,35 +160,8 @@ const styles = StyleSheet.create({
     color: Colors.light.subtext,
     textAlign: 'center',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: Layout.spacing.m,
-    paddingVertical: Layout.spacing.m,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.light.border,
-  },
-  backButton: {
-    padding: Layout.spacing.xs,
-  },
-  headerTitle: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 18,
-    color: Colors.light.text,
-  },
   scrollContent: {
     padding: Layout.spacing.l,
-  },
-  card: {
-    backgroundColor: Colors.light.card, // Use light card background for consistency
-    borderRadius: Layout.borderRadius.large,
-    padding: Layout.spacing.l,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: Layout.borderRadius.medium,
-    elevation: 3,
   },
   title: {
     fontFamily: 'Inter-Bold',

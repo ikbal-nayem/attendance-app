@@ -1,7 +1,6 @@
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useNotifications } from '@/context/NotificationContext';
-import { MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { History } from 'lucide-react-native';
 import React, { useEffect, useMemo } from 'react';
@@ -16,11 +15,10 @@ import {
   UIManager,
   View,
 } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
 
 import AppHeader from '@/components/Header';
+import NotificationCard from '@/components/NotificationCard';
 import AppStatusBar from '@/components/StatusBar';
-import { formatNotificationDateTime } from './history';
 
 if (Platform.OS === 'android') {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -69,45 +67,11 @@ export default function NotificationsScreen() {
   };
 
   const renderNotification = ({ item }: { item: any }) => (
-    <Animated.View
-      entering={FadeIn.duration(300)}
-      style={[
-        styles.notificationItem,
-        !item.read && { backgroundColor: `${Colors.light.warning}20` },
-      ]}
-    >
-      <TouchableOpacity
-        activeOpacity={0.8}
-        style={[
-          styles.notificationTouchable,
-          // !item.read && { backgroundColor: `${Colors.light.warning}20` },
-        ]}
-        onPress={() => handleNotificationPress(item.id)}
-      >
-        <View style={styles.notificationHeader}>
-          <Text style={styles.notificationTitle}>{item.title}</Text>
-          {!item.read && (
-            <View style={styles.unreadBadge}>
-              <Text style={styles.unreadBadgeText}>New</Text>
-            </View>
-          )}
-        </View>
-        <Text style={styles.notificationMessage} numberOfLines={2}>
-          {item.message}
-        </Text>
-        <View style={styles.notificationFooter}>
-          <MaterialIcons
-            name="schedule"
-            size={14}
-            color={Colors.light.subtext}
-            style={styles.timeIcon}
-          />
-          <Text style={styles.notificationTime}>
-            {formatNotificationDateTime(new Date(item.date))}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    </Animated.View>
+    <NotificationCard
+      item={item}
+      onPress={handleNotificationPress}
+      showBadge={!item.read}
+    />
   );
 
   return (
@@ -171,34 +135,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.light.background,
-  },
-  notificationItem: {
-    borderRadius: Layout.borderRadius.large,
-    marginBottom: Layout.spacing.m,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.light.card,
-  },
-  notificationTouchable: {
-    flex: 1,
-    padding: Layout.spacing.m,
-  },
-  notificationTitle: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 16,
-    color: Colors.light.text,
-    marginBottom: Layout.spacing.xs,
-  },
-  notificationMessage: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 14,
-    color: Colors.light.subtext,
-    marginBottom: Layout.spacing.xs,
-  },
-  notificationTime: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 12,
-    color: Colors.light.subtext,
   },
   listContent: {
     padding: Layout.spacing.m,
