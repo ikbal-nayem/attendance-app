@@ -88,7 +88,8 @@ export default function NotificationsScreen() {
             style={styles.historyTextButton}
             onPress={navigateToHistory}
           >
-            <Text style={styles.historyText}>View Full History</Text>
+            <Text style={styles.historyText}>History</Text>
+            <History color={Colors.light.primary} size={20} />
           </TouchableOpacity>
         </View>
       ) : (
@@ -172,6 +173,10 @@ const styles = StyleSheet.create({
     marginBottom: Layout.spacing.m,
   },
   historyTextButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Layout.spacing.s,
     marginTop: Layout.spacing.m,
     paddingVertical: Layout.spacing.s,
     paddingHorizontal: Layout.spacing.m,
