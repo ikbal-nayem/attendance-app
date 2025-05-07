@@ -38,25 +38,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [tempUserData, setTempUserData] = useState<FormData | null>(null);
 
-  useEffect(() => {
-    // Check if user is already logged in
-    const checkLoginStatus = async () => {
-      try {
-        const userJson = await localData.get('user');
-        if (userJson) {
-          console.log('User found: ', userJson);
-          setUser(userJson);
-          router.replace('/(tabs)');
-        }
-      } catch (error) {
-        console.error('Error retrieving user data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   // Check if user is already logged in
+  //   const checkLoginStatus = async () => {
+  //     try {
+  //       const userJson = await localData.get('user');
+  //       if (userJson) {
+  //         console.log('User found: ', userJson);
+  //         setUser(userJson);
+  //         router.replace('/(tabs)');
+  //       }
+  //     } catch (error) {
+  //       console.error('Error retrieving user data:', error);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
 
-    checkLoginStatus();
-  }, []);
+  //   checkLoginStatus();
+  // }, []);
 
   const login = (data: FormData): Promise<string | IObject> => {
     setIsLoading(true);
@@ -65,7 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         .post(API_CONSTANTS.AUTH.SIGN_IN, data)
         .then(async (response: AxiosResponse<IResponse & IUser>) => {
           if (response.data?.messageCode === '0') {
-            await localData.set('user', response.data);
+            // await localData.set('user', response.data);
             setUser(response.data);
             resolve({success: true, data: response?.data});
           }
@@ -88,7 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         sCompanyID: user?.companyID,
       })
       .finally(() => setIsLoading(false));
-    await localData.remove('user');
+    // await localData.remove('user');
     setIsLoading(false);
     setUser(null);
   };
