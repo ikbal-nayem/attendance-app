@@ -1,23 +1,23 @@
+import { useNotificationHistoryInit, useNotificationHistoryList } from '@/api/notification.api';
 import AppHeader from '@/components/Header';
+import NotificationCard from '@/components/NotificationCard';
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
-import { useNotifications } from '@/context/NotificationContext';
-import DateTimePicker, {
-  DateTimePickerEvent,
-} from '@react-native-community/datetimepicker';
+import { parseRequestDate } from '@/utils/date-time';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import { CalendarDays, Filter } from 'lucide-react-native';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
-  LayoutAnimation,
   Platform,
+  Pressable,
   SafeAreaView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   UIManager,
   View,
 } from 'react-native';
@@ -77,65 +77,39 @@ export const formatNotificationDateTime = (date: Date): string => {
 };
 
 export default function AllNotificationsScreen() {
-  const { notifications, markAsRead } = useNotifications();
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const [showDatePicker, setShowDatePicker] = useState<'start' | 'end' | null>(null);
   const { user } = useAuth();
-
-  const handleNotificationPress = (id: string) => {
-    markAsRead(id);
-    router.push({ pathname: '/notifications/[id]', params: { id } });
-  };
-
-  const filteredNotifications = useMemo(() => {
-    let filtered = notifications;
-
-    if (startDate) {
-      // Set start date to beginning of day for inclusive filtering
-      const startOfDay = new Date(startDate);
-      startOfDay.setHours(0, 0, 0, 0);
-      filtered = filtered.filter((n) => new Date(n.date) >= startOfDay);
-    }
-    if (endDate) {
-      // Set end date to end of day for inclusive filtering
-      const endOfDay = new Date(endDate);
-      endOfDay.setHours(23, 59, 59, 999);
-      filtered = filtered.filter((n) => new Date(n.date) <= endOfDay);
-    }
-
-    // Sort by date descending
-    return filtered.sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
-  }, [notifications, startDate, endDate]);
+  const { notificationHistoryData } = useNotificationHistoryInit(user?.companyID!);
+  const [startDate, setStartDate] = useState<Date>();
+  const [endDate, setEndDate] = useState<Date>();
+  const { notificationHistoryList, isLoading } = useNotificationHistoryList(
+    user?.userID!,
+    user?.sessionID!,
+    user?.companyID!,
+    user?.employeeCode!,
+    startDate,
+    endDate
+  );
+  const [showDatePicker, setShowDatePicker] = useState<'start' | 'end' | null>(null);
 
   useEffect(() => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-  }, [filteredNotifications]);
-
-  const getNotificationBackgroundColor = (type?: string) => {
-    switch (type) {
-      case 'success':
-        return `${Colors.light.success}20`; // Lighter shade
-      case 'warning':
-        return `${Colors.light.warning}20`;
-      case 'error':
-        return `${Colors.light.error}20`;
-      default:
-        return `${Colors.light.primary}15`;
+    if (notificationHistoryData) {
+      setStartDate(parseRequestDate(notificationHistoryData.fromDate));
+      setEndDate(parseRequestDate(notificationHistoryData.toDate));
     }
+  }, [notificationHistoryData]);
+
+  const handleNotificationPress = (item: INotification) => {
+    router.push({ pathname: '/notifications/[id]', params: { id: item?.referenceNo, ...item } });
   };
 
   const onDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
-    const currentDate =
-      selectedDate || (showDatePicker === 'start' ? startDate : endDate);
-    setShowDatePicker(null); // Hide picker
+    const currentDate = selectedDate || (showDatePicker === 'start' ? startDate : endDate);
+    setShowDatePicker(null);
     if (event.type === 'set' && currentDate) {
       if (showDatePicker === 'start') {
         setStartDate(currentDate);
         if (endDate && currentDate > endDate) {
-          setEndDate(undefined); // Reset end date if start is after end
+          setEndDate(currentDate);
         }
       } else if (showDatePicker === 'end') {
         setEndDate(currentDate);
@@ -144,31 +118,9 @@ export default function AllNotificationsScreen() {
   };
 
   const clearFilters = () => {
-    setStartDate(undefined);
-    setEndDate(undefined);
+    setStartDate(parseRequestDate(notificationHistoryData?.fromDate));
+    setEndDate(parseRequestDate(notificationHistoryData?.toDate));
   };
-
-  const renderNotification = ({ item }: { item: Notification }) => (
-    <TouchableOpacity
-      style={[
-        styles.notificationItem,
-        { backgroundColor: getNotificationBackgroundColor(item.type) },
-        !item.read && styles.unreadNotification,
-      ]}
-      onPress={() => handleNotificationPress(item.id)}
-    >
-      <View style={styles.notificationContent}>
-        <Text style={styles.notificationTitle}>{item.title}</Text>
-        <Text style={styles.notificationMessage} numberOfLines={2}>
-          {item.message}
-        </Text>
-        <Text style={styles.notificationTime}>
-          {formatNotificationDateTime(new Date(item.date))}
-        </Text>
-      </View>
-      {!item.read && <View style={styles.unreadIndicator} />}
-    </TouchableOpacity>
-  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -181,31 +133,23 @@ export default function AllNotificationsScreen() {
       />
 
       <View style={styles.filterContainer}>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={styles.dateButton}
-          onPress={() => setShowDatePicker('start')}
-        >
+        <Pressable style={styles.dateButton} onPress={() => setShowDatePicker('start')}>
           <CalendarDays size={18} color={Colors.light.primary} />
           <Text style={styles.dateButtonText}>
             {startDate ? startDate.toLocaleDateString() : 'Start Date'}
           </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          style={styles.dateButton}
-          onPress={() => setShowDatePicker('end')}
-        >
+        </Pressable>
+        <Pressable style={styles.dateButton} onPress={() => setShowDatePicker('end')}>
           <CalendarDays size={18} color={Colors.light.primary} />
           <Text style={styles.dateButtonText}>
             {endDate ? endDate.toLocaleDateString() : 'End Date'}
           </Text>
-        </TouchableOpacity>
+        </Pressable>
         {(startDate || endDate) && (
-          <TouchableOpacity style={styles.clearFilterButton} onPress={clearFilters}>
+          <Pressable style={styles.clearFilterButton} onPress={clearFilters}>
             <Filter size={18} color={Colors.light.error} />
             <Text style={styles.clearFilterText}>Clear</Text>
-          </TouchableOpacity>
+          </Pressable>
         )}
       </View>
 
@@ -215,22 +159,24 @@ export default function AllNotificationsScreen() {
           mode="date"
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={onDateChange}
-          maximumDate={new Date()} // Optional: prevent selecting future dates
+          maximumDate={new Date()}
           minimumDate={showDatePicker === 'end' && startDate ? startDate : undefined}
         />
       )}
 
-      {filteredNotifications.length === 0 ? (
+      {isLoading ? (
+        <ActivityIndicator color={Colors.light.primary} style={{ flex: 1 }} size="large" />
+      ) : notificationHistoryList.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyMessage}>
-            No notifications found for the selected period.
-          </Text>
+          <Text style={styles.emptyMessage}>No notifications found for the selected period.</Text>
         </View>
       ) : (
         <FlatList
-          data={filteredNotifications}
-          renderItem={renderNotification}
-          keyExtractor={(item) => item.id}
+          data={notificationHistoryList}
+          renderItem={({ item }: { item: INotification }) => (
+            <NotificationCard item={item} onPress={handleNotificationPress} />
+          )}
+          keyExtractor={(item) => item.referenceNo}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
         />
@@ -258,7 +204,7 @@ const styles = StyleSheet.create({
     borderStartEndRadius: Layout.borderRadius.large,
     marginBottom: Layout.spacing.m,
     marginTop: -Layout.borderRadius.large,
-    paddingTop: Layout.spacing.s,
+    paddingTop: Layout.spacing.l,
   },
   dateButton: {
     flexDirection: 'row',

@@ -13,4 +13,9 @@ interface INotification {
   referenceDate: string;
   referenceNo: string;
   attachmentFile01: Array<any>;
+  messageDate: string;
+  messageFrom: string;
+  messageStatus: string;
+  messageTo: string;
+  serialNo: string;
 }

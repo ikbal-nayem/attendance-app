@@ -60,10 +60,6 @@ export default function NotificationsScreen() {
     router.push('/notifications/history');
   };
 
-  const renderNotification = ({ item }: { item: INotification }) => (
-    <NotificationCard item={item} onPress={handleNotificationPress} isUnread />
-  );
-
   return (
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
@@ -95,7 +91,9 @@ export default function NotificationsScreen() {
       ) : (
         <FlatList
           data={notificationList}
-          renderItem={renderNotification}
+          renderItem={({ item }: { item: INotification }) => (
+            <NotificationCard item={item} onPress={handleNotificationPress} isUnread />
+          )}
           keyExtractor={(item) => item?.referenceNo}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
