@@ -1,13 +1,14 @@
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
-import { useNotifications } from '@/context/NotificationContext';
 import { router } from 'expo-router';
 import { History } from 'lucide-react-native';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   LayoutAnimation,
   Platform,
+  Pressable,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -16,9 +17,12 @@ import {
   View,
 } from 'react-native';
 
+import { markAsRead, useNotificationUnread } from '@/api/notification.api';
 import AppHeader from '@/components/Header';
 import NotificationCard from '@/components/NotificationCard';
 import AppStatusBar from '@/components/StatusBar';
+import { useAuth } from '@/context/AuthContext';
+import { makeFormData } from '@/utils/form-actions';
 
 if (Platform.OS === 'android') {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
@@ -27,51 +31,37 @@ if (Platform.OS === 'android') {
 }
 
 export default function NotificationsScreen() {
-  const { notifications, markAsRead, markAllAsRead, clearAll } = useNotifications();
-
-  // Filter for recent notifications (e.g., unread or last 15)
-  const recentNotifications = useMemo(() => {
-    // Show unread first, then recent read ones, limit to a certain number e.g. 15
-    const unread = notifications.filter((n) => !n.read);
-    const read = notifications.filter((n) => n.read);
-    const sorted = [...unread, ...read]
-      .slice(0, 15)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    return sorted;
-  }, [notifications]);
+  const { user } = useAuth();
+  const { notificationList, isLoading } = useNotificationUnread(
+    user?.userID!,
+    user?.sessionID!,
+    user?.companyID!,
+    user?.employeeCode!
+  );
 
   useEffect(() => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-  }, [recentNotifications]);
+  }, [notificationList]);
 
-  const handleNotificationPress = (id: string) => {
-    markAsRead(id);
-    router.push({ pathname: '/notifications/[id]', params: { id } });
+  const handleNotificationPress = (item: INotification) => {
+    markAsRead(
+      makeFormData({
+        sUserID: user?.userID,
+        sSessionID: user?.sessionID,
+        sCompanyID: user?.companyID,
+        sEmployeeCode: user?.employeeCode,
+        sReferenceNo: item?.referenceNo,
+      })
+    );
+    router.push({ pathname: '/notifications/[id]', params: { id: item?.referenceNo, ...item } });
   };
 
   const navigateToHistory = () => {
     router.push('/notifications/history');
   };
 
-  const getNotificationBackgroundColor = (type?: string) => {
-    switch (type) {
-      case 'success':
-        return `${Colors.light.success}20`; // Lighter shade
-      case 'warning':
-        return `${Colors.light.warning}20`;
-      case 'error':
-        return `${Colors.light.error}20`;
-      default:
-        return `${Colors.light.primary}15`;
-    }
-  };
-
-  const renderNotification = ({ item }: { item: any }) => (
-    <NotificationCard
-      item={item}
-      onPress={handleNotificationPress}
-      showBadge={!item.read}
-    />
+  const renderNotification = ({ item }: { item: INotification }) => (
+    <NotificationCard item={item} onPress={handleNotificationPress} isUnread />
   );
 
   return (
@@ -82,51 +72,48 @@ export default function NotificationsScreen() {
         withBackButton={true}
         bg="primary"
         rightContent={
-          <TouchableOpacity onPress={navigateToHistory}>
+          <Pressable onPress={navigateToHistory}>
             <History color={Colors.light.background} />
-          </TouchableOpacity>
+          </Pressable>
         }
       />
 
-      {recentNotifications.length === 0 ? (
+      {isLoading ? (
+        <ActivityIndicator color={Colors.light.primary} style={{ flex: 1 }} size="large" />
+      ) : notificationList?.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyMessage}>No recent notifications</Text>
-          <TouchableOpacity style={styles.historyTextButton} onPress={navigateToHistory}>
+          <Text style={styles.emptyMessage}>No new notifications</Text>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={styles.historyTextButton}
+            onPress={navigateToHistory}
+          >
             <Text style={styles.historyText}>View Full History</Text>
           </TouchableOpacity>
         </View>
       ) : (
         <FlatList
-          data={recentNotifications}
+          data={notificationList}
           renderItem={renderNotification}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item?.referenceNo}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
         />
       )}
 
-      <View style={styles.footerButtonsContainer}>
-        {notifications.length > 0 && (
-          <TouchableOpacity
+      {!isLoading && notificationList?.length !== 0 && (
+        <View style={styles.footerButtonsContainer}>
+          <Pressable
             style={[styles.footerButton, styles.markAllReadButton]}
-            onPress={markAllAsRead}
+            // onPress={markAllAsRead}
           >
-            <Text style={[styles.footerButtonText, styles.markAllReadText]}>
-              Mark all as read
-            </Text>
-          </TouchableOpacity>
-        )}
-        {notifications.length > 0 && (
-          <TouchableOpacity
-            style={[styles.footerButton, styles.clearButton]}
-            onPress={clearAll}
-          >
-            <Text style={[styles.footerButtonText, styles.clearButtonText]}>
-              Clear All Recent
-            </Text>
-          </TouchableOpacity>
-        )}
-      </View>
+            <Text style={[styles.footerButtonText, styles.markAllReadText]}>Mark all as read</Text>
+          </Pressable>
+          {/* <TouchableOpacity style={[styles.footerButton, styles.clearButton]} onPress={clearAll}>
+            <Text style={[styles.footerButtonText, styles.clearButtonText]}>Clear All</Text>
+          </TouchableOpacity> */}
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -137,14 +124,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.background,
   },
   listContent: {
-    padding: Layout.spacing.m,
-  },
-  unreadIndicator: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: Colors.light.primary,
-    marginLeft: Layout.spacing.m,
+    marginTop: Layout.spacing.m,
   },
   footerButtonsContainer: {
     flexDirection: 'row',
@@ -177,30 +157,6 @@ const styles = StyleSheet.create({
   },
   clearButtonText: {
     color: Colors.light.error,
-  },
-  notificationHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Layout.spacing.s,
-  },
-  notificationFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  unreadBadge: {
-    backgroundColor: Colors.light.primary,
-    paddingHorizontal: Layout.spacing.s,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  unreadBadgeText: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 10,
-    color: Colors.light.background,
-  },
-  timeIcon: {
-    marginRight: Layout.spacing.xs,
   },
   emptyContainer: {
     flex: 1,

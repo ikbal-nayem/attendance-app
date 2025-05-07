@@ -26,13 +26,27 @@ export const useNotificationData = (companyId: string) => {
   return { notificationData, isLoading, error };
 };
 
-export const useNotificationList = (
+export const sendNotification = async (data: FormData) => {
+  try {
+    const req = await axiosIns.post(API_CONSTANTS.NOTIFICATION.SUBMIT, data);
+    console.log(req.data);
+    if (req.data?.messageCode === '0') {
+      return { success: true, message: req.data?.messageDesc, data: req.data };
+    }
+    return { success: false, message: req.data?.messageDesc };
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
+
+export const useNotificationUnread = (
   userId: string,
   sessionId: string,
   companyId: string,
   employeeCode: string
 ) => {
-  const [notificationList, setNotificationList] = useState<NotificationData>();
+  const [notificationList, setNotificationList] = useState<INotification[]>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -47,7 +61,7 @@ export const useNotificationList = (
           sEmployeeCode: employeeCode,
         })
       )
-      .then((response) => setNotificationList(response.data))
+      .then((response) => setNotificationList(response.data || []))
       .catch((err) => {
         console.log(err);
         setError(err.message);
@@ -58,12 +72,12 @@ export const useNotificationList = (
   return { notificationList, isLoading, error };
 };
 
-export const sendNotification = async (data: FormData) => {
+export const markAsRead = async (data: FormData) => {
   try {
-    const req = await axiosIns.post(API_CONSTANTS.NOTIFICATION.SUBMIT, data);
+    const req = await axiosIns.post(API_CONSTANTS.NOTIFICATION.MARK_AS_READ, data);
     console.log(req.data);
     if (req.data?.messageCode === '0') {
-      return { success: true, message: req.data?.messageDesc, data: req.data };
+      return { success: true, message: req.data?.messageDesc };
     }
     return { success: false, message: req.data?.messageDesc };
   } catch (err) {

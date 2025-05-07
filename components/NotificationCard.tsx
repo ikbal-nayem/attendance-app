@@ -1,73 +1,47 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
+import { parseDate } from '@/utils/date-time';
+import { Clock } from 'lucide-react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 interface NotificationCardProps {
-  item: {
-    id: string;
-    title: string;
-    message: string;
-    date: string;
-    read: boolean;
-    type?: string;
-  };
-  onPress: (id: string) => void;
-  showBadge?: boolean;
+  item: INotification;
+  onPress: (item: INotification) => void;
+  isUnread?: boolean;
 }
 
-export default function NotificationCard({ item, onPress, showBadge = true }: NotificationCardProps) {
-  const getNotificationBackgroundColor = (type?: string) => {
-    switch (type) {
-      case 'success':
-        return `${Colors.light.success}20`;
-      case 'warning':
-        return `${Colors.light.warning}20`;
-      case 'error':
-        return `${Colors.light.error}20`;
-      default:
-        return `${Colors.light.primary}15`;
-    }
-  };
-
+export default function NotificationCard({ item, onPress, isUnread }: NotificationCardProps) {
   return (
-    <Animated.View 
+    <Animated.View
       entering={FadeIn.duration(300)}
-      style={[
-        styles.notificationItem,
-        { 
-          backgroundColor: getNotificationBackgroundColor(item.type),
-        },
-        !item.read && styles.unreadNotification,
-      ]}
+      style={[styles.notificationItem, isUnread && styles.unreadNotification]}
     >
-      <TouchableOpacity 
+      <TouchableOpacity
         activeOpacity={0.8}
         style={styles.notificationTouchable}
-        onPress={() => onPress(item.id)}
+        onPress={() => onPress(item)}
       >
         <View style={styles.notificationContent}>
           <View style={styles.notificationHeader}>
-            <Text style={styles.notificationTitle}>{item.title}</Text>
-            {showBadge && !item.read && (
-              <View style={styles.unreadBadge}>
-                <Text style={styles.unreadBadgeText}>New</Text>
-              </View>
-            )}
+            <Text style={styles.notificationTitle} numberOfLines={1}>
+              {item?.messageTitle}
+            </Text>
+            <View style={styles.unreadBadge} />
           </View>
           <Text style={styles.notificationMessage} numberOfLines={2}>
-            {item.message}
+            {item?.messageDetails}
           </Text>
           <View style={styles.notificationFooter}>
-            <MaterialIcons 
-              name="schedule" 
-              size={14} 
-              color={Colors.light.subtext} 
-              style={styles.timeIcon}
-            />
+            <Clock size={13} style={styles.timeIcon} />
             <Text style={styles.notificationTime}>
-              {new Date(item.date).toLocaleString()}
+              {parseDate(item?.referenceDate).toLocaleString('en-US', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
             </Text>
           </View>
         </View>
@@ -85,6 +59,7 @@ const styles = StyleSheet.create({
   unreadNotification: {
     borderLeftWidth: 4,
     borderLeftColor: Colors.light.primary,
+    backgroundColor: `${Colors.light.primary}15`,
   },
   notificationTouchable: {
     padding: Layout.spacing.m,
@@ -120,16 +95,12 @@ const styles = StyleSheet.create({
   },
   unreadBadge: {
     backgroundColor: Colors.light.primary,
-    paddingHorizontal: Layout.spacing.s,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  unreadBadgeText: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 10,
-    color: Colors.light.background,
+    height: 8,
+    width: 8,
+    borderRadius: Layout.borderRadius.large,
   },
   timeIcon: {
     marginRight: Layout.spacing.xs,
+    color: Colors.light.subtext,
   },
 });

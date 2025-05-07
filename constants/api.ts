@@ -20,6 +20,6 @@ export const API_CONSTANTS = {
     INIT: '/PushNotificationService/firstLoad',
     SUBMIT: '/PushNotificationService/pushNotificationEntry',
     LIST: '/ViewNotificationService/pushNotificationData',
-    READ: '/ViewNotificationService/pushNotificationRead',
+    MARK_AS_READ: '/ViewNotificationService/pushNotificationRead',
   },
 };

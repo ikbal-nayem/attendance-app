@@ -1,4 +1,3 @@
-import { useNotificationList } from '@/api/notification.api';
 import AppHeader from '@/components/Header';
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
@@ -9,14 +8,13 @@ import DateTimePicker, {
   DateTimePickerEvent,
 } from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
-import { CalendarDays, ChevronLeft, Filter } from 'lucide-react-native';
+import { CalendarDays, Filter } from 'lucide-react-native';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   FlatList,
   LayoutAnimation,
   Platform,
   SafeAreaView,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -84,14 +82,6 @@ export default function AllNotificationsScreen() {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [showDatePicker, setShowDatePicker] = useState<'start' | 'end' | null>(null);
   const { user } = useAuth();
-  const { notificationList } = useNotificationList(
-    user?.userID!,
-    user?.sessionID!,
-    user?.companyID!,
-    user?.employeeCode!
-  );
-
-  console.log(notificationList);
 
   const handleNotificationPress = (id: string) => {
     markAsRead(id);
@@ -268,7 +258,7 @@ const styles = StyleSheet.create({
     borderStartEndRadius: Layout.borderRadius.large,
     marginBottom: Layout.spacing.m,
     marginTop: -Layout.borderRadius.large,
-    paddingTop: Layout.spacing.s
+    paddingTop: Layout.spacing.s,
   },
   dateButton: {
     flexDirection: 'row',

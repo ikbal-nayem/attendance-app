@@ -3,64 +3,21 @@ import AppHeader from '@/components/Header';
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
-import { useNotifications } from '@/context/NotificationContext';
-import { useLocalSearchParams } from 'expo-router';
+import { parseDate } from '@/utils/date-time';
+import { isNull } from '@/utils/validation';
+import { UnknownOutputParams, useLocalSearchParams } from 'expo-router';
 import { Download, Paperclip } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Linking,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import React from 'react';
+import { Linking, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 interface Attachment {
   uri: string;
   name: string;
 }
 
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  date: Date;
-  read: boolean;
-  type?: string;
-  attachments?: Attachment[];
-}
-
 export default function NotificationDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const { notifications, markAsRead } = useNotifications();
-  const [notification, setNotification] = useState<Notification | undefined>(undefined);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (id) {
-      const foundNotification = notifications.find((n) => n.id === id);
-      if (foundNotification) {
-        setNotification(foundNotification as Notification); // Cast to include attachments
-        if (!foundNotification.read) {
-          markAsRead(id);
-        }
-      }
-      setLoading(false);
-    }
-  }, [id, notifications, markAsRead]);
-
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleString([], {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
+  // const { id } = useLocalSearchParams<{ id: string }>();
+  const notification = useLocalSearchParams<UnknownOutputParams & INotification>();
 
   const handleAttachmentPress = async (attachment: Attachment) => {
     try {
@@ -75,24 +32,12 @@ export default function NotificationDetailScreen() {
     }
   };
 
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={Colors.light.primary} />
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  if (!notification) {
+  if (isNull(notification)) {
     return (
       <SafeAreaView style={styles.container}>
         <AppHeader title="Notification Not Found" />
         <View style={styles.centered}>
-          <Text style={styles.errorText}>
-            The requested notification could not be found.
-          </Text>
+          <Text style={styles.errorText}>The requested notification could not be found.</Text>
         </View>
       </SafeAreaView>
     );
@@ -110,16 +55,24 @@ export default function NotificationDetailScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Card variant="outlined">
-          <Text style={styles.title}>{notification.title}</Text>
-          <Text style={styles.date}>{formatDate(new Date(notification.date))}</Text>
+          <Text style={styles.title}>{notification.messageTitle}</Text>
+          <Text style={styles.date}>
+            {parseDate(notification?.referenceDate).toLocaleString('en-US', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </Text>
           <View style={styles.separator} />
-          <Text style={styles.message}>{notification.message}</Text>
+          <Text style={styles.message}>{notification.messageDetails}</Text>
 
           {notification.attachments && notification.attachments.length > 0 && (
             <View style={styles.attachmentsContainer}>
               <Text style={styles.attachmentsTitle}>Attachments:</Text>
-              {notification.attachments.map((att, index) => (
-                <TouchableOpacity
+              {notification.attachmentFile01.map((att, index) => (
+                <Pressable
                   key={index}
                   style={styles.attachmentItem}
                   onPress={() => handleAttachmentPress(att)}
@@ -128,12 +81,8 @@ export default function NotificationDetailScreen() {
                   <Text style={styles.attachmentName} numberOfLines={1}>
                     {att.name}
                   </Text>
-                  <Download
-                    size={18}
-                    color={Colors.light.primary}
-                    style={styles.downloadIcon}
-                  />
-                </TouchableOpacity>
+                  <Download size={18} color={Colors.light.primary} style={styles.downloadIcon} />
+                </Pressable>
               ))}
             </View>
           )}
