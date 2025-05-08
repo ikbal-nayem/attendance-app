@@ -16,14 +16,15 @@ type AttendanceHistoryData = {
 };
 
 export interface IAttendanceHistory {
+  attachmentFile01: [];
+  serialNo: string;
+  attendanceFlag: string;
+  attendanceNote: string;
+  entryLocation: string;
   entryNo: string;
-  entryDate: string;
+  entryType: string;
   entryTime: string;
-  exitTime: string;
-  location: string;
-  entryNote: string;
-  status: string;
-};
+}
 
 export const useAttendanceHistoryInit = (companyId: string) => {
   const [attendanceHistoryData, setAttendanceHistoryData] = useState<AttendanceHistoryData>();
@@ -32,10 +33,7 @@ export const useAttendanceHistoryInit = (companyId: string) => {
 
   useEffect(() => {
     axiosIns
-      .post(
-        API_CONSTANTS.ATTENDANCE.HISTORY_INIT,
-        makeFormData({ sCompanyID: companyId })
-      )
+      .post(API_CONSTANTS.ATTENDANCE.HISTORY_INIT, makeFormData({ sCompanyID: companyId }))
       .then((response) => setAttendanceHistoryData(response?.data))
       .catch((err) => {
         console.log(err);
@@ -53,7 +51,8 @@ export const useAttendanceHistoryList = (
   companyId: string,
   employeeCode: string,
   startDate?: Date,
-  endDate?: Date
+  endDate?: Date,
+  entryType?: string
 ) => {
   const [attendanceHistoryList, setAttendanceHistoryList] = useState<IAttendanceHistory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,11 +66,12 @@ export const useAttendanceHistoryList = (
       sEmployeeCode: employeeCode,
       sFromDate: startDate?.toISOString().split('T')[0],
       sToDate: endDate?.toISOString().split('T')[0],
+      sEntryType: entryType,
     });
 
     axiosIns
       .post(API_CONSTANTS.ATTENDANCE.HISTORY_LIST, formData)
-      .then((response) => setAttendanceHistoryList(response?.data))
+      .then((response) => setAttendanceHistoryList(response?.data?.detailsList || []))
       .catch((err) => {
         console.log(err);
         setError(err.message);
