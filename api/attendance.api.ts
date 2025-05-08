@@ -10,6 +10,78 @@ type AttendanceData = {
   noOfEntry: string;
 };
 
+type AttendanceHistoryData = {
+  fromDate: string;
+  toDate: string;
+};
+
+export interface IAttendanceHistory {
+  entryNo: string;
+  entryDate: string;
+  entryTime: string;
+  exitTime: string;
+  location: string;
+  entryNote: string;
+  status: string;
+};
+
+export const useAttendanceHistoryInit = (companyId: string) => {
+  const [attendanceHistoryData, setAttendanceHistoryData] = useState<AttendanceHistoryData>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    axiosIns
+      .post(
+        API_CONSTANTS.ATTENDANCE.HISTORY_INIT,
+        makeFormData({ sCompanyID: companyId })
+      )
+      .then((response) => setAttendanceHistoryData(response?.data))
+      .catch((err) => {
+        console.log(err);
+        setError(err.message);
+      })
+      .finally(() => setIsLoading(false));
+  }, [companyId]);
+
+  return { attendanceHistoryData, isLoading, error };
+};
+
+export const useAttendanceHistoryList = (
+  userId: string,
+  sessionId: string,
+  companyId: string,
+  employeeCode: string,
+  startDate?: Date,
+  endDate?: Date
+) => {
+  const [attendanceHistoryList, setAttendanceHistoryList] = useState<IAttendanceHistory[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const formData = makeFormData({
+      sUserID: userId,
+      sSessionID: sessionId,
+      sCompanyID: companyId,
+      sEmployeeCode: employeeCode,
+      sFromDate: startDate?.toISOString().split('T')[0],
+      sToDate: endDate?.toISOString().split('T')[0],
+    });
+
+    axiosIns
+      .post(API_CONSTANTS.ATTENDANCE.HISTORY_LIST, formData)
+      .then((response) => setAttendanceHistoryList(response?.data))
+      .catch((err) => {
+        console.log(err);
+        setError(err.message);
+      })
+      .finally(() => setIsLoading(false));
+  }, [userId, sessionId, companyId, employeeCode, startDate, endDate]);
+
+  return { attendanceHistoryList, isLoading, error };
+};
+
 export const useAttendanceData = (companyId: string, employeeCode: string) => {
   const [attendanceData, setAttendanceData] = useState<AttendanceData>();
   const [isLoading, setIsLoading] = useState(true);

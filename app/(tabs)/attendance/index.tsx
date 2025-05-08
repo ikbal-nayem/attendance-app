@@ -155,7 +155,7 @@ export default function AttendanceScreen() {
           <Text style={styles.entryText}>Entry {Math.floor(entryNo / 2 + 1)}</Text>
         }
         rightContent={
-          <TouchableOpacity onPress={() => router.push('/enquiry/attendance-history')}>
+          <TouchableOpacity onPress={() => router.push('/(tabs)/attendance/history')}>
             <History color={Colors.light.background} />
           </TouchableOpacity>
         }

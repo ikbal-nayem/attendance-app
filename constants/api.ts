@@ -11,6 +11,8 @@ export const API_CONSTANTS = {
   ATTENDANCE: {
     INIT: '/AttendanceEntryService/firstLoad',
     SUBMIT: '/AttendanceEntryService/attendanceEntry',
+    HISTORY_INIT: '/EnquiryAttendanceService/firstLoad',
+    HISTORY_LIST: '/EnquiryAttendanceService/attendanceData',
   },
   ACTIVITY: {
     INIT: '/ActivityEntryService/firstLoad',

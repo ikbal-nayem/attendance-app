@@ -60,10 +60,7 @@ const header = (user: IUser, handleLogout: () => void) => (
         <Text style={styles.userName}>{user.userName}</Text>
       </View>
     </View>
-    <TouchableOpacity
-      style={styles.iconButton}
-      onPress={() => router.push('/notifications')}
-    >
+    <TouchableOpacity style={styles.iconButton} onPress={() => router.push('/notifications')}>
       <Bell size={26} color={Colors.light.text} />
     </TouchableOpacity>
   </View>
@@ -102,7 +99,9 @@ const userCard = (user: IUser) => (
   </LinearGradient>
 );
 
-const CheckinDuration = ({ checkInTime }: { checkInTime: Date }) => {
+const CheckinDuration = ({ checkInTime }: { checkInTime?: Date }) => {
+  if (!checkInTime) return '';
+
   const [duration, setDuration] = useState<IObject>(getDuration(checkInTime, new Date()));
 
   useEffect(() => {
@@ -205,11 +204,11 @@ export default function DashboardScreen() {
   }
 
   const checkIn = parseDate(user?.todayCheckIn);
-  const lastCheckinTime = checkIn.toLocaleTimeString('en-US', {
+  const lastCheckinTime = checkIn?.toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
   });
-  const lastCheckinDate = checkIn.toLocaleDateString('en-US', {
+  const lastCheckinDate = checkIn?.toLocaleDateString('en-US', {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
@@ -221,10 +220,7 @@ export default function DashboardScreen() {
       <AppStatusBar />
       {header(user, handleLogout)}
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <Animated.View style={{ opacity: fadeAnim }}>
           {userCard(user)}
 
@@ -244,11 +240,7 @@ export default function DashboardScreen() {
 
           <View style={styles.enquiryContainer}>
             {(params.screen === 'enquiry' ? menu2 : menu1).map((item, index) => (
-              <TouchableOpacity
-                style={styles.enquiryCard}
-                onPress={item.onPress}
-                key={item.name}
-              >
+              <TouchableOpacity style={styles.enquiryCard} onPress={item.onPress} key={item.name}>
                 <View style={styles.enquiryIconContainer}>{item.icon}</View>
                 <Text style={styles.enquiryTitle}>{item?.name}</Text>
               </TouchableOpacity>
@@ -257,10 +249,7 @@ export default function DashboardScreen() {
 
           {params.screen === 'enquiry' && (
             <TouchableOpacity onPress={() => router.setParams({ screen: 'home' })}>
-              <ChevronsLeft
-                style={{ alignSelf: 'center' }}
-                color={Colors.light.primary}
-              />
+              <ChevronsLeft style={{ alignSelf: 'center' }} color={Colors.light.primary} />
             </TouchableOpacity>
           )}
         </Animated.View>

@@ -4,13 +4,7 @@ import { Clock, Home, ListTodo, ScanSearch } from 'lucide-react-native';
 import React, { useEffect, useRef } from 'react';
 import { Animated } from 'react-native';
 
-const AnimatedIcon = ({
-  focused,
-  children,
-}: {
-  focused: boolean;
-  children: React.ReactNode;
-}) => {
+const AnimatedIcon = ({ focused, children }: { focused: boolean; children: React.ReactNode }) => {
   const scaleAnim = useRef(new Animated.Value(focused ? 1.2 : 1)).current;
 
   useEffect(() => {
@@ -21,11 +15,7 @@ const AnimatedIcon = ({
     }).start();
   }, [focused]);
 
-  return (
-    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-      {children}
-    </Animated.View>
-  );
+  return <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>{children}</Animated.View>;
 };
 
 export default function TabLayout() {
@@ -70,6 +60,7 @@ export default function TabLayout() {
               <Clock size={size * 1.1} color={color} />
             </AnimatedIcon>
           ),
+          href: '/(tabs)/attendance',
         }}
       />
       <Tabs.Screen
