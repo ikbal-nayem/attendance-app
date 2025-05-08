@@ -1,15 +1,9 @@
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { BlurView } from 'expo-blur';
-import { AlertTriangle, CheckCircle, Info, X } from 'lucide-react-native';
+import { AlertTriangle, CheckCircle, CircleX, Info, X } from 'lucide-react-native';
 import React, { useEffect } from 'react';
-import {
-  Platform,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -22,7 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 export interface ToastProps {
   isVisible: boolean;
   message: string;
-  type?: 'success' | 'error' | 'info';
+  type?: 'success' | 'error' | 'info' | 'warning';
   duration?: number;
   onHide: () => void;
 }
@@ -85,6 +79,8 @@ const Toast: React.FC<ToastProps> = ({
       ? Colors.dark.success
       : type === 'error'
       ? Colors.dark.error
+      : type === 'warning'
+      ? Colors.dark.warning
       : Colors.dark.info;
   const closeIconColor = Colors.dark.subtext;
 
@@ -93,6 +89,8 @@ const Toast: React.FC<ToastProps> = ({
       case 'success':
         return <CheckCircle color={iconColor} size={20} />;
       case 'error':
+        return <CircleX color={iconColor} size={20} />;
+      case 'warning':
         return <AlertTriangle color={iconColor} size={20} />;
       case 'info':
       default:

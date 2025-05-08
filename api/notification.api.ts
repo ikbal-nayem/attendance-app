@@ -138,7 +138,7 @@ export const useNotificationHistoryList = (
           sCompanyID: companyId,
           sUserID: userId,
           sSessionID: sessionId,
-          sEmployeeCode: "EM0002",
+          sEmployeeCode: employeeCode,
           sFromDate: generateRequestDate(sFromDate),
           sToDate: generateRequestDate(sToDate),
         })

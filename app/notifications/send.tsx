@@ -67,6 +67,7 @@ export default function SendNotificationScreen() {
   });
 
   const onSubmit = async (data: NotificationFormData) => {
+    setIsSubmitting(true)
     const reqData = {
       ...data,
       sUserID: user?.userID,

@@ -9,4 +9,21 @@ const axiosIns = axios.create({
   },
 });
 
+axiosIns.interceptors.response.use(
+  (res)=>{return res},
+  (error) => {
+    if(error.response) {
+      const { status, data } = error.response;
+      if (status === 401) {
+        // Handle unauthorized access
+        console.error('Unauthorized access:', data);
+      } else if (status === 500) {
+        // Handle server error
+        console.error('Server error:', data);
+        return Promise.reject(new Error('Server error, please try again later.'));
+      }
+    }
+  }
+)
+
 export { axiosIns };

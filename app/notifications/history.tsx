@@ -28,15 +28,6 @@ if (Platform.OS === 'android') {
   }
 }
 
-interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  date: Date;
-  read: boolean;
-  type?: string;
-}
-
 export const formatNotificationDateTime = (date: Date): string => {
   const now = new Date();
   const notificationDate = new Date(date);

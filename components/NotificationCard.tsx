@@ -1,9 +1,37 @@
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { parseDate } from '@/utils/date-time';
-import { Clock } from 'lucide-react-native';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+
+const formatNotificationDate = (dateString?: string): string => {
+  if (!dateString) return '';
+  const date = parseDate(dateString);
+  const now = new Date();
+
+  const timeOptions: Intl.DateTimeFormatOptions = {
+    hour: '2-digit',
+    minute: '2-digit',
+  };
+  const timeString = date.toLocaleTimeString('en-US', timeOptions);
+
+  const isToday =
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate();
+
+  if (isToday) {
+    return `Today, ${timeString}`;
+  } else {
+    const dateOptions: Intl.DateTimeFormatOptions = {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    };
+    const datePartString = date.toLocaleDateString('en-US', dateOptions);
+    return `${datePartString}, ${timeString}`;
+  }
+};
 
 interface NotificationCardProps {
   item: INotification;
@@ -23,27 +51,18 @@ export default function NotificationCard({ item, onPress, isUnread }: Notificati
         onPress={() => onPress(item)}
       >
         <View style={styles.notificationContent}>
-          <View style={styles.notificationHeader}>
-            <Text style={styles.notificationTitle} numberOfLines={1}>
-              {item?.messageTitle}
+          <View style={styles.topRow}>
+            <Text style={styles.fromText} numberOfLines={1}>
+              {item?.messageFrom || 'System'}
             </Text>
-            <View style={styles.unreadBadge} />
+            <Text style={styles.dateTimeText}>{formatNotificationDate(item?.referenceDate)}</Text>
           </View>
-          <Text style={styles.notificationMessage} numberOfLines={2}>
+          <Text style={styles.notificationTitle} numberOfLines={1}>
+            {item?.messageTitle}
+          </Text>
+          <Text style={styles.notificationMessage} numberOfLines={3}>
             {item?.messageDetails}
           </Text>
-          <View style={styles.notificationFooter}>
-            <Clock size={13} style={styles.timeIcon} />
-            <Text style={styles.notificationTime}>
-              {parseDate(item?.referenceDate).toLocaleString('en-US', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </Text>
-          </View>
         </View>
       </TouchableOpacity>
     </Animated.View>
@@ -55,11 +74,17 @@ const styles = StyleSheet.create({
     borderRadius: Layout.borderRadius.medium,
     marginBottom: Layout.spacing.m,
     marginHorizontal: Layout.spacing.m,
+    backgroundColor: Colors.light.card,
+    shadowColor: Colors.light.subtext,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   unreadNotification: {
     borderLeftWidth: 4,
     borderLeftColor: Colors.light.primary,
-    backgroundColor: `${Colors.light.primary}15`,
+    backgroundColor: `${Colors.light.primary}1A`,
   },
   notificationTouchable: {
     padding: Layout.spacing.m,
@@ -67,40 +92,35 @@ const styles = StyleSheet.create({
   notificationContent: {
     flex: 1,
   },
-  notificationHeader: {
+  topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: Layout.spacing.s,
+  },
+  fromText: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 13,
+    color: Colors.light.text,
+    flex: 1,
+    marginRight: Layout.spacing.s,
+  },
+  dateTimeText: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 12,
+    color: Colors.light.subtext,
+    textAlign: 'right',
   },
   notificationTitle: {
     fontFamily: 'Inter-SemiBold',
     fontSize: 16,
     color: Colors.light.text,
+    marginBottom: Layout.spacing.xs,
   },
   notificationMessage: {
     fontFamily: 'Inter-Regular',
     fontSize: 14,
     color: Colors.light.subtext,
-    marginBottom: Layout.spacing.s,
-  },
-  notificationFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  notificationTime: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 12,
-    color: Colors.light.subtext,
-  },
-  unreadBadge: {
-    backgroundColor: Colors.light.primary,
-    height: 8,
-    width: 8,
-    borderRadius: Layout.borderRadius.large,
-  },
-  timeIcon: {
-    marginRight: Layout.spacing.xs,
-    color: Colors.light.subtext,
+    lineHeight: 14 * 1.4,
   },
 });
