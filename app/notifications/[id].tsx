@@ -16,7 +16,6 @@ interface Attachment {
 }
 
 export default function NotificationDetailScreen() {
-  // const { id } = useLocalSearchParams<{ id: string }>();
   const notification = useLocalSearchParams<UnknownOutputParams & INotification>();
 
   const handleAttachmentPress = async (attachment: Attachment) => {
@@ -47,23 +46,26 @@ export default function NotificationDetailScreen() {
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
       <AppHeader
-        title="Notification Details"
+        title={notification.messageFrom}
         withBackButton={true}
         bg="primary"
         rightContent={<View style={{ width: 24 }} />}
       />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Card variant="outlined">
+        <Card>
           <Text style={styles.title}>{notification.messageTitle}</Text>
           <Text style={styles.date}>
-            {parseDate(notification?.referenceDate).toLocaleString('en-US', {
-              day: 'numeric',
-              month: 'short',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
+            {parseDate(notification?.messageDate || notification?.referenceDate)?.toLocaleString(
+              'en-US',
+              {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              }
+            )}
           </Text>
           <View style={styles.separator} />
           <Text style={styles.message}>{notification.messageDetails}</Text>

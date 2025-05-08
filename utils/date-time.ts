@@ -1,4 +1,5 @@
 export const parseDate = (dateString: string) => {
+  if(!dateString) return undefined;
   const [datePart, timePart] = dateString.split(' ');
   const [day, month, year] = datePart.split('/').map(Number);
   const [time, modifier] = timePart.split(' ');

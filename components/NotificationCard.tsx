@@ -2,11 +2,11 @@ import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { parseDate } from '@/utils/date-time';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import AnimatedRenderView from './AnimatedRenderView'; // Added import
 
 const formatNotificationDate = (dateString?: string): string => {
   if (!dateString) return '';
-  const date = parseDate(dateString);
+  const date = parseDate(dateString) || new Date();
   const now = new Date();
 
   const timeOptions: Intl.DateTimeFormatOptions = {
@@ -26,10 +26,10 @@ const formatNotificationDate = (dateString?: string): string => {
     const dateOptions: Intl.DateTimeFormatOptions = {
       day: 'numeric',
       month: 'short',
-      year: 'numeric',
+      // year: 'numeric',
     };
     const datePartString = date.toLocaleDateString('en-US', dateOptions);
-    return `${datePartString}, ${timeString}`;
+    return `${datePartString} | ${timeString}`;
   }
 };
 
@@ -37,13 +37,21 @@ interface NotificationCardProps {
   item: INotification;
   onPress: (item: INotification) => void;
   isUnread?: boolean;
+  index?: number; // Added index for staggered animation
 }
 
-export default function NotificationCard({ item, onPress, isUnread }: NotificationCardProps) {
+export default function NotificationCard({
+  item,
+  onPress,
+  isUnread,
+  index,
+}: NotificationCardProps) {
+  isUnread = isUnread ? isUnread : item?.messageStatus === 'Unread';
   return (
-    <Animated.View
-      entering={FadeIn.duration(300)}
+    <AnimatedRenderView
+      index={index} // Pass index to AnimatedRenderView
       style={[styles.notificationItem, isUnread && styles.unreadNotification]}
+      // entering prop is now handled by AnimatedRenderView
     >
       <TouchableOpacity
         activeOpacity={0.8}
@@ -53,9 +61,11 @@ export default function NotificationCard({ item, onPress, isUnread }: Notificati
         <View style={styles.notificationContent}>
           <View style={styles.topRow}>
             <Text style={styles.fromText} numberOfLines={1}>
-              {item?.messageFrom || 'System'}
+              {item?.messageFrom}
             </Text>
-            <Text style={styles.dateTimeText}>{formatNotificationDate(item?.referenceDate)}</Text>
+            <Text style={styles.dateTimeText}>
+              {formatNotificationDate(item?.messageDate || item?.referenceDate)}
+            </Text>
           </View>
           <Text style={styles.notificationTitle} numberOfLines={1}>
             {item?.messageTitle}
@@ -65,7 +75,7 @@ export default function NotificationCard({ item, onPress, isUnread }: Notificati
           </Text>
         </View>
       </TouchableOpacity>
-    </Animated.View>
+    </AnimatedRenderView>
   );
 }
 
@@ -101,7 +111,7 @@ const styles = StyleSheet.create({
   fromText: {
     fontFamily: 'Inter-Medium',
     fontSize: 13,
-    color: Colors.light.text,
+    color: Colors.light.primaryDark,
     flex: 1,
     marginRight: Layout.spacing.s,
   },

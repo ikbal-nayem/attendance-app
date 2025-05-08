@@ -1,4 +1,5 @@
 import { useNotificationHistoryInit, useNotificationHistoryList } from '@/api/notification.api';
+import { ErrorPreview } from '@/components/ErrorPreview';
 import AppHeader from '@/components/Header';
 import NotificationCard from '@/components/NotificationCard';
 import AppStatusBar from '@/components/StatusBar';
@@ -8,16 +9,16 @@ import { useAuth } from '@/context/AuthContext';
 import { parseRequestDate } from '@/utils/date-time';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
-import { CalendarDays, Filter } from 'lucide-react-native';
+import { CalendarDays, MoveHorizontal } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
   Platform,
-  Pressable,
   SafeAreaView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   UIManager,
   View,
 } from 'react-native';
@@ -72,7 +73,7 @@ export default function AllNotificationsScreen() {
   const { notificationHistoryData } = useNotificationHistoryInit(user?.companyID!);
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
-  const { notificationHistoryList, isLoading } = useNotificationHistoryList(
+  const { notificationHistoryList, isLoading, error } = useNotificationHistoryList(
     user?.userID!,
     user?.sessionID!,
     user?.companyID!,
@@ -108,10 +109,14 @@ export default function AllNotificationsScreen() {
     }
   };
 
-  const clearFilters = () => {
-    setStartDate(parseRequestDate(notificationHistoryData?.fromDate));
-    setEndDate(parseRequestDate(notificationHistoryData?.toDate));
-  };
+  // const clearFilters = () => {
+  //   setStartDate(parseRequestDate(notificationHistoryData?.fromDate));
+  //   setEndDate(parseRequestDate(notificationHistoryData?.toDate));
+  // };
+
+  if (error) {
+    return <ErrorPreview error={error} />;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -124,24 +129,33 @@ export default function AllNotificationsScreen() {
       />
 
       <View style={styles.filterContainer}>
-        <Pressable style={styles.dateButton} onPress={() => setShowDatePicker('start')}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={styles.dateButton}
+          onPress={() => setShowDatePicker('start')}
+        >
           <CalendarDays size={18} color={Colors.light.primary} />
           <Text style={styles.dateButtonText}>
             {startDate ? startDate.toLocaleDateString() : 'Start Date'}
           </Text>
-        </Pressable>
-        <Pressable style={styles.dateButton} onPress={() => setShowDatePicker('end')}>
+        </TouchableOpacity>
+        <MoveHorizontal color={Colors.light.text} />
+        <TouchableOpacity
+          activeOpacity={0.7}
+          style={styles.dateButton}
+          onPress={() => setShowDatePicker('end')}
+        >
           <CalendarDays size={18} color={Colors.light.primary} />
           <Text style={styles.dateButtonText}>
             {endDate ? endDate.toLocaleDateString() : 'End Date'}
           </Text>
-        </Pressable>
-        {(startDate || endDate) && (
+        </TouchableOpacity>
+        {/* {(startDate || endDate) && (
           <Pressable style={styles.clearFilterButton} onPress={clearFilters}>
             <Filter size={18} color={Colors.light.error} />
             <Text style={styles.clearFilterText}>Clear</Text>
           </Pressable>
-        )}
+        )} */}
       </View>
 
       {showDatePicker && (
@@ -168,7 +182,6 @@ export default function AllNotificationsScreen() {
             <NotificationCard item={item} onPress={handleNotificationPress} />
           )}
           keyExtractor={(item) => item.referenceNo}
-          contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
         />
       )}
@@ -236,46 +249,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.light.subtext,
     textAlign: 'center',
-  },
-  listContent: {
-    paddingHorizontal: Layout.spacing.l,
-    paddingBottom: Layout.spacing.l,
-  },
-  notificationItem: {
-    borderRadius: Layout.borderRadius.medium,
-    padding: Layout.spacing.m,
-    marginBottom: Layout.spacing.m,
-    backgroundColor: Colors.light.card, // Default background for items
-  },
-  unreadNotification: {
-    borderLeftWidth: 4,
-    borderLeftColor: Colors.light.primary,
-  },
-  notificationContent: {
-    flex: 1,
-  },
-  notificationTitle: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 16,
-    color: Colors.light.text,
-    marginBottom: Layout.spacing.xs,
-  },
-  notificationMessage: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 14,
-    color: Colors.light.subtext,
-    marginBottom: Layout.spacing.xs,
-  },
-  notificationTime: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 12,
-    color: Colors.light.subtext,
-  },
-  unreadIndicator: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: Colors.light.primary,
-    marginLeft: Layout.spacing.m,
   },
 });
