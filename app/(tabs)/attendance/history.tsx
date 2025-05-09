@@ -3,6 +3,8 @@ import {
   useAttendanceHistoryInit,
   useAttendanceHistoryList,
 } from '@/api/attendance.api';
+import AnimatedRenderView from '@/components/AnimatedRenderView';
+import Card from '@/components/Card';
 import { ErrorPreview } from '@/components/ErrorPreview';
 import AppHeader from '@/components/Header';
 import AppStatusBar from '@/components/StatusBar';
@@ -16,13 +18,14 @@ import {
   AlertTriangle,
   CalendarDays,
   CheckCircle,
+  ClockArrowDown,
+  ClockArrowUp,
   Edit3,
-  Hash,
   MapPin,
   MoveHorizontal,
   XCircle,
 } from 'lucide-react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -86,6 +89,75 @@ export default function AttendanceHistoryScreen() {
     }
   };
 
+  const renderItem = useCallback(
+    ({ item, index }: { item: IAttendanceHistory & { entryDate?: string }; index: number }) => {
+      let statusText = 'Pending';
+      let statusColor = Colors.light.warning;
+      let StatusIcon = AlertTriangle;
+
+      if (item.attendanceFlag === 'I') {
+        statusText = 'Check In';
+        statusColor = Colors.light.success;
+        StatusIcon = ClockArrowUp;
+      } else if (item.attendanceFlag === 'O') {
+        statusText = 'Check Out';
+        statusColor = Colors.light.error;
+        StatusIcon = ClockArrowDown;
+      }
+
+      // const serialNo = index + 1;
+
+      return (
+        <TouchableOpacity onPress={() => handleItemPress(item)} activeOpacity={0.8}>
+          <AnimatedRenderView index={index}>
+            <Card variant="outlined" style={styles.itemContainer}>
+              <View style={styles.cardHeader}>
+                <View style={styles.headerLeft}>
+                  <Text style={styles.entryTypeText} numberOfLines={1}>
+                    {item.entryType}
+                  </Text>
+                </View>
+                <View style={[styles.statusBadge, { backgroundColor: `${statusColor}20` }]}>
+                  <StatusIcon size={14} color={statusColor} />
+                  <Text style={[styles.statusText, { color: statusColor }]}>{statusText}</Text>
+                </View>
+              </View>
+
+              {/* Date and Entry No Row */}
+              {item.entryDate && (
+                <View style={styles.infoRow}>
+                  <View style={styles.infoItem}>
+                    <CalendarDays size={14} color={Colors.light.subtext} />
+                    <Text style={styles.infoText}>{item.entryDate}</Text>
+                  </View>
+                </View>
+              )}
+
+              {item.entryLocation && (
+                <View style={styles.detailRow}>
+                  <MapPin size={16} color={Colors.light.subtext} />
+                  <Text style={styles.detailText} numberOfLines={1}>
+                    {item.entryLocation}
+                  </Text>
+                </View>
+              )}
+
+              {item.attendanceNote && (
+                <View style={styles.detailRow}>
+                  <Edit3 size={16} color={Colors.light.subtext} />
+                  <Text style={styles.detailText} numberOfLines={2}>
+                    {item.attendanceNote}
+                  </Text>
+                </View>
+              )}
+            </Card>
+          </AnimatedRenderView>
+        </TouchableOpacity>
+      );
+    },
+    []
+  );
+
   if (error) {
     return <ErrorPreview error={error} />;
   }
@@ -146,83 +218,8 @@ export default function AttendanceHistoryScreen() {
       ) : (
         <FlatList
           data={attendanceHistoryList}
-          renderItem={({
-            item,
-            index,
-          }: {
-            item: IAttendanceHistory & { attendanceNote?: string; entryDate?: string };
-            index: number;
-          }) => {
-            let statusText = 'Pending';
-            let statusColor = Colors.light.warning;
-            let StatusIcon = AlertTriangle;
-
-            if (item.attendanceFlag === 'P') {
-              statusText = 'Present';
-              statusColor = Colors.light.success;
-              StatusIcon = CheckCircle;
-            } else if (item.attendanceFlag === 'A') {
-              statusText = 'Absent';
-              statusColor = Colors.light.error;
-              StatusIcon = XCircle;
-            }
-
-            const serialNo = index + 1;
-
-            return (
-              <TouchableOpacity
-                style={styles.itemContainer}
-                onPress={() => handleItemPress(item)}
-                activeOpacity={0.8}
-              >
-                <View style={styles.cardHeader}>
-                  <View style={styles.headerLeft}>
-                    <Text style={styles.serialNoText}>{serialNo}.</Text>
-                    <Text style={styles.entryTypeText} numberOfLines={1}>
-                      {item.entryType || 'N/A'}
-                    </Text>
-                  </View>
-                  {/* <View style={[styles.statusBadge, { backgroundColor: `${statusColor}20` }]}>
-                    <StatusIcon size={14} color={statusColor} />
-                    <Text style={[styles.statusText, { color: statusColor }]}>{statusText}</Text>
-                  </View> */}
-                </View>
-
-                {/* Date and Entry No Row */}
-                <View style={styles.infoRow}>
-                  {item.entryDate && (
-                    <View style={styles.infoItem}>
-                      <CalendarDays size={14} color={Colors.light.subtext} />
-                      <Text style={styles.infoText}>{item.entryDate}</Text>
-                    </View>
-                  )}
-                  <View style={styles.infoItem}>
-                    <Hash size={14} color={Colors.light.subtext} />
-                    <Text style={styles.infoText}>#{item.entryNo}</Text>
-                  </View>
-                </View>
-
-                {item.entryLocation && (
-                  <View style={styles.detailRow}>
-                    <MapPin size={16} color={Colors.light.subtext} />
-                    <Text style={styles.detailText} numberOfLines={1}>
-                      {item.entryLocation}
-                    </Text>
-                  </View>
-                )}
-
-                {item.attendanceNote && (
-                  <View style={styles.detailRow}>
-                    <Edit3 size={16} color={Colors.light.subtext} />
-                    <Text style={styles.detailText} numberOfLines={2}>
-                      {item.attendanceNote}
-                    </Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-            );
-          }}
-          keyExtractor={(item) => item.entryNo.toString()}
+          renderItem={renderItem}
+          keyExtractor={(item, idx) => item?.entryNo + idx}
           showsVerticalScrollIndicator={false}
         />
       )}
@@ -278,13 +275,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   itemContainer: {
-    backgroundColor: Colors.light.card,
-    borderRadius: Layout.borderRadius.large, // Increased border radius
     padding: Layout.spacing.m,
     marginHorizontal: Layout.spacing.m,
-    marginBottom: Layout.spacing.m, // Increased margin bottom
-    borderWidth: 1,
-    borderColor: Colors.light.border,
+    marginBottom: Layout.spacing.s,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -295,8 +288,8 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    flex: 1, // Allow it to take available space
-    marginRight: Layout.spacing.s, // Space before status badge
+    flex: 1,
+    marginRight: Layout.spacing.s,
   },
   serialNoText: {
     fontFamily: 'Inter-Medium',
@@ -308,12 +301,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-SemiBold',
     fontSize: 16,
     color: Colors.light.primary,
-    flexShrink: 1, // Allow text to shrink if headerLeft is constrained
+    flexShrink: 1,
   },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: Layout.spacing.xs / 1.5, // Slightly adjusted padding
+    paddingVertical: Layout.spacing.xs / 1.5,
     paddingHorizontal: Layout.spacing.s,
     borderRadius: Layout.borderRadius.large,
   },
@@ -324,17 +317,17 @@ const styles = StyleSheet.create({
   },
   infoRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between', // This will push items to ends if only two
+    justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: Layout.spacing.s,
     marginBottom: Layout.spacing.xs,
-    flexWrap: 'wrap', // Allow wrapping if items don't fit
+    flexWrap: 'wrap',
   },
   infoItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: Layout.spacing.m, // Space between info items
-    marginBottom: Layout.spacing.xs, // Space if they wrap
+    marginRight: Layout.spacing.m,
+    marginBottom: Layout.spacing.xs,
   },
   infoText: {
     fontFamily: 'Inter-Regular',

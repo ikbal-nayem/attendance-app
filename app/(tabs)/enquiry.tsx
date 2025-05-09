@@ -26,7 +26,7 @@ export default function EnquiryScreen() {
       id: 'attendance',
       title: 'Clock-in/Clock-out History',
       icon: <ListChecks size={24} color="#2980B9" />,
-      route: '/enquiry/attendance-history',
+      route: '/(tabs)/attendance/history',
     },
     {
       id: 'geolocation',

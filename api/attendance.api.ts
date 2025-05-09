@@ -13,6 +13,7 @@ type AttendanceData = {
 type AttendanceHistoryData = {
   fromDate: string;
   toDate: string;
+  entryTypeList: { code: string; name: string }[];
 };
 
 export interface IAttendanceHistory {
@@ -23,7 +24,7 @@ export interface IAttendanceHistory {
   entryLocation: string;
   entryNo: string;
   entryType: string;
-  entryTime: string;
+  entryDate: string;
 }
 
 export const useAttendanceHistoryInit = (companyId: string) => {
