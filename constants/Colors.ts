@@ -5,12 +5,12 @@ const tintColorDark = '#0A84FF'; // Lighter Blue for Dark Mode
 
 export default {
   light: {
-    primary: '#04696d', // Vibrant Blue
-    primaryLight: '#C4E6E7', // Lighter shade for hover/active states if needed
-    primaryDark: '#035156', // Darker shade if needed
-    secondary: '#FF9500', // Orange
-    secondaryLight: '#FFB340',
-    secondaryDark: '#CC7A00',
+    primary: '#0096c7', // Vibrant Blue
+    primaryLight: '#caf0f8', // Lighter shade for hover/active states if needed
+    primaryDark: '#023e8a', // Darker shade if needed
+    secondary: '#d264b6', // Orange
+    secondaryLight: '#a480cf',
+    secondaryDark: '#ff499e',
     accent: '#34C759', // Green
     accentLight: '#6EE089',
     accentDark: '#248A3D',

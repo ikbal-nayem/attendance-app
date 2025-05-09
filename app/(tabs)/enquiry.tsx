@@ -20,7 +20,7 @@ export default function EnquiryScreen() {
       id: 'activities',
       title: 'Daily Activities',
       icon: <Layers size={24} color="#8E44AD" />,
-      route: '/enquiry/activities',
+      route: '/(tabs)/activity/history',
     },
     {
       id: 'attendance',
