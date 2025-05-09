@@ -45,7 +45,7 @@ const popoverContent = (handleLogout: () => void) => (
 );
 
 const header = (user: IUser, handleLogout: () => void) => (
-  <View style={styles.header}>
+  <LinearGradient colors={['#0096c7', '#00b4d8']} style={styles.header}>
     <View style={styles.userInfo}>
       <Popover content={popoverContent(handleLogout)}>
         <Image
@@ -62,7 +62,7 @@ const header = (user: IUser, handleLogout: () => void) => (
     <TouchableOpacity style={styles.iconButton} onPress={() => router.push('/notifications')}>
       <Bell size={26} color={Colors.light.text} />
     </TouchableOpacity>
-  </View>
+  </LinearGradient>
 );
 
 const userCard = (user: IUser) => (
@@ -272,7 +272,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Layout.spacing.m,
     paddingTop: Layout.spacing.s,
-    paddingBottom: Layout.spacing.m,
+    paddingBottom: Layout.spacing.s,
+    backgroundColor: Colors.light.primary,
+    borderBottomLeftRadius: Layout.borderRadius.xl,
+    borderBottomRightRadius: Layout.borderRadius.xl,
   },
   userInfo: {
     flexDirection: 'row',
@@ -286,15 +289,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.light.tint + '50',
   },
+  userName: {
+    fontSize: 18,
+    fontFamily: 'Inter-SemiBold',
+    color: Colors.dark.text,
+  },
   userId: {
     fontSize: 14,
     fontFamily: 'Inter-Regular',
     color: Colors.light.subtext,
-  },
-  userName: {
-    fontSize: 18,
-    fontFamily: 'Inter-SemiBold',
-    color: Colors.light.text,
   },
   iconButton: {
     padding: Layout.spacing.s,
@@ -303,14 +306,14 @@ const styles = StyleSheet.create({
     borderRadius: Layout.borderRadius.large,
     marginBottom: Layout.spacing.l,
     padding: Layout.spacing.m,
-    ...Layout.shadow.medium, // Add shadow for depth
+    ...Layout.shadow.medium,
   },
   profileCardContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   profileDetails: {
-    flex: 1, // Take available space
+    flex: 1,
     marginRight: Layout.spacing.m,
   },
   userRole: {
@@ -322,7 +325,7 @@ const styles = StyleSheet.create({
   userDepartment: {
     fontSize: 18,
     fontFamily: 'Inter-SemiBold',
-    color: Colors.light.primary, // Use primary color
+    color: Colors.light.primary,
     marginBottom: Layout.spacing.s,
   },
   detailText: {

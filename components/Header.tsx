@@ -1,5 +1,6 @@
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useEffect } from 'react';
@@ -65,7 +66,8 @@ const AppHeader = ({
 }: HeaderProps) => {
   return (
     <FadeInView duration={300}>
-      <View
+      <LinearGradient
+        colors={['#0096c7', '#00b4d8']}
         style={[
           styles.headerWrapStyle,
           bg === 'primary' ? styles.primaryHeaderWrapper : styles.defaultHeaderWrapper,
@@ -85,15 +87,12 @@ const AppHeader = ({
           {leftContent}
         </View>
         <View style={styles.centerView}>
-          <Text
-            numberOfLines={1}
-            style={[styles.text, bg === 'primary' && styles.textWithPrimary]}
-          >
+          <Text numberOfLines={1} style={[styles.text, bg === 'primary' && styles.textWithPrimary]}>
             {title}
           </Text>
         </View>
         <View style={styles.rightView}>{rightContent}</View>
-      </View>
+      </LinearGradient>
     </FadeInView>
   );
 };
@@ -108,8 +107,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: Layout.spacing.m,
     paddingVertical: Layout.spacing.m,
     zIndex: 100,
-    borderEndEndRadius: Layout.borderRadius.xl,
-    borderStartEndRadius: Layout.borderRadius.xl,
+    borderBottomLeftRadius: Layout.borderRadius.xl,
+    borderBottomRightRadius: Layout.borderRadius.xl,
   },
   defaultHeaderWrapper: {
     backgroundColor: Colors.light.card,

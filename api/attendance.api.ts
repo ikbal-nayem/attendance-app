@@ -78,7 +78,7 @@ export const useAttendanceHistoryList = (
         setError(err.message);
       })
       .finally(() => setIsLoading(false));
-  }, [userId, sessionId, companyId, employeeCode, startDate, endDate]);
+  }, [userId, sessionId, companyId, employeeCode, startDate, endDate, entryType]);
 
   return { attendanceHistoryList, isLoading, error };
 };

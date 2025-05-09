@@ -1,63 +1,45 @@
-import { IAttendanceHistory } from '@/api/attendance.api'; // Assuming params match this
+import { IAttendanceHistory } from '@/api/attendance.api';
 import AppHeader from '@/components/Header';
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
+import { parseDate } from '@/utils/date-time';
 import { useLocalSearchParams } from 'expo-router';
 import {
   AlertTriangle,
   Briefcase,
-  CheckCircle,
-  Hash,
+  ClockArrowDown,
+  ClockArrowUp,
   MapPin,
   Tag,
-  User,
-  XCircle,
 } from 'lucide-react-native';
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function AttendanceDetailScreen() {
-  const params =
-    useLocalSearchParams<
-      Partial<
-        IAttendanceHistory & {
-          entryDate: string;
-          entryTime: string;
-          exitTime: string;
-          status: string;
-          location: string;
-          entryNote: string;
-        }
-      >
-    >(); // Use Partial for safety, as not all fields from IAttendanceHistory might be passed or some old fields might still be there.
+  const params = useLocalSearchParams<Partial<IAttendanceHistory>>();
 
-  let statusText = 'Pending';
+  let statusText = '';
   let statusColor = Colors.light.warning;
   let StatusIcon = AlertTriangle;
 
-  // Interpret attendanceFlag from params
-  if (params.attendanceFlag === 'P') {
-    statusText = 'Present';
+  if (params.attendanceFlag === 'I') {
+    statusText =
+      'In ' +
+      parseDate(params?.entryTime!)?.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
     statusColor = Colors.light.success;
-    StatusIcon = CheckCircle;
-  } else if (params.attendanceFlag === 'A') {
-    statusText = 'Absent';
+    StatusIcon = ClockArrowUp;
+  } else if (params.attendanceFlag === 'O') {
+    statusText =
+      'Out ' +
+      parseDate(params?.entryTime!)?.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
     statusColor = Colors.light.error;
-    StatusIcon = XCircle;
-  }
-  // For older params structure if still being passed (fallback)
-  else if (params.status) {
-    if (params.status === 'Present') {
-      statusText = 'Present';
-      statusColor = Colors.light.success;
-      StatusIcon = CheckCircle;
-    } else if (params.status === 'Absent') {
-      statusText = 'Absent';
-      statusColor = Colors.light.error;
-      StatusIcon = XCircle;
-    } else {
-      statusText = params.status; // Use the status directly if it's something else like 'Late'
-    }
+    StatusIcon = ClockArrowDown;
   }
 
   const DetailItem = ({
@@ -81,15 +63,26 @@ export default function AttendanceDetailScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <AppStatusBar />
-      <AppHeader title="Attendance Details" bg="primary" withBackButton />
+      <AppHeader
+        title="Attendance Details"
+        bg="primary"
+        withBackButton
+        rightContent={<View style={{ width: 24 }} />}
+      />
       <ScrollView style={styles.container} contentContainerStyle={styles.scrollContentContainer}>
         <View style={styles.card}>
           <View style={styles.headerSection}>
             <Briefcase size={36} color={Colors.light.primary} />
             <View style={styles.headerTextContainer}>
               <Text style={styles.entryType}>{params.entryType || 'N/A'}</Text>
-              {params.entryDate && (
-                <Text style={styles.entryDateText}>Date: {params.entryDate}</Text>
+              {params.entryTime && (
+                <Text style={styles.entryDateText}>
+                  {parseDate(params?.entryTime)?.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+                </Text>
               )}
             </View>
             <View style={[styles.statusBadge, { backgroundColor: `${statusColor}20` }]}>
@@ -98,21 +91,11 @@ export default function AttendanceDetailScreen() {
             </View>
           </View>
 
-          <DetailItem
-            icon={MapPin}
-            label="Location"
-            value={params.entryLocation || params.location}
-          />
-          <DetailItem icon={Hash} label="Entry No." value={params.entryNo} />
+          <DetailItem icon={MapPin} label="Location" value={params.entryLocation} />
 
-          {params.entryTime && (
-            <DetailItem icon={Tag} label="Check In Time" value={params.entryTime} />
+          {params.attendanceNote && (
+            <DetailItem icon={Tag} label="Note" value={params.attendanceNote} />
           )}
-          {params.exitTime && (
-            <DetailItem icon={Tag} label="Check Out Time" value={params.exitTime} />
-          )}
-          {params.entryNote && <DetailItem icon={Tag} label="Note" value={params.entryNote} />}
-
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -122,7 +105,6 @@ export default function AttendanceDetailScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.light.background,
   },
   container: {
     flex: 1,

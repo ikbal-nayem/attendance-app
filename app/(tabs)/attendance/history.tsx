@@ -21,7 +21,6 @@ import {
   ClockArrowDown,
   ClockArrowUp,
   Edit3,
-  Filter,
   MapPin,
   MoveHorizontal,
 } from 'lucide-react-native';
@@ -34,28 +33,17 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  UIManager,
   View,
 } from 'react-native';
-
-if (Platform.OS === 'android') {
-  if (UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-  }
-}
 
 export default function AttendanceHistoryScreen() {
   const { user } = useAuth();
   const { attendanceHistoryData } = useAttendanceHistoryInit(user?.companyID!);
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
-  const [selectedAttendanceType, setSelectedAttendanceType] = useState<string | undefined>(undefined);
-
-  const attendanceTypes = [
-    { label: 'All Types', value: undefined },
-    { label: 'Day Off', value: 'O' },
-    { label: 'Work Day', value: 'W' },
-  ];
+  const [selectedAttendanceType, setSelectedAttendanceType] = useState<string | undefined>(
+    undefined
+  );
 
   const { attendanceHistoryList, isLoading, error } = useAttendanceHistoryList(
     user?.userID!,
@@ -99,7 +87,7 @@ export default function AttendanceHistoryScreen() {
   };
 
   const renderItem = useCallback(({ item, index }: { item: IAttendanceHistory; index: number }) => {
-    let statusText = 'Pending';
+    let statusText = '';
     let statusColor = Colors.light.warning;
     let StatusIcon = AlertTriangle;
 
@@ -113,15 +101,20 @@ export default function AttendanceHistoryScreen() {
       statusColor = Colors.light.success;
       StatusIcon = ClockArrowUp;
     } else if (item.attendanceFlag === 'O') {
-      statusText = 'Check Out';
+      statusText =
+        'Out ' +
+        parseDate(item?.entryTime!)?.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+        });
       statusColor = Colors.light.error;
       StatusIcon = ClockArrowDown;
     }
 
     return (
-      <TouchableOpacity onPress={() => handleItemPress(item)} activeOpacity={0.8}>
-        <AnimatedRenderView index={index}>
-          <Card variant='outlined' style={styles.itemContainer}>
+      <AnimatedRenderView index={index}>
+        <TouchableOpacity onPress={() => handleItemPress(item)} activeOpacity={0.8}>
+          <Card variant="outlined" style={styles.itemContainer}>
             <View style={styles.cardHeader}>
               <View style={styles.headerLeft}>
                 <CalendarDays size={15} color={Colors.light.primary} />
@@ -160,8 +153,8 @@ export default function AttendanceHistoryScreen() {
               </View>
             )}
           </Card>
-        </AnimatedRenderView>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      </AnimatedRenderView>
     );
   }, []);
 
@@ -202,7 +195,7 @@ export default function AttendanceHistoryScreen() {
           </Text>
         </TouchableOpacity>
         <Select
-          options={attendanceTypes}
+          options={attendanceHistoryData?.entryTypeList || []}
           keyProp="code"
           valueProp="name"
           value={selectedAttendanceType}
@@ -251,7 +244,7 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between', // Changed from space-around
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: Layout.spacing.s,
     paddingHorizontal: Layout.spacing.s,
@@ -267,14 +260,13 @@ const styles = StyleSheet.create({
   },
   dateButton: {
     flexDirection: 'row',
-    // flex: 1, // Allow buttons to take available space
-    justifyContent: 'center', // Center content in button
+    justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: Layout.spacing.s,
-    paddingHorizontal: Layout.spacing.m,
+    paddingHorizontal: Layout.spacing.s,
     backgroundColor: Colors.light.card,
     borderRadius: Layout.borderRadius.medium,
-    marginHorizontal: Layout.spacing.xs, // Add some margin between elements
+    marginHorizontal: Layout.spacing.xs,
   },
   dateButtonText: {
     fontFamily: 'Inter-Medium',
@@ -349,13 +341,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   selectFilterContainer: {
-    marginHorizontal: Layout.spacing.xs, // Add some margin
-    marginBottom: 0, // Override default marginBottom from Select component
+    flex: 1,
+    marginHorizontal: Layout.spacing.xs,
+    marginBottom: 0,
   },
   selectFilter: {
-    height: Layout.inputHeight - Layout.spacing.s, // Adjust height to match date buttons (approx)
-    paddingVertical: 0, // Adjust padding
+    height: Layout.inputHeight - Layout.spacing.m,
+    paddingVertical: 0,
     paddingHorizontal: Layout.spacing.s,
-    borderRadius: Layout.borderRadius.medium, // Match date buttons
+    borderRadius: Layout.borderRadius.medium,
+    borderWidth: 0,
   },
 });
