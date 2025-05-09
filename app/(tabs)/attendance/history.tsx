@@ -11,19 +11,17 @@ import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
-import { parseRequestDate } from '@/utils/date-time';
+import { parseDate, parseRequestDate } from '@/utils/date-time';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import {
   AlertTriangle,
   CalendarDays,
-  CheckCircle,
   ClockArrowDown,
   ClockArrowUp,
   Edit3,
   MapPin,
   MoveHorizontal,
-  XCircle,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -89,74 +87,72 @@ export default function AttendanceHistoryScreen() {
     }
   };
 
-  const renderItem = useCallback(
-    ({ item, index }: { item: IAttendanceHistory & { entryDate?: string }; index: number }) => {
-      let statusText = 'Pending';
-      let statusColor = Colors.light.warning;
-      let StatusIcon = AlertTriangle;
+  const renderItem = useCallback(({ item, index }: { item: IAttendanceHistory; index: number }) => {
+    let statusText = 'Pending';
+    let statusColor = Colors.light.warning;
+    let StatusIcon = AlertTriangle;
 
-      if (item.attendanceFlag === 'I') {
-        statusText = 'Check In';
-        statusColor = Colors.light.success;
-        StatusIcon = ClockArrowUp;
-      } else if (item.attendanceFlag === 'O') {
-        statusText = 'Check Out';
-        statusColor = Colors.light.error;
-        StatusIcon = ClockArrowDown;
-      }
+    if (item.attendanceFlag === 'I') {
+      statusText =
+        'In ' +
+        parseDate(item.entryTime)?.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+      statusColor = Colors.light.success;
+      StatusIcon = ClockArrowUp;
+    } else if (item.attendanceFlag === 'O') {
+      statusText = 'Check Out';
+      statusColor = Colors.light.error;
+      StatusIcon = ClockArrowDown;
+    }
 
-      // const serialNo = index + 1;
-
-      return (
-        <TouchableOpacity onPress={() => handleItemPress(item)} activeOpacity={0.8}>
-          <AnimatedRenderView index={index}>
-            <Card variant="outlined" style={styles.itemContainer}>
-              <View style={styles.cardHeader}>
-                <View style={styles.headerLeft}>
-                  <Text style={styles.entryTypeText} numberOfLines={1}>
-                    {item.entryType}
-                  </Text>
-                </View>
-                <View style={[styles.statusBadge, { backgroundColor: `${statusColor}20` }]}>
-                  <StatusIcon size={14} color={statusColor} />
-                  <Text style={[styles.statusText, { color: statusColor }]}>{statusText}</Text>
-                </View>
+    return (
+      <TouchableOpacity onPress={() => handleItemPress(item)} activeOpacity={0.8}>
+        <AnimatedRenderView index={index}>
+          <Card style={styles.itemContainer}>
+            <View style={styles.cardHeader}>
+              <View style={styles.headerLeft}>
+                <CalendarDays size={15} color={Colors.light.primary} />
+                <Text style={styles.entryTypeText}>
+                  {parseDate(item.entryTime)?.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })}
+                </Text>
+                <Text style={styles.infoText} numberOfLines={1}>
+                  ({item.entryType})
+                </Text>
               </View>
+              <View style={[styles.statusBadge, { backgroundColor: `${statusColor}20` }]}>
+                <StatusIcon size={14} color={statusColor} />
+                <Text style={[styles.statusText, { color: statusColor }]}>{statusText}</Text>
+              </View>
+            </View>
 
-              {/* Date and Entry No Row */}
-              {item.entryDate && (
-                <View style={styles.infoRow}>
-                  <View style={styles.infoItem}>
-                    <CalendarDays size={14} color={Colors.light.subtext} />
-                    <Text style={styles.infoText}>{item.entryDate}</Text>
-                  </View>
-                </View>
-              )}
+            {item.attendanceNote && (
+              <View style={styles.detailRow}>
+                <Edit3 size={16} color={Colors.light.subtext} />
+                <Text style={styles.detailText} numberOfLines={2}>
+                  {item.attendanceNote}
+                </Text>
+              </View>
+            )}
 
-              {item.entryLocation && (
-                <View style={styles.detailRow}>
-                  <MapPin size={16} color={Colors.light.subtext} />
-                  <Text style={styles.detailText} numberOfLines={1}>
-                    {item.entryLocation}
-                  </Text>
-                </View>
-              )}
-
-              {item.attendanceNote && (
-                <View style={styles.detailRow}>
-                  <Edit3 size={16} color={Colors.light.subtext} />
-                  <Text style={styles.detailText} numberOfLines={2}>
-                    {item.attendanceNote}
-                  </Text>
-                </View>
-              )}
-            </Card>
-          </AnimatedRenderView>
-        </TouchableOpacity>
-      );
-    },
-    []
-  );
+            {item.entryLocation && (
+              <View style={styles.detailRow}>
+                <MapPin size={16} color={Colors.light.subtext} />
+                <Text style={styles.detailText} numberOfLines={1}>
+                  {item.entryLocation}
+                </Text>
+              </View>
+            )}
+          </Card>
+        </AnimatedRenderView>
+      </TouchableOpacity>
+    );
+  }, []);
 
   if (error) {
     return <ErrorPreview error={error} />;
@@ -288,18 +284,13 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: Layout.spacing.xs,
     flex: 1,
     marginRight: Layout.spacing.s,
   },
-  serialNoText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 15,
-    color: Colors.light.subtext,
-    marginRight: Layout.spacing.xs,
-  },
   entryTypeText: {
     fontFamily: 'Inter-SemiBold',
-    fontSize: 16,
+    fontSize: 15,
     color: Colors.light.primary,
     flexShrink: 1,
   },
@@ -314,20 +305,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Medium',
     fontSize: 12,
     marginLeft: Layout.spacing.xs / 2,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: Layout.spacing.s,
-    marginBottom: Layout.spacing.xs,
-    flexWrap: 'wrap',
-  },
-  infoItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: Layout.spacing.m,
-    marginBottom: Layout.spacing.xs,
   },
   infoText: {
     fontFamily: 'Inter-Regular',

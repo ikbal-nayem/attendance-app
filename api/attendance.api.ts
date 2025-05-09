@@ -24,7 +24,7 @@ export interface IAttendanceHistory {
   entryLocation: string;
   entryNo: string;
   entryType: string;
-  entryDate: string;
+  entryTime: string;
 }
 
 export const useAttendanceHistoryInit = (companyId: string) => {
