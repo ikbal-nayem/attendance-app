@@ -27,6 +27,42 @@ export interface IAttendanceHistory {
   entryTime: string;
 }
 
+export const useAttendanceData = (companyId: string, employeeCode: string) => {
+  const [attendanceData, setAttendanceData] = useState<AttendanceData>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    axiosIns
+      .post(
+        API_CONSTANTS.ATTENDANCE.INIT,
+        makeFormData({ sCompanyID: companyId, sEmployeeCode: employeeCode })
+      )
+      .then((response) => setAttendanceData(response.data))
+      .catch((err) => {
+        console.log(err);
+        setError(err.message);
+      })
+      .finally(() => setIsLoading(false));
+  }, [companyId]);
+
+  return { attendanceData, isLoading, error };
+};
+
+export const submitAttendance = async (data: FormData) => {
+  try {
+    const req = await axiosIns.post(API_CONSTANTS.ATTENDANCE.SUBMIT, data);
+    console.log(req.data);
+    if (req.data?.messageCode === '0') {
+      return { success: true, data: req.data };
+    }
+    return { success: false, message: req.data?.messageDesc };
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};
+
 export const useAttendanceHistoryInit = (companyId: string) => {
   const [attendanceHistoryData, setAttendanceHistoryData] = useState<AttendanceHistoryData>();
   const [isLoading, setIsLoading] = useState(true);
@@ -81,40 +117,4 @@ export const useAttendanceHistoryList = (
   }, [userId, sessionId, companyId, employeeCode, startDate, endDate, entryType]);
 
   return { attendanceHistoryList, isLoading, error };
-};
-
-export const useAttendanceData = (companyId: string, employeeCode: string) => {
-  const [attendanceData, setAttendanceData] = useState<AttendanceData>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    axiosIns
-      .post(
-        API_CONSTANTS.ATTENDANCE.INIT,
-        makeFormData({ sCompanyID: companyId, sEmployeeCode: employeeCode })
-      )
-      .then((response) => setAttendanceData(response.data))
-      .catch((err) => {
-        console.log(err);
-        setError(err.message);
-      })
-      .finally(() => setIsLoading(false));
-  }, [companyId]);
-
-  return { attendanceData, isLoading, error };
-};
-
-export const submitAttendance = async (data: FormData) => {
-  try {
-    const req = await axiosIns.post(API_CONSTANTS.ATTENDANCE.SUBMIT, data);
-    console.log(req.data);
-    if (req.data?.messageCode === '0') {
-      return { success: true, data: req.data };
-    }
-    return { success: false, message: req.data?.messageDesc };
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
 };

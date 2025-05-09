@@ -15,7 +15,7 @@ export default {
     accentLight: '#6EE089',
     accentDark: '#248A3D',
     success: '#34C759', // Green
-    warning: '#FFCC00', // Yellow
+    warning: '#ff8d00', // Yellow
     error: '#FF3B30', // Red
     info: '#007AFF', // Vibrant Blue (Using primary for info)
     text: '#1C1C1E', // Almost Black

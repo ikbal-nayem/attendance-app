@@ -2,20 +2,22 @@ import { API_CONSTANTS } from '@/constants/api';
 import { makeFormData } from '@/utils/form-actions';
 import { useEffect, useState } from 'react';
 import { axiosIns } from './config';
+
 export interface IActivityHistory {
-  id?: string; // Assuming an ID field
-  entryDate?: string;
-  entryTime?: string;
-  exitTime?: string;
-  status?: string;
-  location?: string;
-  description?: string;
-  activityType?: string;
-  activityNo?: string;
-  activityFlag?: string; // e.g., 'C' for Completed, 'I' for Incomplete
-  title?: string; // A general title for the activity
-  remarks?: string;
-  // Add any other fields that are relevant for activity history
+  companyID: string;
+  companyName: string;
+  serialNo: string;
+  sessionID: string;
+  userID: string;
+  userName: string;
+  attachmentFile01: [];
+  attendanceFlag: string;
+  employeeCode: string;
+  employeeName: string;
+  entryLocation: string;
+  entryNo: string;
+  entryTime: string;
+  entryType: string;
 }
 
 type ActivityData = {
@@ -25,6 +27,8 @@ type ActivityData = {
   territoryList: { code: string; name: string }[];
   imagePhoto: Array<any>;
   noOfEntry: string;
+  fromDate: string;
+  toDate: string;
 };
 
 export const useActivityData = (companyId: string) => {
@@ -58,4 +62,74 @@ export const submitActivity = async (data: FormData) => {
     console.error(err);
     throw err;
   }
+};
+
+export const useActivityHistoryInit = (companyId: string) => {
+  const [activityData, setActivityData] = useState<ActivityData>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    axiosIns
+      .post(API_CONSTANTS.ACTIVITY.HISTORY_INIT, makeFormData({ sCompanyID: companyId }))
+      .then((response) => setActivityData(response.data))
+      .catch((err) => {
+        console.log(err);
+        setError(err.message);
+      })
+      .finally(() => setIsLoading(false));
+  }, [companyId]);
+
+  return { activityData, isLoading, error };
+};
+
+export const useActivityHistoryList = (
+  userId: string,
+  sessionId: string,
+  companyId?: string,
+  employeeCode?: string,
+  startDate?: Date,
+  endDate?: Date,
+  activityType?: string,
+  client?: string,
+  territory?: string
+) => {
+  const [activityHistoryList, setActivityHistoryList] = useState<[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const formData = makeFormData({
+      sUserID: userId,
+      sSessionID: sessionId,
+      sCompanyID: companyId,
+      sEmployeeCode: employeeCode,
+      sFromDate: startDate?.toISOString().split('T')[0],
+      sToDate: endDate?.toISOString().split('T')[0],
+      sActivityType: activityType,
+      sClient: client,
+      sTerritory: territory,
+    });
+
+    axiosIns
+      .post(API_CONSTANTS.ATTENDANCE.HISTORY_LIST, formData)
+      .then((response) => setActivityHistoryList(response?.data?.detailsList || []))
+      .catch((err) => {
+        console.log(err);
+        setError(err.message);
+      })
+      .finally(() => setIsLoading(false));
+  }, [
+    userId,
+    sessionId,
+    companyId,
+    employeeCode,
+    startDate,
+    endDate,
+    activityType,
+    client,
+    territory,
+  ]);
+
+  return { activityHistoryList, isLoading, error };
 };

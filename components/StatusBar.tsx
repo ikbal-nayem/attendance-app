@@ -1,14 +1,18 @@
-import {SafeAreaView, StatusBar} from 'react-native';
-import React from 'react';
 import Colors from '@/constants/Colors';
+import React from 'react';
+import { SafeAreaView, StatusBar } from 'react-native';
 
-const AppStatusBar = () => {
+const AppStatusBar = ({ bgColor }: { bgColor?: 'primary' | 'default' }) => {
   return (
-    <SafeAreaView style={{backgroundColor: Colors.light.primary}}>
+    <SafeAreaView
+      style={{
+        backgroundColor: bgColor === 'default' ? Colors.light.inputBackground : Colors.light.primary,
+      }}
+    >
       <StatusBar
         translucent={false}
-        backgroundColor={Colors.light.primary}
-        barStyle={'light-content'}
+        backgroundColor={bgColor === 'default' ? Colors.light.inputBackground : Colors.light.primary}
+        barStyle={bgColor === 'default'? 'dark-content' : 'light-content'}
       />
     </SafeAreaView>
   );

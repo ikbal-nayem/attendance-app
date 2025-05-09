@@ -1,6 +1,12 @@
-import { IActivityHistory, useActivityData } from '@/api/activity.api';
+import {
+  IActivityHistory,
+  useActivityHistoryInit,
+  useActivityHistoryList,
+} from '@/api/activity.api';
 import AnimatedRenderView from '@/components/AnimatedRenderView';
+import Button from '@/components/Button';
 import Card from '@/components/Card';
+import Drawer from '@/components/Drawer'; // Import the new Drawer component
 import { ErrorPreview } from '@/components/ErrorPreview';
 import AppHeader from '@/components/Header';
 import Select from '@/components/Select';
@@ -8,157 +14,160 @@ import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
-import { parseDate, parseRequestDate } from '@/utils/date-time';
+import { parseRequestDate } from '@/utils/date-time';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import {
   Activity as ActivityIcon,
   AlertTriangle,
   CalendarDays,
-  CheckCircle, // For completed status
-  Edit3,
+  CheckCircle,
+  Clock,
+  Filter,
+  FilterIcon,
   MapPin,
-  MoveHorizontal, // Using Activity icon
+  MoveHorizontal,
+  User,
   XCircle,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import {
   ActivityIndicator,
   FlatList,
   Platform,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  UIManager,
   View,
 } from 'react-native';
 
-if (Platform.OS === 'android') {
-  if (UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-  }
+interface FilterFormInputs {
+  activityType: string;
+  client: string;
+  territory: string;
 }
 
-// Placeholder for actual activity history list fetching hook
-const useActivityHistoryList = (
-  userId: string,
-  sessionId: string,
-  companyId: string,
-  // employeeCode: string, // May not be relevant for all activities
-  startDate?: Date,
-  endDate?: Date,
-  selectedActivityType?: string
-): {
-  activityHistoryList: IActivityHistory[] | undefined;
-  isLoading: boolean;
-  error: string | null;
-} => {
-  const [list, setList] = useState<IActivityHistory[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState<string | null>(null);
+const FilterComponent = ({ control, onFilterSubmit, clearFilters, onClose, activityData }: any) => (
+  <View style={styles.drawerContentContainer}>
+    <ScrollView showsVerticalScrollIndicator={false}>
+      <Text style={styles.drawerTitle}>Filter</Text>
 
-  useEffect(() => {
-    setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      // Mock data - replace with actual API fetching logic
-      const mockData: IActivityHistory[] = [
-        {
-          id: '1',
-          activityNo: 'ACT001',
-          title: 'Client Meeting',
-          entryDate: '2023-10-26',
-          entryTime: '2023-10-26T10:00:00Z',
-          activityType: 'Meeting',
-          status: 'Completed',
-          activityFlag: 'C',
-          location: 'Client Office',
-          description: 'Discuss project proposal.',
-        },
-        {
-          id: '2',
-          activityNo: 'ACT002',
-          title: 'Site Visit',
-          entryDate: '2023-10-25',
-          entryTime: '2023-10-25T14:30:00Z',
-          activityType: 'Visit',
-          status: 'Incomplete',
-          activityFlag: 'I',
-          location: 'Construction Site X',
-          description: 'Check progress.',
-        },
-      ];
-      // Filter mock data based on dates and type for demonstration
-      let filteredData = mockData;
-      if (startDate && endDate) {
-        filteredData = mockData.filter((item) => {
-          const itemDate = item.entryDate ? new Date(item.entryDate) : new Date();
-          return itemDate >= startDate && itemDate <= endDate;
-        });
-      }
-      if (selectedActivityType) {
-        filteredData = filteredData.filter((item) => item.activityType === selectedActivityType);
-      }
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Activity Type</Text>
+        <Controller
+          control={control}
+          name="activityType"
+          render={({ field: { onChange, value } }) => (
+            <Select
+              options={activityData?.activityTypeList || []}
+              keyProp="code"
+              valueProp="name"
+              value={value}
+              onChange={(val: string) => onChange(val)}
+              placeholder="Select Activity Type"
+            />
+          )}
+        />
+      </View>
 
-      setList(filteredData);
-      setLoading(false);
-      // setErr("Failed to load data"); // Uncomment to test error state
-    }, 1000);
-  }, [startDate, endDate, selectedActivityType]);
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Client</Text>
+        <Controller
+          control={control}
+          name="client"
+          render={({ field: { onChange, value } }) => (
+            <Select
+              options={activityData?.clientList || []}
+              keyProp="code"
+              valueProp="name"
+              value={value}
+              onChange={(val: string) => onChange(val)}
+              placeholder="Select Client"
+            />
+          )}
+        />
+      </View>
 
-  return { activityHistoryList: list, isLoading: loading, error: err };
-};
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Territory</Text>
+        <Controller
+          control={control}
+          name="territory"
+          render={({ field: { onChange, value } }) => (
+            <Select
+              options={activityData?.territoryList || []}
+              keyProp="code"
+              valueProp="name"
+              value={value}
+              onChange={(val: string) => onChange(val)}
+              placeholder="Select Territory"
+            />
+          )}
+        />
+      </View>
+
+      <View style={styles.filterButtonGroup}>
+        <Button size="small" title="Clear Filters" onPress={clearFilters} variant="outline" />
+        <Button
+          size="small"
+          title="Apply Filters"
+          onPress={onFilterSubmit}
+          icon={<FilterIcon color={Colors.light.background} size={14} />}
+          iconPosition="right"
+        />
+      </View>
+      <Button
+        title="Close Drawer"
+        onPress={onClose}
+        variant="ghost"
+        textStyle={{ color: Colors.light.warning }}
+        style={styles.closeButton}
+      />
+    </ScrollView>
+  </View>
+);
 
 export default function ActivityHistoryScreen() {
   const { user } = useAuth();
-  const { activityData: initialActivityData } = useActivityData(user?.companyID!);
+  const { activityData } = useActivityHistoryInit(user?.companyID!);
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
-  const [selectedActivityType, setSelectedActivityType] = useState<string | undefined>(undefined);
+  const [isFilterDrawerVisible, setIsFilterDrawerVisible] = useState(false);
+  const [selectedActivityType, setSelectedActivityType] = useState<string | undefined>();
+  const [selectedClient, setSelectedClient] = useState<string | undefined>();
+  const [selectedTerritory, setSelectedTerritory] = useState<string | undefined>();
 
-  // Placeholder for activity types - fetch or define these as needed
-  const activityTypes = [
-    { label: 'All Types', value: undefined },
-    { label: 'Meeting', value: 'Meeting' },
-    { label: 'Visit', value: 'Visit' },
-    { label: 'Task', value: 'Task' },
-  ];
+  const { control, handleSubmit, reset } = useForm<FilterFormInputs>({
+    defaultValues: { activityType: '', client: '', territory: '' },
+  });
 
   const { activityHistoryList, isLoading, error } = useActivityHistoryList(
     user?.userID!,
     user?.sessionID!,
-    user?.companyID!,
+    user?.companyID,
+    user?.employeeCode,
     startDate,
     endDate,
-    selectedActivityType
+    selectedActivityType,
+    selectedClient,
+    selectedTerritory
   );
   const [showDatePicker, setShowDatePicker] = useState<'start' | 'end' | null>(null);
 
   useEffect(() => {
-    // Assuming initialActivityData might provide default date ranges
-    // Adjust if the structure of initialActivityData is different
-    if (
-      initialActivityData &&
-      (initialActivityData as any).fromDate &&
-      (initialActivityData as any).toDate
-    ) {
-      setStartDate(parseRequestDate((initialActivityData as any).fromDate));
-      setEndDate(parseRequestDate((initialActivityData as any).toDate));
-    } else {
-      // Default to a range if not provided, e.g., last 7 days
-      const today = new Date();
-      const lastWeek = new Date();
-      lastWeek.setDate(today.getDate() - 7);
-      setStartDate(lastWeek);
-      setEndDate(today);
+    if (activityData?.fromDate && activityData?.toDate) {
+      setStartDate(parseRequestDate(activityData.fromDate));
+      setEndDate(parseRequestDate(activityData.toDate));
     }
-  }, [initialActivityData]);
+  }, [activityData]);
 
   const handleItemPress = (item: IActivityHistory) => {
     router.push({
       pathname: '/(tabs)/activity/[id]',
-      params: { id: item?.activityNo!, ...item },
+      params: { id: item?.entryNo!, ...item },
     });
   };
 
@@ -177,82 +186,94 @@ export default function ActivityHistoryScreen() {
     }
   };
 
-  const renderItem = useCallback(({ item, index }: { item: IActivityHistory; index: number }) => {
-    let statusText = item.status || 'Pending';
-    let statusColor = Colors.light.warning;
-    let StatusIconComponent = AlertTriangle;
+  const onFilterSubmit = (data: FilterFormInputs) => {
+    setSelectedActivityType(data.activityType || undefined);
+    setSelectedClient(data.client || undefined);
+    setSelectedTerritory(data.territory || undefined);
+    setIsFilterDrawerVisible(false);
+  };
 
-    if (item.activityFlag === 'C') {
-      statusText = 'Completed';
-      statusColor = Colors.light.success;
-      StatusIconComponent = CheckCircle;
-    } else if (item.activityFlag === 'I') {
-      statusText = 'Incomplete';
-      statusColor = Colors.light.error;
-      StatusIconComponent = XCircle;
-    } else if (item.status) {
-      // Fallback to status string
-      if (item.status.toLowerCase() === 'completed') {
+  const clearFilters = () => {
+    reset({ activityType: '', client: '', territory: '' });
+    setSelectedActivityType(undefined);
+    setSelectedClient(undefined);
+    setSelectedTerritory(undefined);
+    // setIsFilterDrawerVisible(false); // Optionally close drawer on clear
+  };
+
+  const renderItem = useCallback(
+    ({ item, index }: { item: IActivityHistory; index: number }) => {
+      let statusText = 'Pending'; // Default status
+      let statusColor = Colors.light.warning;
+      let StatusIconComponent = AlertTriangle;
+
+      // Use attendanceFlag for status, assuming 'C' for Completed, 'A' for Absent/Incomplete
+      // Adjust these flags based on actual API behavior for activities if different from attendance
+      if (item.attendanceFlag === 'C') {
+        // Assuming 'C' means completed for activity context too
         statusText = 'Completed';
         statusColor = Colors.light.success;
         StatusIconComponent = CheckCircle;
-      } else if (
-        item.status.toLowerCase() === 'incomplete' ||
-        item.status.toLowerCase() === 'skipped'
-      ) {
+      } else if (item.attendanceFlag === 'A' || item.attendanceFlag === 'I') {
+        // Assuming 'A' or 'I' means Incomplete
         statusText = 'Incomplete';
         statusColor = Colors.light.error;
         StatusIconComponent = XCircle;
       }
-    }
+      // If there are other flags or no flag, it remains 'Pending'
 
-    return (
-      <TouchableOpacity onPress={() => handleItemPress(item)} activeOpacity={0.8}>
-        <AnimatedRenderView index={index}>
-          <Card variant="outlined" style={styles.itemContainer}>
-            <View style={styles.cardHeader}>
-              <View style={styles.headerLeft}>
-                <ActivityIcon size={16} color={Colors.light.primary} />
-                <Text style={styles.entryTypeText} numberOfLines={1}>
-                  {item.title || item.activityType || 'Activity'}
-                </Text>
-                {/* {item.entryDate && (
-                  <Text style={styles.infoText} numberOfLines={1}>
-                    {parseDate(item.entryDate)?.toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                    })}
+      return (
+        <TouchableOpacity onPress={() => handleItemPress(item)} activeOpacity={0.8}>
+          <AnimatedRenderView index={index}>
+            <Card variant="outlined" style={styles.itemContainer}>
+              <View style={styles.cardHeader}>
+                <View style={styles.headerLeft}>
+                  <ActivityIcon size={18} color={Colors.light.primary} />
+                  <Text style={styles.entryTypeText} numberOfLines={1}>
+                    {item.entryType || 'Activity'}
                   </Text>
-                )} */}
+                </View>
+                <View style={[styles.statusBadge, { backgroundColor: `${statusColor}20` }]}>
+                  <StatusIconComponent size={14} color={statusColor} />
+                  <Text style={[styles.statusText, { color: statusColor }]}>{statusText}</Text>
+                </View>
               </View>
-              <View style={[styles.statusBadge, { backgroundColor: `${statusColor}20` }]}>
-                <StatusIconComponent size={14} color={statusColor} />
-                <Text style={[styles.statusText, { color: statusColor }]}>{statusText}</Text>
-              </View>
-            </View>
 
-            {item.description && (
-              <View style={styles.detailRow}>
-                <Edit3 size={16} color={Colors.light.subtext} />
-                <Text style={styles.detailText} numberOfLines={2}>
-                  {item.description}
-                </Text>
-              </View>
-            )}
+              {item.employeeName && (
+                <View style={styles.detailRow}>
+                  <User size={16} color={Colors.light.subtext} />
+                  <Text style={styles.detailText} numberOfLines={1}>
+                    {item.employeeName} ({item.userID})
+                  </Text>
+                </View>
+              )}
 
-            {item.location && (
-              <View style={styles.detailRow}>
-                <MapPin size={16} color={Colors.light.subtext} />
-                <Text style={styles.detailText} numberOfLines={1}>
-                  {item.location}
-                </Text>
-              </View>
-            )}
-          </Card>
-        </AnimatedRenderView>
-      </TouchableOpacity>
-    );
-  }, []);
+              {item.entryTime && (
+                <View style={styles.detailRow}>
+                  <Clock size={16} color={Colors.light.subtext} />
+                  <Text style={styles.detailText} numberOfLines={1}>
+                    {new Date(item.entryTime).toLocaleString()} {/* Basic time formatting */}
+                  </Text>
+                </View>
+              )}
+
+              {/* item.description is not in IActivityHistory, so it's removed */}
+
+              {item.entryLocation && (
+                <View style={styles.detailRow}>
+                  <MapPin size={16} color={Colors.light.subtext} />
+                  <Text style={styles.detailText} numberOfLines={1}>
+                    {item.entryLocation}
+                  </Text>
+                </View>
+              )}
+            </Card>
+          </AnimatedRenderView>
+        </TouchableOpacity>
+      );
+    },
+    [] // Add dependencies if any are used from outside, e.g., handleItemPress
+  );
 
   if (error) {
     return <ErrorPreview error={error} />;
@@ -262,10 +283,19 @@ export default function ActivityHistoryScreen() {
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
       <AppHeader
-        title="Activity History" // Changed title
+        title="Activity History"
         withBackButton={true}
         bg="primary"
-        rightContent={<View style={{ width: 24 }} />}
+        rightContent={
+          <TouchableOpacity
+            onPress={() => {
+              setIsFilterDrawerVisible(true);
+            }}
+            style={styles.filterIconContainer}
+          >
+            <Filter size={24} color={Colors.dark.text} />
+          </TouchableOpacity>
+        }
       />
 
       <View style={styles.filterContainer}>
@@ -290,16 +320,6 @@ export default function ActivityHistoryScreen() {
             {endDate ? endDate.toLocaleDateString() : 'End Date'}
           </Text>
         </TouchableOpacity>
-        <Select
-          options={activityTypes} // Changed to activityTypes
-          keyProp="value" // Assuming value is the key
-          valueProp="label" // Assuming label is for display
-          value={selectedActivityType}
-          onChange={(itemValue: string) => setSelectedActivityType(itemValue || undefined)}
-          placeholder="Type"
-          containerStyle={styles.selectFilterContainer}
-          selectStyle={styles.selectFilter}
-        />
       </View>
 
       {showDatePicker && (
@@ -325,11 +345,21 @@ export default function ActivityHistoryScreen() {
         <FlatList
           data={activityHistoryList}
           renderItem={renderItem}
-          keyExtractor={(item, idx) => (item?.activityNo || item?.id || 'activity') + idx} // Changed key
+          keyExtractor={(item, idx) => (item?.entryNo || 'activity') + idx} // Use entryNo
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: Layout.spacing.l }}
         />
       )}
+
+      <Drawer isOpen={isFilterDrawerVisible} onClose={() => setIsFilterDrawerVisible(false)}>
+        <FilterComponent
+          activityData={activityData}
+          onFilterSubmit={handleSubmit(onFilterSubmit)}
+          onClose={() => setIsFilterDrawerVisible(false)}
+          clearFilters={clearFilters}
+          control={control}
+        />
+      </Drawer>
     </SafeAreaView>
   );
 }
@@ -337,7 +367,9 @@ export default function ActivityHistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.background,
+  },
+  filterIconContainer: {
+    padding: Layout.spacing.s,
   },
   filterContainer: {
     flexDirection: 'row',
@@ -354,6 +386,11 @@ const styles = StyleSheet.create({
     marginBottom: Layout.spacing.m,
     marginTop: -Layout.borderRadius.large,
     paddingTop: Layout.spacing.l,
+  },
+  filterButtonGroup: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   dateButton: {
     flexDirection: 'row',
@@ -397,14 +434,13 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Layout.spacing.s, // Adjusted gap
+    gap: Layout.spacing.s,
     flex: 1,
     marginRight: Layout.spacing.s,
   },
   entryTypeText: {
-    // Reused style name, content is different
     fontFamily: 'Inter-SemiBold',
-    fontSize: 15,
+    fontSize: 16, // Increased size
     color: Colors.light.primary,
     flexShrink: 1,
   },
@@ -420,33 +456,41 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginLeft: Layout.spacing.xs / 2,
   },
-  infoText: {
-    // Reused style name
-    fontFamily: 'Inter-Regular',
-    fontSize: 13,
-    color: Colors.light.subtext,
-    // marginLeft: Layout.spacing.xs, // Removed to use gap in headerLeft
-  },
   detailRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center', // Changed to center for better alignment with icons
     marginTop: Layout.spacing.s,
+    gap: Layout.spacing.s, // Added gap for icon and text
   },
   detailText: {
     fontFamily: 'Inter-Regular',
-    fontSize: 13,
+    fontSize: 14, // Increased size
     color: Colors.light.text,
-    marginLeft: Layout.spacing.s,
     flex: 1,
   },
-  selectFilterContainer: {
-    marginHorizontal: Layout.spacing.xs,
-    marginBottom: 0,
+  drawerContentContainer: {
+    flex: 1, // Ensure it takes up available space in the drawer
+    paddingHorizontal: Layout.spacing.m,
+    paddingBottom: Layout.spacing.xl, // For safe area or button spacing
   },
-  selectFilter: {
-    height: Layout.inputHeight - Layout.spacing.s,
-    paddingVertical: 0,
-    paddingHorizontal: Layout.spacing.s,
-    borderRadius: Layout.borderRadius.medium,
+  drawerTitle: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 20,
+    color: Colors.light.text,
+    marginBottom: Layout.spacing.l,
+    textAlign: 'center',
+  },
+  inputGroup: {
+    marginBottom: Layout.spacing.m,
+  },
+  label: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    color: Colors.light.subtext,
+    marginBottom: Layout.spacing.xs,
+  },
+  closeButton: {
+    marginTop: Layout.spacing.s,
+    marginBottom: Layout.spacing.m,
   },
 });
