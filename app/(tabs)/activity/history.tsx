@@ -1,8 +1,4 @@
-import {
-  IAttendanceHistory,
-  useAttendanceHistoryInit,
-  useAttendanceHistoryList,
-} from '@/api/attendance.api';
+import { IActivityHistory, useActivityData } from '@/api/activity.api';
 import AnimatedRenderView from '@/components/AnimatedRenderView';
 import Card from '@/components/Card';
 import { ErrorPreview } from '@/components/ErrorPreview';
@@ -16,14 +12,14 @@ import { parseDate, parseRequestDate } from '@/utils/date-time';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import {
+  Activity as ActivityIcon,
   AlertTriangle,
   CalendarDays,
-  ClockArrowDown,
-  ClockArrowUp,
+  CheckCircle, // For completed status
   Edit3,
-  Filter,
   MapPin,
-  MoveHorizontal,
+  MoveHorizontal, // Using Activity icon
+  XCircle,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -44,41 +40,125 @@ if (Platform.OS === 'android') {
   }
 }
 
-export default function AttendanceHistoryScreen() {
+// Placeholder for actual activity history list fetching hook
+const useActivityHistoryList = (
+  userId: string,
+  sessionId: string,
+  companyId: string,
+  // employeeCode: string, // May not be relevant for all activities
+  startDate?: Date,
+  endDate?: Date,
+  selectedActivityType?: string
+): {
+  activityHistoryList: IActivityHistory[] | undefined;
+  isLoading: boolean;
+  error: string | null;
+} => {
+  const [list, setList] = useState<IActivityHistory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      // Mock data - replace with actual API fetching logic
+      const mockData: IActivityHistory[] = [
+        {
+          id: '1',
+          activityNo: 'ACT001',
+          title: 'Client Meeting',
+          entryDate: '2023-10-26',
+          entryTime: '2023-10-26T10:00:00Z',
+          activityType: 'Meeting',
+          status: 'Completed',
+          activityFlag: 'C',
+          location: 'Client Office',
+          description: 'Discuss project proposal.',
+        },
+        {
+          id: '2',
+          activityNo: 'ACT002',
+          title: 'Site Visit',
+          entryDate: '2023-10-25',
+          entryTime: '2023-10-25T14:30:00Z',
+          activityType: 'Visit',
+          status: 'Incomplete',
+          activityFlag: 'I',
+          location: 'Construction Site X',
+          description: 'Check progress.',
+        },
+      ];
+      // Filter mock data based on dates and type for demonstration
+      let filteredData = mockData;
+      if (startDate && endDate) {
+        filteredData = mockData.filter((item) => {
+          const itemDate = item.entryDate ? new Date(item.entryDate) : new Date();
+          return itemDate >= startDate && itemDate <= endDate;
+        });
+      }
+      if (selectedActivityType) {
+        filteredData = filteredData.filter((item) => item.activityType === selectedActivityType);
+      }
+
+      setList(filteredData);
+      setLoading(false);
+      // setErr("Failed to load data"); // Uncomment to test error state
+    }, 1000);
+  }, [startDate, endDate, selectedActivityType]);
+
+  return { activityHistoryList: list, isLoading: loading, error: err };
+};
+
+export default function ActivityHistoryScreen() {
   const { user } = useAuth();
-  const { attendanceHistoryData } = useAttendanceHistoryInit(user?.companyID!);
+  const { activityData: initialActivityData } = useActivityData(user?.companyID!);
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
-  const [selectedAttendanceType, setSelectedAttendanceType] = useState<string | undefined>(undefined);
+  const [selectedActivityType, setSelectedActivityType] = useState<string | undefined>(undefined);
 
-  const attendanceTypes = [
+  // Placeholder for activity types - fetch or define these as needed
+  const activityTypes = [
     { label: 'All Types', value: undefined },
-    { label: 'Day Off', value: 'O' },
-    { label: 'Work Day', value: 'W' },
+    { label: 'Meeting', value: 'Meeting' },
+    { label: 'Visit', value: 'Visit' },
+    { label: 'Task', value: 'Task' },
   ];
 
-  const { attendanceHistoryList, isLoading, error } = useAttendanceHistoryList(
+  const { activityHistoryList, isLoading, error } = useActivityHistoryList(
     user?.userID!,
     user?.sessionID!,
     user?.companyID!,
-    user?.employeeCode!,
     startDate,
     endDate,
-    selectedAttendanceType
+    selectedActivityType
   );
   const [showDatePicker, setShowDatePicker] = useState<'start' | 'end' | null>(null);
 
   useEffect(() => {
-    if (attendanceHistoryData) {
-      setStartDate(parseRequestDate(attendanceHistoryData.fromDate));
-      setEndDate(parseRequestDate(attendanceHistoryData.toDate));
+    // Assuming initialActivityData might provide default date ranges
+    // Adjust if the structure of initialActivityData is different
+    if (
+      initialActivityData &&
+      (initialActivityData as any).fromDate &&
+      (initialActivityData as any).toDate
+    ) {
+      setStartDate(parseRequestDate((initialActivityData as any).fromDate));
+      setEndDate(parseRequestDate((initialActivityData as any).toDate));
+    } else {
+      // Default to a range if not provided, e.g., last 7 days
+      const today = new Date();
+      const lastWeek = new Date();
+      lastWeek.setDate(today.getDate() - 7);
+      setStartDate(lastWeek);
+      setEndDate(today);
     }
-  }, [attendanceHistoryData]);
+  }, [initialActivityData]);
 
-  const handleItemPress = (item: IAttendanceHistory) => {
+  const handleItemPress = (item: IActivityHistory) => {
     router.push({
-      pathname: '/(tabs)/attendance/[id]',
-      params: { id: item?.entryNo, ...item },
+      pathname: '/(tabs)/activity/[id]',
+      params: { id: item?.activityNo!, ...item },
     });
   };
 
@@ -90,7 +170,6 @@ export default function AttendanceHistoryScreen() {
         setStartDate(currentDate);
         if (endDate && currentDate > endDate) {
           setEndDate(currentDate);
-          attendanceHistoryData;
         }
       } else if (showDatePicker === 'end') {
         setEndDate(currentDate);
@@ -98,64 +177,74 @@ export default function AttendanceHistoryScreen() {
     }
   };
 
-  const renderItem = useCallback(({ item, index }: { item: IAttendanceHistory; index: number }) => {
-    let statusText = 'Pending';
+  const renderItem = useCallback(({ item, index }: { item: IActivityHistory; index: number }) => {
+    let statusText = item.status || 'Pending';
     let statusColor = Colors.light.warning;
-    let StatusIcon = AlertTriangle;
+    let StatusIconComponent = AlertTriangle;
 
-    if (item.attendanceFlag === 'I') {
-      statusText =
-        'In ' +
-        parseDate(item.entryTime)?.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-        });
+    if (item.activityFlag === 'C') {
+      statusText = 'Completed';
       statusColor = Colors.light.success;
-      StatusIcon = ClockArrowUp;
-    } else if (item.attendanceFlag === 'O') {
-      statusText = 'Check Out';
+      StatusIconComponent = CheckCircle;
+    } else if (item.activityFlag === 'I') {
+      statusText = 'Incomplete';
       statusColor = Colors.light.error;
-      StatusIcon = ClockArrowDown;
+      StatusIconComponent = XCircle;
+    } else if (item.status) {
+      // Fallback to status string
+      if (item.status.toLowerCase() === 'completed') {
+        statusText = 'Completed';
+        statusColor = Colors.light.success;
+        StatusIconComponent = CheckCircle;
+      } else if (
+        item.status.toLowerCase() === 'incomplete' ||
+        item.status.toLowerCase() === 'skipped'
+      ) {
+        statusText = 'Incomplete';
+        statusColor = Colors.light.error;
+        StatusIconComponent = XCircle;
+      }
     }
 
     return (
       <TouchableOpacity onPress={() => handleItemPress(item)} activeOpacity={0.8}>
         <AnimatedRenderView index={index}>
-          <Card variant='outlined' style={styles.itemContainer}>
+          <Card variant="outlined" style={styles.itemContainer}>
             <View style={styles.cardHeader}>
               <View style={styles.headerLeft}>
-                <CalendarDays size={15} color={Colors.light.primary} />
-                <Text style={styles.entryTypeText}>
-                  {parseDate(item.entryTime)?.toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })}
+                <ActivityIcon size={16} color={Colors.light.primary} />
+                <Text style={styles.entryTypeText} numberOfLines={1}>
+                  {item.title || item.activityType || 'Activity'}
                 </Text>
-                <Text style={styles.infoText} numberOfLines={1}>
-                  ({item.entryType})
-                </Text>
+                {/* {item.entryDate && (
+                  <Text style={styles.infoText} numberOfLines={1}>
+                    {parseDate(item.entryDate)?.toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </Text>
+                )} */}
               </View>
               <View style={[styles.statusBadge, { backgroundColor: `${statusColor}20` }]}>
-                <StatusIcon size={14} color={statusColor} />
+                <StatusIconComponent size={14} color={statusColor} />
                 <Text style={[styles.statusText, { color: statusColor }]}>{statusText}</Text>
               </View>
             </View>
 
-            {item.attendanceNote && (
+            {item.description && (
               <View style={styles.detailRow}>
                 <Edit3 size={16} color={Colors.light.subtext} />
                 <Text style={styles.detailText} numberOfLines={2}>
-                  {item.attendanceNote}
+                  {item.description}
                 </Text>
               </View>
             )}
 
-            {item.entryLocation && (
+            {item.location && (
               <View style={styles.detailRow}>
                 <MapPin size={16} color={Colors.light.subtext} />
                 <Text style={styles.detailText} numberOfLines={1}>
-                  {item.entryLocation}
+                  {item.location}
                 </Text>
               </View>
             )}
@@ -173,7 +262,7 @@ export default function AttendanceHistoryScreen() {
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
       <AppHeader
-        title="Attendance History"
+        title="Activity History" // Changed title
         withBackButton={true}
         bg="primary"
         rightContent={<View style={{ width: 24 }} />}
@@ -202,11 +291,11 @@ export default function AttendanceHistoryScreen() {
           </Text>
         </TouchableOpacity>
         <Select
-          options={attendanceTypes}
-          keyProp="code"
-          valueProp="name"
-          value={selectedAttendanceType}
-          onChange={(itemValue: string) => setSelectedAttendanceType(itemValue || undefined)}
+          options={activityTypes} // Changed to activityTypes
+          keyProp="value" // Assuming value is the key
+          valueProp="label" // Assuming label is for display
+          value={selectedActivityType}
+          onChange={(itemValue: string) => setSelectedActivityType(itemValue || undefined)}
           placeholder="Type"
           containerStyle={styles.selectFilterContainer}
           selectStyle={styles.selectFilter}
@@ -219,25 +308,26 @@ export default function AttendanceHistoryScreen() {
           mode="date"
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={onDateChange}
-          maximumDate={new Date()}
+          maximumDate={new Date()} // Can be adjusted based on requirements
           minimumDate={showDatePicker === 'end' && startDate ? startDate : undefined}
         />
       )}
 
       {isLoading ? (
         <ActivityIndicator color={Colors.light.primary} style={{ flex: 1 }} size="large" />
-      ) : attendanceHistoryList?.length === 0 ? (
+      ) : activityHistoryList?.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyMessage}>
-            No attendance records found for the selected period.
+            No activity records found for the selected period. {/* Changed message */}
           </Text>
         </View>
       ) : (
         <FlatList
-          data={attendanceHistoryList}
+          data={activityHistoryList}
           renderItem={renderItem}
-          keyExtractor={(item, idx) => item?.entryNo + idx}
+          keyExtractor={(item, idx) => (item?.activityNo || item?.id || 'activity') + idx} // Changed key
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: Layout.spacing.l }}
         />
       )}
     </SafeAreaView>
@@ -251,7 +341,7 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between', // Changed from space-around
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: Layout.spacing.s,
     paddingHorizontal: Layout.spacing.s,
@@ -267,14 +357,13 @@ const styles = StyleSheet.create({
   },
   dateButton: {
     flexDirection: 'row',
-    // flex: 1, // Allow buttons to take available space
-    justifyContent: 'center', // Center content in button
+    justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: Layout.spacing.s,
     paddingHorizontal: Layout.spacing.m,
     backgroundColor: Colors.light.card,
     borderRadius: Layout.borderRadius.medium,
-    marginHorizontal: Layout.spacing.xs, // Add some margin between elements
+    marginHorizontal: Layout.spacing.xs,
   },
   dateButtonText: {
     fontFamily: 'Inter-Medium',
@@ -308,11 +397,12 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Layout.spacing.xs,
+    gap: Layout.spacing.s, // Adjusted gap
     flex: 1,
     marginRight: Layout.spacing.s,
   },
   entryTypeText: {
+    // Reused style name, content is different
     fontFamily: 'Inter-SemiBold',
     fontSize: 15,
     color: Colors.light.primary,
@@ -331,10 +421,11 @@ const styles = StyleSheet.create({
     marginLeft: Layout.spacing.xs / 2,
   },
   infoText: {
+    // Reused style name
     fontFamily: 'Inter-Regular',
     fontSize: 13,
     color: Colors.light.subtext,
-    marginLeft: Layout.spacing.xs,
+    // marginLeft: Layout.spacing.xs, // Removed to use gap in headerLeft
   },
   detailRow: {
     flexDirection: 'row',
@@ -349,13 +440,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   selectFilterContainer: {
-    marginHorizontal: Layout.spacing.xs, // Add some margin
-    marginBottom: 0, // Override default marginBottom from Select component
+    marginHorizontal: Layout.spacing.xs,
+    marginBottom: 0,
   },
   selectFilter: {
-    height: Layout.inputHeight - Layout.spacing.s, // Adjust height to match date buttons (approx)
-    paddingVertical: 0, // Adjust padding
+    height: Layout.inputHeight - Layout.spacing.s,
+    paddingVertical: 0,
     paddingHorizontal: Layout.spacing.s,
-    borderRadius: Layout.borderRadius.medium, // Match date buttons
+    borderRadius: Layout.borderRadius.medium,
   },
 });

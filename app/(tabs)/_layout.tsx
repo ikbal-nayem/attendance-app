@@ -72,6 +72,7 @@ export default function TabLayout() {
               <ListTodo size={size * 1.1} color={color} />
             </AnimatedIcon>
           ),
+          href: '/(tabs)/activity',
         }}
       />
       <Tabs.Screen

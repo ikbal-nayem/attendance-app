@@ -2,6 +2,21 @@ import { API_CONSTANTS } from '@/constants/api';
 import { makeFormData } from '@/utils/form-actions';
 import { useEffect, useState } from 'react';
 import { axiosIns } from './config';
+export interface IActivityHistory {
+  id?: string; // Assuming an ID field
+  entryDate?: string;
+  entryTime?: string;
+  exitTime?: string;
+  status?: string;
+  location?: string;
+  description?: string;
+  activityType?: string;
+  activityNo?: string;
+  activityFlag?: string; // e.g., 'C' for Completed, 'I' for Incomplete
+  title?: string; // A general title for the activity
+  remarks?: string;
+  // Add any other fields that are relevant for activity history
+}
 
 type ActivityData = {
   entryTime: string;

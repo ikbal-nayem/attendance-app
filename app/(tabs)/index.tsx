@@ -56,7 +56,6 @@ const header = (user: IUser, handleLogout: () => void) => (
         />
       </Popover>
       <View>
-        <Text style={styles.userId}>{user.employeeCode}</Text>
         <Text style={styles.userName}>{user.userName}</Text>
       </View>
     </View>
@@ -72,13 +71,8 @@ const userCard = (user: IUser) => (
       <View style={styles.profileDetails}>
         <Text style={styles.userRole}>{user.designation}</Text>
         <Text style={styles.userDepartment}>{user.department}</Text>
+        <Text style={styles.userId}>Code: {user.employeeCode}</Text>
         <Text style={styles.detailText}>{user.companyName}</Text>
-        {/* joiningDate does not exist on IUser */}
-        {/* <Text style={styles.detailText}>
-                Joining Date: {user.joiningDate || '12-2-2020'}
-              </Text> */}
-        {/* tenure relies on joiningDate */}
-        {/* <Text style={styles.detailText}>{tenure}</Text> */}
       </View>
 
       <View style={styles.profileActions}>
@@ -261,7 +255,7 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.light.background, // Or a slightly off-white like #F8F9FA
+    backgroundColor: Colors.light.background,
   },
   loadingContainer: {
     flex: 1,
@@ -269,15 +263,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   scrollContent: {
-    padding: Layout.spacing.m, // Consistent padding
-    paddingBottom: Layout.spacing.xl * 2, // Extra padding at bottom for scroll
+    padding: Layout.spacing.m,
+    paddingBottom: Layout.spacing.xl * 2,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: Layout.spacing.m, // Use main padding
-    paddingTop: Layout.spacing.s, // Adjust as needed
+    paddingHorizontal: Layout.spacing.m,
+    paddingTop: Layout.spacing.s,
     paddingBottom: Layout.spacing.m,
   },
   userInfo: {
@@ -290,7 +284,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginRight: Layout.spacing.m,
     borderWidth: 1,
-    borderColor: Colors.light.tint + '50', // Subtle border
+    borderColor: Colors.light.tint + '50',
   },
   userId: {
     fontSize: 14,
@@ -371,10 +365,6 @@ const styles = StyleSheet.create({
     borderRadius: Layout.borderRadius.small,
     ...Layout.shadow.light,
   },
-  // qrCodeImage: { // If using an actual image
-  //   width: 60,
-  //   height: 60,
-  // },
   punchInfoCard: {
     backgroundColor: 'white',
     borderRadius: Layout.borderRadius.large,
@@ -424,7 +414,6 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Center content
   },
   enquiryIconContainer: {
-    // Container for icon
     marginBottom: Layout.spacing.m,
   },
   enquiryTitle: {

@@ -1,9 +1,11 @@
+import { isNull } from './validation';
+
 export const parseDate = (dateString: string) => {
-  if(!dateString) return undefined;
-  const [datePart, timePart] = dateString.split(' ');
-  const [day, month, year] = datePart.split('/').map(Number);
-  const [time, modifier] = timePart.split(' ');
-  let [hours, minutes, seconds] = time.split(':').map(Number);
+  if (isNull(dateString)) return undefined;
+  const [datePart, timePart] = dateString?.split(' ');
+  const [day, month, year] = datePart?.split('/').map(Number);
+  const [time, modifier] = timePart?.split(' ');
+  let [hours, minutes, seconds] = time?.split(':').map(Number);
 
   if (modifier === 'PM' && hours < 12) hours += 12;
   if (modifier === 'AM' && hours === 12) hours = 0;
@@ -13,7 +15,7 @@ export const parseDate = (dateString: string) => {
 
 export const parseRequestDate = (dateString?: string) => {
   if (!dateString) return new Date();
-  const [day, month, year] = dateString.split('/').map(Number);
+  const [day, month, year] = dateString?.split('/').map(Number);
   return new Date(year, month - 1, day);
 };
 
