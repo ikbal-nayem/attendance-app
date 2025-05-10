@@ -60,7 +60,7 @@ const FadeInView = ({
 const AppHeader = ({
   title,
   withBackButton = true,
-  bg = 'default',
+  bg = 'primary',
   rightContent,
   leftContent,
 }: HeaderProps) => {

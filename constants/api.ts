@@ -29,4 +29,7 @@ export const API_CONSTANTS = {
     HISTORY_DATA_PROCESS: '/EnquiryNotificationService/pushNotificationEnquiry',
     HISTORY_LIST: '/EnquiryNotificationService/pushNotificationData',
   },
+  LOACTION: {
+    SEND_LOCATION: '/StaffTrackingService/staffTracking',
+  }
 };
