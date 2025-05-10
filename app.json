@@ -2,7 +2,7 @@
   "expo": {
     "name": "IPS-SMAT",
     "slug": "IPS-SMAT",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -21,7 +21,7 @@
     },
     "android": {
       "package": "com.ips-smat.attendance",
-      "versionCode": 1,
+      "versionCode": "1.0.1",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#FFFFFF"

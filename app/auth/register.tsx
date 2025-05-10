@@ -6,10 +6,12 @@ import Radio from '@/components/Radio';
 import SingleImagePicker from '@/components/SingleImagePicker';
 import Switch from '@/components/Switch';
 import Colors from '@/constants/Colors';
+import { USER_DEVICE_ID } from '@/constants/common';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
 import { useLocation } from '@/context/LocationContext';
 import AuthLayout from '@/layout/AuthLayout';
+import { localData } from '@/services/storage';
 import { getDeviceInfo } from '@/utils/deviceInfo';
 import { makeFormData } from '@/utils/form-actions';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -60,6 +62,7 @@ export default function RegisterScreen() {
 
   const onSubmitHandler = async (data: FormData) => {
     const deviceInfo = getDeviceInfo();
+    const deviceId = await localData.get(USER_DEVICE_ID);
     const reqData = {
       ...data,
       sLatitude: currentLocation?.latitude,
@@ -72,7 +75,7 @@ export default function RegisterScreen() {
       sDeviceModel: deviceInfo.deviceModel,
       sDevicePlatForm: deviceInfo.platform,
       sDeviceVersion: deviceInfo.osVersion,
-      sDeviceID: deviceInfo.deviceId,
+      sDeviceID: deviceId,
     };
     registerRequest(makeFormData(reqData))
       .then((res) => {
@@ -208,10 +211,7 @@ export default function RegisterScreen() {
 
             {errors.root && <Text style={styles.errorText}>{errors.root.message}</Text>}
 
-            <Animated.View
-              entering={FadeInDown.duration(500).delay(400)}
-              style={styles.button}
-            >
+            <Animated.View entering={FadeInDown.duration(500).delay(400)} style={styles.button}>
               <Button
                 title="Register"
                 onPress={handleSubmit(onSubmitHandler)}

@@ -68,29 +68,27 @@ export default function RootLayout() {
           resizeMode="contain"
         />
         <Text style={styles.splashText}>Supervisor/Manager Activity Tracking</Text>
-        {!isAppReady && (
-          <ActivityIndicator
-            size="large"
-            color={Colors.light.primary}
-            style={styles.loadingIndicator}
-          />
-        )}
+        <ActivityIndicator
+          size="large"
+          color={Colors.light.primary}
+          style={styles.loadingIndicator}
+        />
       </Animated.View>
     );
   }
 
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <LocationProvider>
-          <NotificationProvider>
-            <ToastProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <LocationProvider>
+            <NotificationProvider>
               <RootLayoutNav />
               <AppStatusBar />
-            </ToastProvider>
-          </NotificationProvider>
-        </LocationProvider>
-      </AuthProvider>
+            </NotificationProvider>
+          </LocationProvider>
+        </AuthProvider>
+      </ToastProvider>
     </SafeAreaProvider>
   );
 }

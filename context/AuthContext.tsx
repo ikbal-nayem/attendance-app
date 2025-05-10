@@ -1,9 +1,13 @@
 import { axiosIns } from '@/api/config';
 import { API_CONSTANTS } from '@/constants/api';
+import { USER_DEVICE_ID } from '@/constants/common';
 import { localData } from '@/services/storage';
+import { getNewDeviceId } from '@/utils/generator';
 import { AxiosResponse } from 'axios';
 import { router } from 'expo-router';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Alert } from 'react-native';
+import { useToast } from './ToastContext';
 
 type AuthContextType = {
   user: IUser | null;
@@ -31,12 +35,11 @@ const defaultContext: AuthContextType = {
 
 const AuthContext = createContext<AuthContextType>(defaultContext);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<IUser | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [tempUserData, setTempUserData] = useState<FormData | null>(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
     // Check if user is already logged in
@@ -58,6 +61,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     checkLoginStatus();
   }, []);
 
+  useEffect(() => {
+    const getDeviceId = async () => {
+      try {
+        let deviceId = await localData.get(USER_DEVICE_ID);
+        if (!deviceId) {
+          deviceId = await getNewDeviceId();
+          await localData.set(USER_DEVICE_ID, deviceId);
+        }
+        console.log('Device ID: ', deviceId);
+      } catch (error) {
+        console.error('error', error);
+        Alert.alert('Error', 'Failed to retrieve device ID, ' + JSON.stringify(error));
+        showToast({ message: 'Error retrieving device ID', type: 'error' });
+      }
+    };
+    getDeviceId();
+  }, []);
+
   const login = (data: FormData): Promise<string | IObject> => {
     setIsLoading(true);
     return new Promise((resolve, reject) => {
@@ -67,7 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           if (response.data?.messageCode === '0') {
             await localData.set('user', response.data);
             setUser(response.data);
-            resolve({success: true, data: response?.data});
+            resolve({ success: true, data: response?.data });
           }
           reject(response.data?.messageDesc);
         })
@@ -93,16 +114,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser(null);
   };
 
-  const registerRequest = async (
-    userData: FormData
-  ): Promise<boolean | string> => {
+  const registerRequest = async (userData: FormData): Promise<boolean | string> => {
     setIsLoading(true);
     try {
-      const response = await axiosIns.post(
-        API_CONSTANTS.AUTH.REGISTER_REQUEST,
-        userData
-      );
-      console.log(response)
+      const response = await axiosIns.post(API_CONSTANTS.AUTH.REGISTER_REQUEST, userData);
+      console.log(response);
       if (response.data?.messageCode === '0') {
         userData.append('requestNo', response.data?.requestNo);
         setTempUserData(userData);
@@ -117,16 +133,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const verifyOtp = async (
-    otp: string
-  ): Promise<{ success: boolean; message: string }> => {
+  const verifyOtp = async (otp: string): Promise<{ success: boolean; message: string }> => {
     setIsLoading(true);
     try {
       tempUserData?.append('sInfoOPT', otp);
-      const response = await axiosIns.post(
-        API_CONSTANTS.AUTH.REGISTER_SUBMIT,
-        tempUserData
-      );
+      const response = await axiosIns.post(API_CONSTANTS.AUTH.REGISTER_SUBMIT, tempUserData);
       if (response.data?.messageCode === '0') {
         setTempUserData(null);
         return { success: true, message: response.data.messageDesc };

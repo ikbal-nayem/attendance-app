@@ -1,0 +1,1 @@
+export const USER_DEVICE_ID = 'user_device_id';
