@@ -12,7 +12,7 @@ import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
-import { parseDate, parseRequestDate } from '@/utils/date-time';
+import { parseDate, parseResponseDate } from '@/utils/date-time';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import {
@@ -58,8 +58,8 @@ export default function AttendanceHistoryScreen() {
 
   useEffect(() => {
     if (attendanceHistoryData) {
-      setStartDate(parseRequestDate(attendanceHistoryData.fromDate));
-      setEndDate(parseRequestDate(attendanceHistoryData.toDate));
+      setStartDate(parseResponseDate(attendanceHistoryData.fromDate));
+      setEndDate(parseResponseDate(attendanceHistoryData.toDate));
     }
   }, [attendanceHistoryData]);
 

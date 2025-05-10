@@ -13,10 +13,21 @@ export const parseDate = (dateString: string) => {
   return new Date(year, month - 1, day, hours, minutes, seconds);
 };
 
-export const parseRequestDate = (dateString?: string) => {
+export const parseResponseDate = (dateString?: string) => {
   if (!dateString) return new Date();
   const [day, month, year] = dateString?.split('/').map(Number);
   return new Date(year, month - 1, day);
+};
+
+export const parseResponseTime = (timeString?: string) => {
+  // Time string response format: "17:19:24" (24-hour format)
+  if (!timeString) return undefined;
+  const [hours, minutes, seconds] = timeString?.split(':').map(Number);
+  return new Date(0, 0, 0, hours, minutes, seconds).toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
 };
 
 export const generateRequestDate = (date: Date) => {

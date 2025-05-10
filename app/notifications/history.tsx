@@ -6,7 +6,7 @@ import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
-import { parseRequestDate } from '@/utils/date-time';
+import { parseResponseDate } from '@/utils/date-time';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import { CalendarDays, MoveHorizontal } from 'lucide-react-native';
@@ -85,8 +85,8 @@ export default function AllNotificationsScreen() {
 
   useEffect(() => {
     if (notificationHistoryData) {
-      setStartDate(parseRequestDate(notificationHistoryData.fromDate));
-      setEndDate(parseRequestDate(notificationHistoryData.toDate));
+      setStartDate(parseResponseDate(notificationHistoryData.fromDate));
+      setEndDate(parseResponseDate(notificationHistoryData.toDate));
     }
   }, [notificationHistoryData]);
 
@@ -110,8 +110,8 @@ export default function AllNotificationsScreen() {
   };
 
   // const clearFilters = () => {
-  //   setStartDate(parseRequestDate(notificationHistoryData?.fromDate));
-  //   setEndDate(parseRequestDate(notificationHistoryData?.toDate));
+  //   setStartDate(parseResponseDate(notificationHistoryData?.fromDate));
+  //   setEndDate(parseResponseDate(notificationHistoryData?.toDate));
   // };
 
   if (error) {

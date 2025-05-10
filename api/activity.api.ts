@@ -4,20 +4,17 @@ import { useEffect, useState } from 'react';
 import { axiosIns } from './config';
 
 export interface IActivityHistory {
-  companyID: string;
-  companyName: string;
   serialNo: string;
-  sessionID: string;
-  userID: string;
-  userName: string;
+  activityDate: string;
+  activityDetails: string;
+  activityNote: string;
+  activityStartTime: string;
+  activityStopTime: string;
+  activityType: string;
   attachmentFile01: [];
-  attendanceFlag: string;
-  employeeCode: string;
-  employeeName: string;
-  entryLocation: string;
+  client: string;
   entryNo: string;
-  entryTime: string;
-  entryType: string;
+  territory: string;
 }
 
 type ActivityData = {
@@ -112,7 +109,7 @@ export const useActivityHistoryList = (
     });
 
     axiosIns
-      .post(API_CONSTANTS.ATTENDANCE.HISTORY_LIST, formData)
+      .post(API_CONSTANTS.ACTIVITY.HISTORY_LIST, formData)
       .then((response) => setActivityHistoryList(response?.data?.detailsList || []))
       .catch((err) => {
         console.log(err);

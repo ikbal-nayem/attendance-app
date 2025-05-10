@@ -14,22 +14,19 @@ import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
-import { parseRequestDate } from '@/utils/date-time';
+import { parseResponseDate, parseResponseTime } from '@/utils/date-time';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { router } from 'expo-router';
 import {
   Activity as ActivityIcon,
-  AlertTriangle,
   CalendarDays,
-  CheckCircle,
-  Clock,
+  FilePenLine,
   Filter,
-  FilterIcon,
-  MapPin,
+  FilterIcon, // Added for activityDetails
+  MapPin, // Added for activityNote
   MoveHorizontal,
   User,
   X,
-  XCircle,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -147,7 +144,7 @@ const FilterComponent = ({ control, onFilterSubmit, clearFilters, onClose, activ
 
 export default function ActivityHistoryScreen() {
   const { user } = useAuth();
-  const { activityData } = useActivityHistoryInit(user?.companyID!);
+  const { activityData, isLoading: isInitLoading } = useActivityHistoryInit(user?.companyID!);
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [isFilterDrawerVisible, setIsFilterDrawerVisible] = useState(false);
@@ -174,17 +171,17 @@ export default function ActivityHistoryScreen() {
 
   useEffect(() => {
     if (activityData?.fromDate && activityData?.toDate) {
-      setStartDate(parseRequestDate(activityData.fromDate));
-      setEndDate(parseRequestDate(activityData.toDate));
+      setStartDate(parseResponseDate(activityData.fromDate));
+      setEndDate(parseResponseDate(activityData.toDate));
     }
   }, [activityData]);
 
-  const handleItemPress = (item: IActivityHistory) => {
+  const handleItemPress = useCallback((item: IActivityHistory) => {
     router.push({
       pathname: '/(tabs)/activity/[id]',
       params: { id: item?.entryNo!, ...item },
     });
-  };
+  }, []);
 
   const onDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     const currentDate = selectedDate || (showDatePicker === 'start' ? startDate : endDate);
@@ -218,25 +215,6 @@ export default function ActivityHistoryScreen() {
 
   const renderItem = useCallback(
     ({ item, index }: { item: IActivityHistory; index: number }) => {
-      let statusText = 'Pending'; // Default status
-      let statusColor = Colors.light.warning;
-      let StatusIconComponent = AlertTriangle;
-
-      // Use attendanceFlag for status, assuming 'C' for Completed, 'A' for Absent/Incomplete
-      // Adjust these flags based on actual API behavior for activities if different from attendance
-      if (item.attendanceFlag === 'C') {
-        // Assuming 'C' means completed for activity context too
-        statusText = 'Completed';
-        statusColor = Colors.light.success;
-        StatusIconComponent = CheckCircle;
-      } else if (item.attendanceFlag === 'A' || item.attendanceFlag === 'I') {
-        // Assuming 'A' or 'I' means Incomplete
-        statusText = 'Incomplete';
-        statusColor = Colors.light.error;
-        StatusIconComponent = XCircle;
-      }
-      // If there are other flags or no flag, it remains 'Pending'
-
       return (
         <TouchableOpacity onPress={() => handleItemPress(item)} activeOpacity={0.8}>
           <AnimatedRenderView index={index}>
@@ -244,41 +222,60 @@ export default function ActivityHistoryScreen() {
               <View style={styles.cardHeader}>
                 <View style={styles.headerLeft}>
                   <ActivityIcon size={18} color={Colors.light.primary} />
-                  <Text style={styles.entryTypeText} numberOfLines={1}>
-                    {item.entryType || 'Activity'}
-                  </Text>
+                  <View>
+                    <Text style={styles.entryTypeText} numberOfLines={1}>
+                      {
+                        activityData?.activityTypeList?.find((a) => a.code === item.activityType)
+                          ?.name
+                      }
+                    </Text>
+                    {(item.activityStartTime || item.activityStopTime) && (
+                      <Text style={styles.activityTimeText} numberOfLines={1}>
+                        {parseResponseTime(item.activityStartTime)} -{' '}
+                        {parseResponseTime(item.activityStopTime)}
+                      </Text>
+                    )}
+                  </View>
                 </View>
-                <View style={[styles.statusBadge, { backgroundColor: `${statusColor}20` }]}>
-                  <StatusIconComponent size={14} color={statusColor} />
-                  <Text style={[styles.statusText, { color: statusColor }]}>{statusText}</Text>
-                </View>
+                <Text style={styles.activityDateText}>
+                  <CalendarDays size={14} color={Colors.light.subtext} />{' '}
+                  {parseResponseDate(item.activityDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </Text>
               </View>
 
-              {item.employeeName && (
+              {/* Client */}
+              {item?.client && (
                 <View style={styles.detailRow}>
-                  <User size={16} color={Colors.light.subtext} />
-                  <Text style={styles.detailText} numberOfLines={1}>
-                    {item.employeeName} ({item.userID})
+                  <User size={16} color={Colors.light.success} />
+                  <Text style={styles.detailValue} numberOfLines={2}>
+                    {activityData?.clientList?.find((c) => c.code === item.client)?.name}
                   </Text>
                 </View>
               )}
 
-              {item.entryTime && (
+              {/* Territory */}
+              {item.territory && (
                 <View style={styles.detailRow}>
-                  <Clock size={16} color={Colors.light.subtext} />
-                  <Text style={styles.detailText} numberOfLines={1}>
-                    {new Date(item.entryTime).toLocaleString()} {/* Basic time formatting */}
+                  <MapPin size={16} color={Colors.light.warning} />
+                  <Text style={styles.detailValue} numberOfLines={1}>
+                    {activityData?.territoryList?.find((t) => t.code === item.territory)?.name}
                   </Text>
                 </View>
               )}
 
-              {/* item.description is not in IActivityHistory, so it's removed */}
-
-              {item.entryLocation && (
+              {/* Activity Details */}
+              {item.activityDetails && (
                 <View style={styles.detailRow}>
-                  <MapPin size={16} color={Colors.light.subtext} />
-                  <Text style={styles.detailText} numberOfLines={1}>
-                    {item.entryLocation}
+                  <FilePenLine size={16} color={Colors.light.subtext} />
+                  <Text
+                    style={[styles.detailValue, { color: Colors.light.subtext }]}
+                    numberOfLines={2}
+                  >
+                    {item.activityDetails}
                   </Text>
                 </View>
               )}
@@ -287,7 +284,7 @@ export default function ActivityHistoryScreen() {
         </TouchableOpacity>
       );
     },
-    [] // Add dependencies if any are used from outside, e.g., handleItemPress
+    [handleItemPress, activityData]
   );
 
   if (error) {
@@ -348,7 +345,7 @@ export default function ActivityHistoryScreen() {
         />
       )}
 
-      {isLoading ? (
+      {isLoading || isInitLoading ? (
         <ActivityIndicator color={Colors.light.primary} style={{ flex: 1 }} size="large" />
       ) : activityHistoryList?.length === 0 ? (
         <View style={styles.emptyContainer}>
@@ -448,7 +445,7 @@ const styles = StyleSheet.create({
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: Layout.spacing.s,
   },
   headerLeft: {
@@ -459,22 +456,20 @@ const styles = StyleSheet.create({
     marginRight: Layout.spacing.s,
   },
   entryTypeText: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 16,
+    fontWeight: '600',
+    fontSize: 17,
     color: Colors.light.primary,
     flexShrink: 1,
   },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: Layout.spacing.xs / 1.5,
-    paddingHorizontal: Layout.spacing.s,
-    borderRadius: Layout.borderRadius.large,
+  activityTimeText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: Colors.light.subtext,
   },
-  statusText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 12,
-    marginLeft: Layout.spacing.xs / 2,
+  activityDateText: {
+    fontWeight: '500',
+    fontSize: 15,
+    color: Colors.light.subtext,
   },
   detailRow: {
     flexDirection: 'row',
@@ -512,5 +507,11 @@ const styles = StyleSheet.create({
   closeButton: {
     marginTop: Layout.spacing.s,
     marginBottom: Layout.spacing.m,
+  },
+  detailValue: {
+    fontFamily: 'Inter-Regular',
+    fontSize: 14,
+    color: Colors.light.text,
+    flex: 1,
   },
 });
