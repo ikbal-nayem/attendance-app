@@ -85,6 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       axiosIns
         .post(API_CONSTANTS.AUTH.SIGN_IN, data)
         .then(async (response: AxiosResponse<IResponse & IUser>) => {
+          // TODO: Check current user device ID and update if necessary
           if (response.data?.messageCode === '0') {
             await localData.set('user', response.data);
             setUser(response.data);
