@@ -6,11 +6,7 @@ import { LocationProvider } from '@/context/LocationContext';
 import { NotificationProvider } from '@/context/NotificationContext';
 import { ToastProvider } from '@/context/ToastContext';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-} from '@expo-google-fonts/inter';
+import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -36,6 +32,7 @@ function RootLayoutNav() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="notifications/send" options={{ headerShown: false }} />
+      <Stack.Screen name="enquiry/live-tracking" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );
@@ -70,9 +67,7 @@ export default function RootLayout() {
           style={styles.splashLogo}
           resizeMode="contain"
         />
-        <Text style={styles.splashText}>
-          Supervisor/Manager Activity Tracking
-        </Text>
+        <Text style={styles.splashText}>Supervisor/Manager Activity Tracking</Text>
         {!isAppReady && (
           <ActivityIndicator
             size="large"

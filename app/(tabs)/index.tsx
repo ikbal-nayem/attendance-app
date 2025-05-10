@@ -10,6 +10,7 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
   ArrowRightCircle,
   Bell,
+  BellPlus,
   ChevronsLeft,
   Clock,
   Edit,
@@ -127,7 +128,7 @@ const menu1 = [
   },
   {
     name: 'Notification',
-    icon: <SendHorizonal size={24} color={Colors.light.secondary} />,
+    icon: <BellPlus size={24} color={Colors.light.warning} />,
     onPress: () => {
       router.push('/notifications/send');
     },
@@ -221,7 +222,7 @@ export default function DashboardScreen() {
           {/* Punch Info */}
           <View style={styles.punchInfoCard}>
             <View style={styles.punchHeader}>
-              <ArrowRightCircle size={20} color="#4CAF50" />
+              <ArrowRightCircle size={20} color={Colors.light.success} />
               <Text style={styles.punchHeaderText}>Check In at</Text>
             </View>
             <Text style={styles.punchTime}>
