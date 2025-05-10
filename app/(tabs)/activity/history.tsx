@@ -28,6 +28,7 @@ import {
   MapPin,
   MoveHorizontal,
   User,
+  X,
   XCircle,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -53,7 +54,15 @@ interface FilterFormInputs {
 const FilterComponent = ({ control, onFilterSubmit, clearFilters, onClose, activityData }: any) => (
   <View style={styles.drawerContentContainer}>
     <ScrollView showsVerticalScrollIndicator={false}>
-      <Text style={styles.drawerTitle}>Filter</Text>
+      <AnimatedRenderView
+        direction="right"
+        duration={300}
+        delay={100}
+        style={styles.filterDrawerHeader}
+      >
+        <Text style={styles.drawerTitle}>Filter</Text>
+        <X size={20} color={Colors.light.text} onPress={onClose} />
+      </AnimatedRenderView>
 
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Activity Type</Text>
@@ -68,6 +77,8 @@ const FilterComponent = ({ control, onFilterSubmit, clearFilters, onClose, activ
               value={value}
               onChange={(val: string) => onChange(val)}
               placeholder="Select Activity Type"
+              size="small"
+              containerStyle={styles.filterSelectContainer}
             />
           )}
         />
@@ -86,6 +97,8 @@ const FilterComponent = ({ control, onFilterSubmit, clearFilters, onClose, activ
               value={value}
               onChange={(val: string) => onChange(val)}
               placeholder="Select Client"
+              size="small"
+              containerStyle={styles.filterSelectContainer}
             />
           )}
         />
@@ -104,6 +117,8 @@ const FilterComponent = ({ control, onFilterSubmit, clearFilters, onClose, activ
               value={value}
               onChange={(val: string) => onChange(val)}
               placeholder="Select Territory"
+              size="small"
+              containerStyle={styles.filterSelectContainer}
             />
           )}
         />
@@ -198,7 +213,7 @@ export default function ActivityHistoryScreen() {
     setSelectedActivityType(undefined);
     setSelectedClient(undefined);
     setSelectedTerritory(undefined);
-    // setIsFilterDrawerVisible(false); // Optionally close drawer on clear
+    setIsFilterDrawerVisible(false);
   };
 
   const renderItem = useCallback(
@@ -392,6 +407,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  filterDrawerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  filterSelectContainer: { marginBottom: 5 },
   dateButton: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -400,7 +420,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Layout.spacing.m,
     backgroundColor: Colors.light.card,
     borderRadius: Layout.borderRadius.medium,
-    marginHorizontal: Layout.spacing.xs,
+    marginHorizontal: Layout.spacing.m,
   },
   dateButtonText: {
     fontFamily: 'Inter-Medium',
@@ -440,7 +460,7 @@ const styles = StyleSheet.create({
   },
   entryTypeText: {
     fontFamily: 'Inter-SemiBold',
-    fontSize: 16, // Increased size
+    fontSize: 16,
     color: Colors.light.primary,
     flexShrink: 1,
   },
@@ -458,20 +478,20 @@ const styles = StyleSheet.create({
   },
   detailRow: {
     flexDirection: 'row',
-    alignItems: 'center', // Changed to center for better alignment with icons
+    alignItems: 'center',
     marginTop: Layout.spacing.s,
-    gap: Layout.spacing.s, // Added gap for icon and text
+    gap: Layout.spacing.s,
   },
   detailText: {
     fontFamily: 'Inter-Regular',
-    fontSize: 14, // Increased size
+    fontSize: 14,
     color: Colors.light.text,
     flex: 1,
   },
   drawerContentContainer: {
-    flex: 1, // Ensure it takes up available space in the drawer
+    flex: 1,
     paddingHorizontal: Layout.spacing.m,
-    paddingBottom: Layout.spacing.xl, // For safe area or button spacing
+    paddingBottom: Layout.spacing.xl,
   },
   drawerTitle: {
     fontFamily: 'Inter-Bold',

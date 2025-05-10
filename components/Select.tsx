@@ -32,6 +32,7 @@ type SelectProps = {
   modalTitle?: string;
   disabled?: boolean;
   required?: boolean;
+  size?: 'small' | 'medium' | 'large';
 };
 
 const Select: React.FC<SelectProps> = ({
@@ -49,6 +50,7 @@ const Select: React.FC<SelectProps> = ({
   modalTitle = 'Select an option',
   disabled = false,
   required = false,
+  size = 'medium',
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const selectedOption = options.find((option) => option?.[keyProp] == value);
@@ -76,7 +78,7 @@ const Select: React.FC<SelectProps> = ({
   return (
     <View style={[styles.container, containerStyle]}>
       {label && (
-        <Text style={styles.label}>
+        <Text style={[styles.label, size === 'small' && styles.labelSmall, size === 'large' && styles.labelLarge]}>
           {label} {required && <Text style={{ color: Colors.light.error }}>*</Text>}
         </Text>
       )}
@@ -84,6 +86,9 @@ const Select: React.FC<SelectProps> = ({
       <TouchableOpacity
         style={[
           styles.selectContainer,
+          size === 'small' && styles.selectContainerSmall,
+          size === 'medium' && styles.selectContainerMedium,
+          size === 'large' && styles.selectContainerLarge,
           hasError && styles.selectContainerError,
           disabled && styles.selectContainerDisabled,
           selectStyle,
@@ -95,6 +100,9 @@ const Select: React.FC<SelectProps> = ({
         <Text
           style={[
             styles.selectText,
+            size === 'small' && styles.selectTextSmall,
+            size === 'medium' && styles.selectTextMedium,
+            size === 'large' && styles.selectTextLarge,
             !selectedOption && styles.placeholderText,
             disabled && styles.selectTextDisabled,
           ]}
@@ -103,7 +111,7 @@ const Select: React.FC<SelectProps> = ({
           {selectedOption ? selectedOption?.[valueProp] : placeholder}
         </Text>
         <ChevronDown
-          size={20}
+          size={size === 'small' ? 16 : size === 'large' ? 22 : 20}
           color={disabled ? Colors.light.subtext : Colors.light.text}
         />
       </TouchableOpacity>
@@ -160,6 +168,14 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
     marginBottom: Layout.spacing.xs,
   },
+  labelSmall: {
+    fontSize: 12,
+    marginBottom: Layout.spacing.xs,
+  },
+  labelLarge: {
+    fontSize: 16,
+    marginBottom: Layout.spacing.s,
+  },
   selectContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -167,8 +183,18 @@ const styles = StyleSheet.create({
     borderColor: Colors.light.inputBorder,
     borderRadius: Layout.borderRadius.xl, // Match Input component
     backgroundColor: Colors.light.inputBackground,
-    height: Layout.inputHeight,
+  },
+  selectContainerSmall: {
+    height: 36,
+    paddingHorizontal: Layout.spacing.s,
+  },
+  selectContainerMedium: {
+    height: Layout.inputHeight, // Default height
     paddingHorizontal: Layout.spacing.m,
+  },
+  selectContainerLarge: {
+    height: 60,
+    paddingHorizontal: Layout.spacing.l,
   },
   selectContainerError: {
     borderColor: Colors.light.error,
@@ -180,9 +206,17 @@ const styles = StyleSheet.create({
   selectText: {
     flex: 1,
     fontFamily: 'Inter-Regular',
-    fontSize: 16,
     color: Colors.light.text,
     marginRight: Layout.spacing.m,
+  },
+  selectTextSmall: {
+    fontSize: 14,
+  },
+  selectTextMedium: {
+    fontSize: 16, // Default font size
+  },
+  selectTextLarge: {
+    fontSize: 18,
   },
   selectTextDisabled: {
     color: Colors.light.subtext,

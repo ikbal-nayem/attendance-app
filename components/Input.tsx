@@ -29,6 +29,7 @@ type InputProps = TextInputProps & {
   onLeftIconPress?: () => void;
   showPasswordToggle?: boolean;
   required?: boolean;
+  size?: 'small' | 'medium' | 'large';
 };
 
 const Input: React.FC<InputProps> = ({
@@ -46,6 +47,7 @@ const Input: React.FC<InputProps> = ({
   onLeftIconPress,
   showPasswordToggle = false,
   required = false,
+  size = 'medium',
   ...rest
 }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -58,30 +60,36 @@ const Input: React.FC<InputProps> = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {label && <Text style={[styles.label, labelStyle]}>{label} {required && <Text style={{ color: Colors.light.error }}>*</Text>}</Text>}
+      {label && <Text style={[styles.label, size === 'small' && styles.labelSmall, size === 'large' && styles.labelLarge, labelStyle]}>{label} {required && <Text style={{ color: Colors.light.error }}>*</Text>}</Text>}
 
       <View
         style={[
           styles.inputContainer,
+          size === 'small' && styles.inputContainerSmall,
+          size === 'medium' && styles.inputContainerMedium,
+          size === 'large' && styles.inputContainerLarge,
           hasError && styles.inputContainerError,
           inputContainerStyle,
         ]}
       >
         {leftIcon && (
           <TouchableOpacity
-            style={styles.leftIcon}
+            style={[styles.leftIcon, size === 'small' && styles.iconSmall, size === 'large' && styles.iconLarge]}
             onPress={onLeftIconPress}
             disabled={!onLeftIconPress}
           >
-            {leftIcon}
+            {React.cloneElement(leftIcon as React.ReactElement, { size: size === 'small' ? 16 : size === 'large' ? 22 : 20 })}
           </TouchableOpacity>
         )}
 
         <TextInput
           style={[
             styles.input,
+            size === 'small' && styles.inputSmall,
+            size === 'medium' && styles.inputMedium,
+            size === 'large' && styles.inputLarge,
             !!leftIcon && styles.inputWithLeftIcon,
-            !!(rightIcon || showPasswordToggle) && { paddingRight: 40 },
+            !!(rightIcon || showPasswordToggle) && { paddingRight: size === 'small' ? 35 : size === 'large' ? 45 : 40 },
             inputStyle,
           ]}
           placeholderTextColor={Colors.light.subtext}
@@ -93,24 +101,24 @@ const Input: React.FC<InputProps> = ({
 
         {showPasswordToggle && (
           <TouchableOpacity
-            style={styles.rightIcon}
+            style={[styles.rightIcon, size === 'small' && styles.iconSmall, size === 'large' && styles.iconLarge]}
             onPress={togglePasswordVisibility}
           >
             {isPasswordVisible ? (
-              <EyeOff size={20} color={Colors.light.subtext} />
+              <EyeOff size={size === 'small' ? 16 : size === 'large' ? 22 : 20} color={Colors.light.subtext} />
             ) : (
-              <Eye size={20} color={Colors.light.subtext} />
+              <Eye size={size === 'small' ? 16 : size === 'large' ? 22 : 20} color={Colors.light.subtext} />
             )}
           </TouchableOpacity>
         )}
 
         {rightIcon && !showPasswordToggle && (
           <TouchableOpacity
-            style={styles.rightIcon}
+            style={[styles.rightIcon, size === 'small' && styles.iconSmall, size === 'large' && styles.iconLarge]}
             onPress={onRightIconPress}
             disabled={!onRightIconPress}
           >
-            {rightIcon}
+             {React.cloneElement(rightIcon as React.ReactElement, { size: size === 'small' ? 16 : size === 'large' ? 22 : 20 })}
           </TouchableOpacity>
         )}
       </View>
@@ -134,6 +142,14 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
     marginBottom: Layout.spacing.xs,
   },
+  labelSmall: {
+    fontSize: 12,
+    marginBottom: Layout.spacing.xs, // Corrected from xxs
+  },
+  labelLarge: {
+    fontSize: 16,
+    marginBottom: Layout.spacing.s,
+  },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -141,7 +157,15 @@ const styles = StyleSheet.create({
     borderColor: Colors.light.inputBorder,
     borderRadius: Layout.borderRadius.xl,
     backgroundColor: Colors.light.inputBackground,
-    height: Layout.inputHeight,
+  },
+  inputContainerSmall: {
+    height: 36,
+  },
+  inputContainerMedium: {
+    height: Layout.inputHeight, // Default height
+  },
+  inputContainerLarge: {
+    height: 60,
   },
   inputContainerError: {
     borderColor: Colors.light.error,
@@ -151,8 +175,18 @@ const styles = StyleSheet.create({
     height: '100%',
     color: Colors.light.text,
     fontFamily: 'Inter-Regular',
-    fontSize: 16,
+  },
+  inputSmall: {
+    fontSize: 14,
+    paddingHorizontal: Layout.spacing.s,
+  },
+  inputMedium: {
+    fontSize: 16, // Default font size
     paddingHorizontal: Layout.spacing.m,
+  },
+  inputLarge: {
+    fontSize: 18,
+    paddingHorizontal: Layout.spacing.l,
   },
   inputWithLeftIcon: {
     paddingLeft: 0,
@@ -166,6 +200,14 @@ const styles = StyleSheet.create({
   rightIcon: {
     position: 'absolute',
     right: Layout.spacing.m,
+  },
+  iconSmall: {
+    paddingHorizontal: Layout.spacing.s,
+    right: Layout.spacing.s,
+  },
+  iconLarge: {
+    paddingHorizontal: Layout.spacing.l,
+    right: Layout.spacing.l,
   },
   helperText: {
     fontFamily: 'Inter-Regular',

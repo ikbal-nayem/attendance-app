@@ -145,12 +145,12 @@ const menu2 = [
   {
     name: 'Daily Activity',
     icon: <Layers size={24} color="#8E44AD" />,
-    onPress: () => router.push('/enquiry/activities'),
+    onPress: () => router.push('/(tabs)/activity/history'),
   },
   {
     name: 'Clock In/Out history',
     icon: <ListChecks size={24} color="#2980B9" />,
-    onPress: () => router.push('/enquiry/attendance-history'),
+    onPress: () => router.push('/(tabs)/attendance/history'),
   },
   {
     name: 'Geolocation & Territory',

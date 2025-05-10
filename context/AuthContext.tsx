@@ -44,7 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       try {
         const userJson = await localData.get('user');
         if (userJson) {
-          console.log('User found: ', userJson);
+          // console.log('User found: ', userJson);
           setUser(userJson);
           router.replace('/(tabs)');
         }
