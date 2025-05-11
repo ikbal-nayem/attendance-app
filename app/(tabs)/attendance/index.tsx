@@ -145,7 +145,7 @@ export default function AttendanceScreen() {
         title="Attendance"
         withBackButton={false}
         bg="primary"
-        leftContent={<Text style={styles.entryText}>Entry {Math.floor(entryNo / 2 + 1)}</Text>}
+        // leftContent={<Text style={styles.entryText}>Entry {Math.floor(entryNo / 2 + 1)}</Text>}
         rightContent={
           <TouchableOpacity onPress={() => router.push('/(tabs)/attendance/history')}>
             <History color={Colors.light.background} />
