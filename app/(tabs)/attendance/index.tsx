@@ -11,16 +11,11 @@ import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
 import { useLocation } from '@/context/LocationContext';
 import { useToast } from '@/context/ToastContext';
+import { getAddressFromCoordinates } from '@/services/location';
 import { makeFormData } from '@/utils/form-actions';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
-import {
-  ClockArrowDown,
-  ClockArrowUp,
-  FileText,
-  History,
-  MapPin,
-} from 'lucide-react-native';
+import { ClockArrowDown, ClockArrowUp, FileText, History, MapPin } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
@@ -44,8 +39,7 @@ type AttendanceFormData = z.infer<typeof attendanceSchema>;
 
 export default function AttendanceScreen() {
   const { user } = useAuth();
-  const { currentLocation, getAddressFromCoordinates, requestLocationPermission } =
-    useLocation();
+  const { currentLocation, requestLocationPermission } = useLocation();
 
   const [address, setAddress] = useState('Fetching location...');
   const { attendanceData, isLoading: isLoadingAttendanceData } = useAttendanceData(
@@ -100,7 +94,7 @@ export default function AttendanceScreen() {
       }
     };
     initialize();
-  }, [currentLocation, getAddressFromCoordinates, requestLocationPermission]);
+  }, [currentLocation, requestLocationPermission]);
 
   const onSubmit = async (data: AttendanceFormData) => {
     if (!currentLocation) {
@@ -151,9 +145,7 @@ export default function AttendanceScreen() {
         title="Attendance"
         withBackButton={false}
         bg="primary"
-        leftContent={
-          <Text style={styles.entryText}>Entry {Math.floor(entryNo / 2 + 1)}</Text>
-        }
+        leftContent={<Text style={styles.entryText}>Entry {Math.floor(entryNo / 2 + 1)}</Text>}
         rightContent={
           <TouchableOpacity onPress={() => router.push('/(tabs)/attendance/history')}>
             <History color={Colors.light.background} />
@@ -171,11 +163,7 @@ export default function AttendanceScreen() {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Location</Text>
             <View style={styles.locationInputContainer}>
-              <MapPin
-                size={20}
-                color={Colors.light.subtext}
-                style={styles.locationIcon}
-              />
+              <MapPin size={20} color={Colors.light.subtext} style={styles.locationIcon} />
               <Text style={styles.locationText}>
                 {isLoadingAttendanceData
                   ? 'Loading location...'
@@ -200,9 +188,7 @@ export default function AttendanceScreen() {
                     source="camera"
                     previewContainerStyle={styles.photoPreviewContainer}
                   />
-                  {errors.sPhoto && (
-                    <Text style={styles.errorText}>{errors.sPhoto.message}</Text>
-                  )}
+                  {errors.sPhoto && <Text style={styles.errorText}>{errors.sPhoto.message}</Text>}
                 </>
               )}
             />

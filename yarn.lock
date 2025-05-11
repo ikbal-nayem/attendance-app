@@ -1730,7 +1730,7 @@
 
 "@react-navigation/core@^7.9.1":
   version "7.9.1"
-  resolved "https://registry.npmjs.org/@react-navigation/core/-/core-7.9.1.tgz"
+  resolved "https://registry.yarnpkg.com/@react-navigation/core/-/core-7.9.1.tgz#885a5133229588469ebfd5fc1e2d1d65cd861c81"
   integrity sha512-HfbsYyfD5EzTicZVv1Zpw3loYguhHSs9Ztq9K3WccyfuV4Y/+XRrMgIv7B5n6ySfQGyviPcdCEl3d1A109FhUQ==
   dependencies:
     "@react-navigation/routers" "^7.3.7"
@@ -1758,7 +1758,7 @@
 
 "@react-navigation/native@^7.0.14", "@react-navigation/native@^7.1.8":
   version "7.1.8"
-  resolved "https://registry.npmjs.org/@react-navigation/native/-/native-7.1.8.tgz"
+  resolved "https://registry.yarnpkg.com/@react-navigation/native/-/native-7.1.8.tgz#402b3da515795e886f5a719426624d7c72d6a413"
   integrity sha512-ryKd/qNigi1pUp6mBb2pq75ese7AZ/Cl3xEmTG6PcUGMfMqAMMrmmVbgiys0h8zCGY2tSBSqnDHbGW1/ZtOoKg==
   dependencies:
     "@react-navigation/core" "^7.9.1"
@@ -3379,6 +3379,11 @@ expo-splash-screen@~0.29.24:
   integrity sha512-k2rdjbb3Qeg4g104Sdz6+qXXYba8QgiuZRSxHX8IpsSYiiTU48BmCCGy12sN+O1B+sD1/+WPL4duCa1Fy6+Y4g==
   dependencies:
     "@expo/prebuild-config" "~8.2.0"
+
+expo-status-bar@~2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/expo-status-bar/-/expo-status-bar-2.0.1.tgz#fc07726346dc30fbb68aadb0d7890b34fba42eee"
+  integrity sha512-AkIPX7jWHRPp83UBZ1iXtVvyr0g+DgBVvIXTtlmPtmUsm8Vq9Bb5IGj86PW8osuFlgoTVAg7HI/+Ok7yEYwiRg==
 
 expo-system-ui@~4.0.9:
   version "4.0.9"
@@ -6658,7 +6663,7 @@ update-browserslist-db@^1.1.1:
 
 use-latest-callback@^0.2.3:
   version "0.2.3"
-  resolved "https://registry.npmjs.org/use-latest-callback/-/use-latest-callback-0.2.3.tgz"
+  resolved "https://registry.yarnpkg.com/use-latest-callback/-/use-latest-callback-0.2.3.tgz#2d644d3063040b9bc2d4c55bb525a13ae3de9e16"
   integrity sha512-7vI3fBuyRcP91pazVboc4qu+6ZqM8izPWX9k7cRnT8hbD5svslcknsh3S9BUhaK11OmgTV4oWZZVSeQAiV53SQ==
 
 use-sync-external-store@^1.5.0:

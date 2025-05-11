@@ -23,7 +23,6 @@ type LocationContextType = {
   startTracking: () => Promise<void>;
   stopTracking: () => void;
   requestLocationPermission: () => Promise<boolean>;
-  getAddressFromCoordinates: (latitude?: number, longitude?: number) => Promise<string>;
 };
 
 const defaultContext: LocationContextType = {
@@ -35,7 +34,6 @@ const defaultContext: LocationContextType = {
   startTracking: async () => {},
   stopTracking: () => {},
   requestLocationPermission: async () => false,
-  getAddressFromCoordinates: async () => '',
 };
 
 const LocationContext = createContext<LocationContextType>(defaultContext);
@@ -176,34 +174,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setIsTracking(false);
   };
 
-  const getAddressFromCoordinates = async (
-    latitude?: number,
-    longitude?: number
-  ): Promise<string> => {
-    if (!latitude || !longitude) return 'Unknown location';
-    try {
-      const location = await Location.reverseGeocodeAsync({
-        latitude,
-        longitude,
-      });
-
-      if (location && location.length > 0) {
-        const { formattedAddress, streetNumber, street, city, region, country, postalCode } =
-          location[0];
-
-        const addressParts = [streetNumber, street, city, region, postalCode, country].filter(
-          Boolean
-        );
-        return formattedAddress || addressParts.join(', ');
-      }
-
-      return 'Unknown location';
-    } catch (error) {
-      console.error('Error getting address from coordinates:', error);
-      return 'Unknown location';
-    }
-  };
-
   const value = {
     currentLocation,
     locationPermission,
@@ -213,7 +183,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     startTracking,
     stopTracking,
     requestLocationPermission,
-    getAddressFromCoordinates,
   };
 
   return <LocationContext.Provider value={value}>{children}</LocationContext.Provider>;

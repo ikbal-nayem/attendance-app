@@ -1,43 +1,18 @@
 import { USER_DEVICE_ID } from '@/constants/common';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
+import { Alert } from 'react-native';
 import { API_CONSTANTS } from '../constants/api';
+import { getAddressFromCoordinates } from './location';
 import { localData } from './storage';
 
 const LOCATION_TASK_NAME = 'background-location-task';
 const LOCATION_UPLOAD_URL = `${API_CONSTANTS.BASE_URL}${API_CONSTANTS.LOACTION.SEND_LOCATION}`;
 
-const getAddressFromCoordinates = async (
-  latitude?: number,
-  longitude?: number
-): Promise<string> => {
-  if (!latitude || !longitude) return 'Unknown location';
-  try {
-    const location = await Location.reverseGeocodeAsync({
-      latitude,
-      longitude,
-    });
-
-    if (location && location.length > 0) {
-      const { formattedAddress, streetNumber, street, city, region, country, postalCode } =
-        location[0];
-
-      const addressParts = [streetNumber, street, city, region, postalCode, country].filter(
-        Boolean
-      );
-      return formattedAddress || addressParts.join(', ');
-    }
-
-    return 'Unknown location';
-  } catch (error) {
-    console.error('Error getting address from coordinates:', error);
-    return 'Unknown location';
-  }
-};
-
 // Define the task
 TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
   if (error) {
+    Alert.alert('Background Location', 'Background location task error' + JSON.stringify(error));
     console.error('Background location task error:', error);
     return;
   }
@@ -50,21 +25,18 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
       const deviceId = await localData.get(USER_DEVICE_ID);
       const address = await getAddressFromCoordinates(latitude, longitude);
 
-      console.log('Background location received:', { latitude, longitude, deviceId });
-
       try {
+        const formdata = new FormData();
+        formdata.append('sLatitude', latitude?.toString());
+        formdata.append('sLongitude', longitude?.toString());
+        formdata.append('sDeviceID', deviceId);
+        formdata.append('sLocation', address);
         const response = await fetch(LOCATION_UPLOAD_URL, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'maltipart/form-data',
-          },
-          body: JSON.stringify({
-            latitude,
-            longitude,
-            sDeviceID: deviceId,
-            sLocation: address,
-          }),
+          headers: { 'Content-Type': 'multipart/form-data' },
+          body: formdata,
         });
+        Alert.alert('Background Location', JSON.stringify(response));
 
         if (response.ok) {
           console.log('Location uploaded successfully:', await response.json());
@@ -73,6 +45,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
         }
       } catch (err) {
         console.error('Error uploading location:', err);
+        Alert.alert('Location Upload Error', JSON.stringify(err));
       }
     }
   }
@@ -87,14 +60,13 @@ export async function registerBackgroundLocationTask() {
       if (backgroundStatus === 'granted') {
         await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
           accuracy: Location.Accuracy.Balanced,
-          timeInterval: 600000, // 10 minutes
-          deferredUpdatesInterval: 600000, // 10 minutes
+          timeInterval: 60000, // 10 minutes
+          deferredUpdatesInterval: 60000, // 10 minutes
           showsBackgroundLocationIndicator: true, // Optional: shows an indicator on iOS
           foregroundService: {
-            // Required for Android background location
             notificationTitle: 'Tracking your location',
             notificationBody: 'To ensure accurate attendance and service delivery.',
-            notificationColor: '#FF0000', // Optional: notification color
+            notificationColor: '#FF0000',
           },
         });
         console.log('Background location task registered');
@@ -106,6 +78,7 @@ export async function registerBackgroundLocationTask() {
     }
   } catch (error) {
     console.error('Error registering background location task:', error);
+    Alert.alert('Error', 'Background location tracking failed to start' + JSON.stringify(error));
   }
 }
 

@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLocation } from '@/context/LocationContext';
 import { useToast } from '@/context/ToastContext';
 import AuthLayout from '@/layout/AuthLayout';
+import { getAddressFromCoordinates } from '@/services/location';
 import { makeFormData } from '@/utils/form-actions';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
@@ -91,7 +92,7 @@ export default function LoginScreen() {
   }, []);
   const { showToast } = useToast();
   const { login, user, isLoading } = useAuth();
-  const { currentLocation, getAddressFromCoordinates } = useLocation();
+  const { currentLocation } = useLocation();
   const {
     control,
     handleSubmit,
@@ -117,7 +118,7 @@ export default function LoginScreen() {
     };
     login(makeFormData(data))
       .then((res) => {
-        if(!(res instanceof Object)) return
+        if (!(res instanceof Object)) return;
         if (res?.success !== true) return;
         showToast({
           type: 'success',

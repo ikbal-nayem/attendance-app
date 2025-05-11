@@ -11,6 +11,7 @@ import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
 import { useLocation } from '@/context/LocationContext';
 import AuthLayout from '@/layout/AuthLayout';
+import { getAddressFromCoordinates } from '@/services/location';
 import { localData } from '@/services/storage';
 import { getDeviceInfo } from '@/utils/deviceInfo';
 import { makeFormData } from '@/utils/form-actions';
@@ -58,7 +59,7 @@ export default function RegisterScreen() {
       sTitle: titleOptions[0].value,
     },
   });
-  const { currentLocation, getAddressFromCoordinates } = useLocation();
+  const { currentLocation } = useLocation();
 
   const onSubmitHandler = async (data: FormData) => {
     const deviceInfo = getDeviceInfo();
