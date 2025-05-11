@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "IPS-SMAT",
-    "slug": "IPS-SMAT",
+    "name": "IPS SMAT",
+    "slug": "ips-smat",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -15,7 +15,7 @@
     },
     "newArchEnabled": true,
     "ios": {
-      "bundleIdentifier": "com.ips-smat.attendance",
+      "bundleIdentifier": "com.ips.smat",
       "buildNumber": "1.0.0",
       "supportsTablet": true,
       "infoPlist": {
@@ -26,7 +26,7 @@
       }
     },
     "android": {
-      "package": "com.ips-smat.attendance",
+      "package": "com.ips.smat",
       "versionCode": "1.0.1",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
