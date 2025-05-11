@@ -350,16 +350,16 @@ export default function ActivityHistoryScreen() {
       ) : activityHistoryList?.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyMessage}>
-            No activity records found for the selected period. {/* Changed message */}
+            No activity records found for the selected period.
           </Text>
         </View>
       ) : (
         <FlatList
           data={activityHistoryList}
           renderItem={renderItem}
-          keyExtractor={(item, idx) => (item?.entryNo || 'activity') + idx} // Use entryNo
+          keyExtractor={(item, idx) => item?.entryNo + idx}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: Layout.spacing.l }}
+          contentContainerStyle={{ paddingTop: Layout.spacing.m }}
         />
       )}
 
@@ -393,9 +393,8 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     borderColor: Colors.light.border,
     backgroundColor: `${Colors.light.primary}10`,
-    borderEndEndRadius: Layout.borderRadius.large,
-    borderStartEndRadius: Layout.borderRadius.large,
-    marginBottom: Layout.spacing.m,
+    borderEndEndRadius: Layout.borderRadius.xl,
+    borderStartEndRadius: Layout.borderRadius.xl,
     marginTop: -Layout.borderRadius.large,
     paddingTop: Layout.spacing.l,
   },

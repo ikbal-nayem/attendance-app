@@ -231,6 +231,7 @@ export default function AttendanceHistoryScreen() {
           renderItem={renderItem}
           keyExtractor={(item, idx) => item?.entryNo + idx}
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingTop: Layout.spacing.m }}
         />
       )}
     </SafeAreaView>
@@ -252,9 +253,8 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     borderColor: Colors.light.border,
     backgroundColor: `${Colors.light.primary}10`,
-    borderEndEndRadius: Layout.borderRadius.large,
-    borderStartEndRadius: Layout.borderRadius.large,
-    marginBottom: Layout.spacing.m,
+    borderEndEndRadius: Layout.borderRadius.xl,
+    borderStartEndRadius: Layout.borderRadius.xl,
     marginTop: -Layout.borderRadius.large,
     paddingTop: Layout.spacing.l,
   },

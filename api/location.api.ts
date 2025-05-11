@@ -87,11 +87,11 @@ export const sendLocationToServer = async (
       body: formdata,
     });
     if (response.ok) {
-      console.log('Location uploaded successfully:', await response.json());
+      console.log('[BG_TASK] Location uploaded successfully:', await response.json());
     } else {
-      console.error('Failed to upload location:', response.status, await response.text());
+      console.error('[BG_TASK] Failed to upload location:', response.status, await response.text());
     }
   } catch (err) {
-    console.error('Error uploading location:', err);
+    console.error('[BG_TASK] Error uploading location:', err);
   }
 };
