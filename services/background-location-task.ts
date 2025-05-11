@@ -1,13 +1,12 @@
+import { sendLocationToServer } from '@/api/location.api';
 import { USER_DEVICE_ID } from '@/constants/common';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 import { Alert } from 'react-native';
-import { API_CONSTANTS } from '../constants/api';
 import { getAddressFromCoordinates } from './location';
 import { localData } from './storage';
 
 const LOCATION_TASK_NAME = 'background-location-task';
-const LOCATION_UPLOAD_URL = `${API_CONSTANTS.BASE_URL}${API_CONSTANTS.LOACTION.SEND_LOCATION}`;
 
 // Define the task
 TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
@@ -25,28 +24,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
       const deviceId = await localData.get(USER_DEVICE_ID);
       const address = await getAddressFromCoordinates(latitude, longitude);
 
-      try {
-        const formdata = new FormData();
-        formdata.append('sLatitude', latitude?.toString());
-        formdata.append('sLongitude', longitude?.toString());
-        formdata.append('sDeviceID', deviceId);
-        formdata.append('sLocation', address);
-        const response = await fetch(LOCATION_UPLOAD_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'multipart/form-data' },
-          body: formdata,
-        });
-        Alert.alert('Background Location', JSON.stringify(response));
-
-        if (response.ok) {
-          console.log('Location uploaded successfully:', await response.json());
-        } else {
-          console.error('Failed to upload location:', response.status, await response.text());
-        }
-      } catch (err) {
-        console.error('Error uploading location:', err);
-        Alert.alert('Location Upload Error', JSON.stringify(err));
-      }
+      sendLocationToServer(latitude, longitude, deviceId, address);
     }
   }
 });
@@ -60,9 +38,9 @@ export async function registerBackgroundLocationTask() {
       if (backgroundStatus === 'granted') {
         await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
           accuracy: Location.Accuracy.Balanced,
-          timeInterval: 60000, // 10 minutes
-          deferredUpdatesInterval: 60000, // 10 minutes
-          showsBackgroundLocationIndicator: true, // Optional: shows an indicator on iOS
+          timeInterval: 600000, // 10 minutes
+          deferredUpdatesInterval: 600000, // 10 minutes
+          showsBackgroundLocationIndicator: true,
           foregroundService: {
             notificationTitle: 'Tracking your location',
             notificationBody: 'To ensure accurate attendance and service delivery.',

@@ -1,7 +1,7 @@
 import { API_CONSTANTS } from '@/constants/api';
-import { makeFormData } from '@/utils/form-actions';
 import { useEffect, useState } from 'react';
-import { axiosIns } from './config';
+
+const LOCATION_UPLOAD_URL = `${API_CONSTANTS.BASE_URL}${API_CONSTANTS.LOACTION.SEND_LOCATION}`;
 
 export interface IUserLocationData {
   userId: string;
@@ -43,13 +43,13 @@ const mockUserLocations: IUserLocationData[] = [
     userId: '3',
     userName: 'Alice Johnson',
     imageUrl: 'https://i.pravatar.cc/150?u=alice.johnson', // Placeholder image
-    location: { latitude: 23.780500, longitude: 90.418500, timestamp: Date.now() - 1000 * 60 * 10 }, // 10 mins ago
+    location: { latitude: 23.7805, longitude: 90.4185, timestamp: Date.now() - 1000 * 60 * 10 }, // 10 mins ago
   },
   {
     userId: '4',
     userName: 'Bob Williams',
     // No image for this user to test fallback
-    location: { latitude: 23.782500, longitude: 90.421500, timestamp: Date.now() - 1000 * 60 * 1 }, // 1 min ago
+    location: { latitude: 23.7825, longitude: 90.4215, timestamp: Date.now() - 1000 * 60 * 1 }, // 1 min ago
   },
 ];
 
@@ -70,21 +70,28 @@ export const useFetchUserLiveLocations = () => {
   return { userLocations, isLoading, error };
 };
 
-// export const useLiveTracking = (companyId: string) => {
-//   const [trackingList, setTrackingList] = useState<ITrackingList>();
-//   const [isLoading, setIsLoading] = useState(true);
-//   const [error, setError] = useState<string | null>(null);
-
-//   useEffect(() => {
-//     axiosIns
-//       .post(API_CONSTANTS.LOACTION.LIVE_TRACKING, makeFormData({ sCompanyID: companyId }))
-//       .then((response) => setTrackingList(response.data))
-//       .catch((err) => {
-//         console.log(err);
-//         setError(err.message);
-//       })
-//       .finally(() => setIsLoading(false));
-//   }, [companyId]);
-
-//   return { trackingList, isLoading, error };
-// };
+export const sendLocationToServer = async (
+  latitude: number,
+  longitude: number,
+  deviceId: string,
+  address: string
+) => {
+  const formdata = new FormData();
+  formdata.append('sLatitude', latitude?.toString());
+  formdata.append('sLongitude', longitude?.toString());
+  formdata.append('sDeviceID', deviceId);
+  formdata.append('sLocation', address);
+  try {
+    const response = await fetch(LOCATION_UPLOAD_URL, {
+      method: 'POST',
+      body: formdata,
+    });
+    if (response.ok) {
+      console.log('Location uploaded successfully:', await response.json());
+    } else {
+      console.error('Failed to upload location:', response.status, await response.text());
+    }
+  } catch (err) {
+    console.error('Error uploading location:', err);
+  }
+};

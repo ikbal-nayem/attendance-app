@@ -1,3 +1,6 @@
+import { sendLocationToServer } from '@/api/location.api';
+import { USER_DEVICE_ID } from '@/constants/common';
+import { getAddressFromCoordinates } from '@/services/location';
 import { localData } from '@/services/storage';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
@@ -49,19 +52,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   );
 
   useEffect(() => {
-    // Load location history from storage
-    // const loadLocationHistory = async () => {
-    //   try {
-    //     const storedHistory = await localData.get('locationHistory');
-    //     if (storedHistory) {
-    //       setLocationHistory(storedHistory);
-    //     }
-    //   } catch (error) {
-    //     console.error('Error loading location history:', error);
-    //   }
-    // };
-
-    // loadLocationHistory();
     const checkPermission = async () => {
       const hasPermission = await requestLocationPermission();
       if (!hasPermission) {
@@ -77,14 +67,6 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
     };
   }, []);
-
-  const saveLocationHistory = async (updatedHistory: LocationData[]) => {
-    try {
-      await localData.set('locationHistory', updatedHistory);
-    } catch (error) {
-      console.error('Error saving location history:', error);
-    }
-  };
 
   const requestLocationPermission = async (): Promise<boolean> => {
     try {
@@ -144,23 +126,24 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (!permissionGranted) return;
     }
 
-    // Get initial location
     const initialLocation = await getCurrentLocation();
     if (initialLocation) {
       const updatedHistory = [...locationHistory, initialLocation];
       setLocationHistory(updatedHistory);
-      // saveLocationHistory(updatedHistory);
     }
 
-    // Set up periodic location tracking (every 5 minutes)
+    // Set up periodic location tracking (every 10 minutes)
     const interval = setInterval(async () => {
       const location = await getCurrentLocation();
       if (location) {
         const updatedHistory = [...locationHistory, location];
         setLocationHistory(updatedHistory);
-        // saveLocationHistory(updatedHistory);
+        // Send location to server
+        const deviceId = await localData.get(USER_DEVICE_ID);
+        const address = await getAddressFromCoordinates(location.latitude, location.longitude);
+        sendLocationToServer(location.latitude, location.longitude, deviceId, address);
       }
-    }, 10 * 60 * 1000); // 5 minutes
+    }, 10 * 60 * 1000); // 10 minutes in milliseconds
 
     setLocationTrackingInterval(interval);
     setIsTracking(true);
