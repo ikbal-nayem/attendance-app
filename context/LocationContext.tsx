@@ -23,10 +23,7 @@ type LocationContextType = {
   startTracking: () => Promise<void>;
   stopTracking: () => void;
   requestLocationPermission: () => Promise<boolean>;
-  getAddressFromCoordinates: (
-    latitude?: number,
-    longitude?: number
-  ) => Promise<string>;
+  getAddressFromCoordinates: (latitude?: number, longitude?: number) => Promise<string>;
 };
 
 const defaultContext: LocationContextType = {
@@ -43,18 +40,15 @@ const defaultContext: LocationContextType = {
 
 const LocationContext = createContext<LocationContextType>(defaultContext);
 
-export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const [currentLocation, setCurrentLocation] = useState<LocationData | null>(
-    null
-  );
+export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [currentLocation, setCurrentLocation] = useState<LocationData | null>(null);
   const [locationPermission, setLocationPermission] = useState(false);
   const [locationErrorMsg, setLocationErrorMsg] = useState<string | null>(null);
   const [isTracking, setIsTracking] = useState(false);
   const [locationHistory, setLocationHistory] = useState<LocationData[]>([]);
-  const [locationTrackingInterval, setLocationTrackingInterval] =
-    useState<NodeJS.Timeout | null>(null);
+  const [locationTrackingInterval, setLocationTrackingInterval] = useState<NodeJS.Timeout | null>(
+    null
+  );
 
   useEffect(() => {
     // Load location history from storage
@@ -96,8 +90,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const requestLocationPermission = async (): Promise<boolean> => {
     try {
-      const { status: foregroundStatus } =
-        await Location.requestForegroundPermissionsAsync();
+      const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
 
       if (foregroundStatus !== 'granted') {
         setLocationErrorMsg('Permission to access location was denied');
@@ -106,8 +99,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       if (Platform.OS !== 'web') {
-        const { status: backgroundStatus } =
-          await Location.requestBackgroundPermissionsAsync();
+        const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
 
         if (backgroundStatus !== 'granted') {
           setLocationErrorMsg('Permission for background location was denied');
@@ -196,24 +188,12 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       if (location && location.length > 0) {
-        const {
-          formattedAddress,
-          streetNumber,
-          street,
-          city,
-          region,
-          country,
-          postalCode,
-        } = location[0];
+        const { formattedAddress, streetNumber, street, city, region, country, postalCode } =
+          location[0];
 
-        const addressParts = [
-          streetNumber,
-          street,
-          city,
-          region,
-          postalCode,
-          country,
-        ].filter(Boolean);
+        const addressParts = [streetNumber, street, city, region, postalCode, country].filter(
+          Boolean
+        );
         return formattedAddress || addressParts.join(', ');
       }
 
@@ -236,11 +216,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({
     getAddressFromCoordinates,
   };
 
-  return (
-    <LocationContext.Provider value={value}>
-      {children}
-    </LocationContext.Provider>
-  );
+  return <LocationContext.Provider value={value}>{children}</LocationContext.Provider>;
 };
 
 export const useLocation = () => useContext(LocationContext);

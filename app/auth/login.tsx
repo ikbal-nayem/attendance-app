@@ -119,7 +119,6 @@ export default function LoginScreen() {
       .then((res) => {
         if(!(res instanceof Object)) return
         if (res?.success !== true) return;
-        console.log(res)
         showToast({
           type: 'success',
           message: `Welcome back, ${res?.data?.userName}`,

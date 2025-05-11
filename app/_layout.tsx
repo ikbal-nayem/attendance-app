@@ -11,7 +11,8 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, Text, Platform } from 'react-native';
+// import { registerBackgroundLocationTask, isBackgroundLocationTaskRegistered } from '@/services/background-location-task';
 import Animated, { FadeOut } from 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -55,6 +56,24 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded]);
+
+  // useEffect(() => {
+  //   const setupBackgroundLocation = async () => {
+  //     if (Platform.OS === 'android' || Platform.OS === 'ios') { // Ensure it runs only on native
+  //       const isRegistered = await isBackgroundLocationTaskRegistered();
+  //       if (!isRegistered) {
+  //         console.log('Attempting to register background location task...');
+  //         await registerBackgroundLocationTask();
+  //       } else {
+  //         console.log('Background location task already registered.');
+  //       }
+  //     }
+  //   };
+
+  //   if (isAppReady) { // Ensure app is ready before attempting to register
+  //       setupBackgroundLocation();
+  //   }
+  // }, [isAppReady]);
 
   if (!isAppReady) {
     return (
