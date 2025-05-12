@@ -166,7 +166,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: Layout.spacing.m,
+    marginBottom: Layout.spacing.l,
+    paddingBottom: Layout.spacing.m,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.border,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -194,8 +197,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     paddingVertical: Layout.spacing.s,
-    borderTopWidth: 1,
-    borderTopColor: Colors.light.border + '50',
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.border + '50',
   },
   detailIcon: {
     marginRight: Layout.spacing.m,

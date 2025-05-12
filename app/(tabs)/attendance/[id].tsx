@@ -1,17 +1,19 @@
 import { IAttendanceHistory } from '@/api/attendance.api';
+import Card from '@/components/Card';
 import AppHeader from '@/components/Header';
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { parseDate } from '@/utils/date-time';
+import { isNull } from '@/utils/validation';
 import { useLocalSearchParams } from 'expo-router';
 import {
   AlertTriangle,
   Briefcase,
   ClockArrowDown,
   ClockArrowUp,
+  FilePenLine,
   MapPin,
-  Tag,
 } from 'lucide-react-native';
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 
@@ -46,12 +48,14 @@ export default function AttendanceDetailScreen() {
     icon: Icon,
     label,
     value,
+    hiddenBorder = false,
   }: {
     icon: React.ElementType;
     label: string;
     value?: string | number | null;
+    hiddenBorder?: boolean;
   }) => (
-    <View style={styles.detailItemContainer}>
+    <View style={[styles.detailItemContainer, hiddenBorder && { borderBottomWidth: 0 }]}>
       <Icon size={20} color={Colors.light.primary} style={styles.detailIcon} />
       <View style={styles.detailTextContainer}>
         <Text style={styles.detailLabel}>{label}</Text>
@@ -70,8 +74,8 @@ export default function AttendanceDetailScreen() {
         rightContent={<View style={{ width: 24 }} />}
       />
       <ScrollView style={styles.container} contentContainerStyle={styles.scrollContentContainer}>
-        <View style={styles.card}>
-          <View style={styles.headerSection}>
+        <Card variant="outlined">
+          <View style={styles.cardHeader}>
             <Briefcase size={36} color={Colors.light.primary} />
             <View style={styles.headerTextContainer}>
               <Text style={styles.entryType}>{params.entryType || 'N/A'}</Text>
@@ -91,12 +95,22 @@ export default function AttendanceDetailScreen() {
             </View>
           </View>
 
-          <DetailItem icon={MapPin} label="Location" value={params.entryLocation} />
+          <DetailItem
+            icon={MapPin}
+            label="Location"
+            value={params.entryLocation}
+            hiddenBorder={isNull(params?.attendanceNote)}
+          />
 
           {params.attendanceNote && (
-            <DetailItem icon={Tag} label="Note" value={params.attendanceNote} />
+            <DetailItem
+              icon={FilePenLine}
+              label="Note"
+              value={params.attendanceNote}
+              hiddenBorder
+            />
           )}
-        </View>
+        </Card>
       </ScrollView>
     </SafeAreaView>
   );
@@ -112,17 +126,7 @@ const styles = StyleSheet.create({
   scrollContentContainer: {
     padding: Layout.spacing.m,
   },
-  card: {
-    backgroundColor: Colors.light.card,
-    borderRadius: Layout.borderRadius.large,
-    padding: Layout.spacing.m,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: Layout.borderRadius.medium,
-    elevation: 3,
-  },
-  headerSection: {
+  cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: Layout.spacing.l,
@@ -160,17 +164,17 @@ const styles = StyleSheet.create({
   },
   detailItemContainer: {
     flexDirection: 'row',
-    alignItems: 'flex-start', // Align items to start for multi-line values
-    paddingVertical: Layout.spacing.m,
+    alignItems: 'flex-start',
+    paddingVertical: Layout.spacing.s,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.light.border + '50', // Lighter border
+    borderBottomColor: Colors.light.border + '50',
   },
   detailIcon: {
     marginRight: Layout.spacing.m,
-    marginTop: Layout.spacing.xs / 2, // Align icon with first line of text
+    marginTop: Layout.spacing.xs / 2,
   },
   detailTextContainer: {
-    flex: 1, // Allow text to wrap
+    flex: 1,
   },
   detailLabel: {
     fontFamily: 'Inter-Medium',
