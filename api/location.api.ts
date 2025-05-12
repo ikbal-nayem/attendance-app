@@ -29,27 +29,27 @@ interface ITrackingList {
 const mockUserLocations: IUserLocationData[] = [
   {
     userId: '1',
-    userName: 'John Doe',
-    imageUrl: 'https://i.pravatar.cc/150?u=john.doe', // Placeholder image
-    location: { latitude: 23.780887, longitude: 90.419945, timestamp: Date.now() - 1000 * 60 * 5 }, // 5 mins ago
+    userName: 'Ikbal',
+    imageUrl: 'https://avatars.githubusercontent.com/u/31121811?v=4', // Placeholder image
+    location: { latitude: 23.748372, longitude: 90.396734, timestamp: Date.now() - 1000 * 60 * 5 }, // 5 mins ago
   },
   {
     userId: '2',
-    userName: 'Jane Smith',
+    userName: 'Mujahid',
     imageUrl: 'https://i.pravatar.cc/150?u=jane.smith', // Placeholder image
-    location: { latitude: 23.781992, longitude: 90.420012, timestamp: Date.now() - 1000 * 60 * 2 }, // 2 mins ago
+    location: { latitude: 23.769999068691877, longitude: 90.4107950519981, timestamp: Date.now() - 1000 * 60 * 2 }, // 2 mins ago
   },
   {
     userId: '3',
     userName: 'Alice Johnson',
     imageUrl: 'https://i.pravatar.cc/150?u=alice.johnson', // Placeholder image
-    location: { latitude: 23.7805, longitude: 90.4185, timestamp: Date.now() - 1000 * 60 * 10 }, // 10 mins ago
+    location: { latitude: 23.75905247216991, longitude: 90.3897508684784, timestamp: Date.now() - 1000 * 60 * 10 }, // 10 mins ago
   },
   {
     userId: '4',
     userName: 'Bob Williams',
     // No image for this user to test fallback
-    location: { latitude: 23.7825, longitude: 90.4215, timestamp: Date.now() - 1000 * 60 * 1 }, // 1 min ago
+    location: { latitude: 23.78111639688084, longitude: 90.39946244398558, timestamp: Date.now() - 1000 * 60 * 1 }, // 1 min ago
   },
 ];
 

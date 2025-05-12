@@ -1,6 +1,6 @@
 import Colors from '@/constants/Colors';
 import { Tabs } from 'expo-router';
-import { Clock, Home, ListTodo, ScanSearch } from 'lucide-react-native';
+import { Clock, FolderClock, FolderSearch, Home, ListTodo, ScanSearch } from 'lucide-react-native';
 import React, { useEffect, useRef } from 'react';
 import { Animated } from 'react-native';
 
@@ -81,7 +81,7 @@ export default function TabLayout() {
           title: 'Enquiry',
           tabBarIcon: ({ color, size, focused }) => (
             <AnimatedIcon focused={focused}>
-              <ScanSearch size={size * 1.1} color={color} />
+              <FolderSearch size={size * 1.1} color={color} />
             </AnimatedIcon>
           ),
         }}

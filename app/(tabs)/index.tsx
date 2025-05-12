@@ -17,12 +17,12 @@ import {
   ChevronsLeft,
   Clock,
   Edit,
+  FileSearch,
   ListTodo,
   LogOut,
   Map,
   MapPin,
   QrCode,
-  ScanSearch,
 } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
@@ -114,7 +114,7 @@ const CheckinDuration = ({ checkInTime }: { checkInTime?: Date }) => {
 const menu1 = [
   {
     name: 'Attendance',
-    icon: <Clock size={30} color="#00ACC1" />,
+    icon: <Clock size={30} color={Colors.light.secondary} />,
     onPress: () => {
       router.push('/(tabs)/attendance');
     },
@@ -135,7 +135,7 @@ const menu1 = [
   },
   {
     name: 'Enquiry',
-    icon: <ScanSearch size={24} color={Colors.light.info} />,
+    icon: <FileSearch size={24} color={Colors.light.primaryDark} />,
     onPress: () => {
       router.setParams({ screen: 'enquiry' });
     },

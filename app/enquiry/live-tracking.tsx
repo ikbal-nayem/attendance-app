@@ -1,68 +1,50 @@
 import { IUserLocationData, useFetchUserLiveLocations } from '@/api/location.api';
+import AppHeader from '@/components/Header';
+import Input from '@/components/Input';
+import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
-import { Search } from 'lucide-react-native'; // ChevronLeft will come from AppHeader
-import React, { useEffect, useRef, useState } from 'react';
+import { Fullscreen, Search } from 'lucide-react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
   Image,
-  SafeAreaView, // Renamed to avoid conflict
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import MapView, { Callout, Marker, Region } from 'react-native-maps';
-// import Card from '@/components/Card'; // Card component might not be needed for the user list container if we style it directly
-import AppHeader from '@/components/Header'; // Import AppHeader
-import Input from '@/components/Input';
-import AppStatusBar from '@/components/StatusBar';
+import MapView, { Callout, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 const { width, height } = Dimensions.get('window');
-const MAP_HEIGHT_PERCENTAGE = 0.6; // 60% of screen height for map
+const MAP_HEIGHT_PERCENTAGE = 0.6;
 const MARKER_IMAGE_SIZE = 30;
 
 export default function LiveTrackingScreen() {
   const { userLocations: allUserLocations, isLoading, error } = useFetchUserLiveLocations();
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [mapRegion, setMapRegion] = useState<Region | undefined>(undefined);
-  const [initialRegionSet, setInitialRegionSet] = useState(false); // To track if initial region/fit has been done
   const mapRef = useRef<MapView>(null);
 
   useEffect(() => {
-    if (allUserLocations.length > 0 && !initialRegionSet && mapRef.current) {
-      if (allUserLocations.length === 1) {
-        const userLocation = allUserLocations[0].location;
-        const region = {
-          latitude: userLocation.latitude,
-          longitude: userLocation.longitude,
-          latitudeDelta: 0.02, // Closer zoom for single user
-          longitudeDelta: 0.02,
-        };
-        setMapRegion(region);
-        mapRef.current.animateToRegion(region, 1000);
-      } else {
-        const coordinates = allUserLocations.map((u) => u.location);
-        mapRef.current.fitToCoordinates(coordinates, {
-          edgePadding: { top: 60, right: 60, bottom: 60, left: 60 }, // Increased padding
-          animated: true,
-        });
-      }
-      setInitialRegionSet(true);
-    } else if (allUserLocations.length > 0 && !mapRegion && !initialRegionSet) {
-      // Fallback if mapRef is not ready immediately, set a general region
-      const firstUserLocation = allUserLocations[0].location;
-      setMapRegion({
-        latitude: firstUserLocation.latitude,
-        longitude: firstUserLocation.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
+    if (!isLoading) {
+      showAllUsers();
+    }
+  }, [isLoading]);
+
+  const showAllUsers = useCallback(() => {
+    if (mapRef.current) {
+      const coordinates = allUserLocations?.map((user) => user.location);
+      mapRef.current.fitToCoordinates(coordinates, {
+        edgePadding: { top: 60, right: 60, bottom: 60, left: 60 },
+        animated: true,
       });
     }
-  }, [allUserLocations, initialRegionSet]);
+    setSelectedUserId(null);
+  }, [allUserLocations]);
 
   const handleUserSelect = (user: IUserLocationData) => {
     setSelectedUserId(user.userId);
@@ -71,10 +53,10 @@ export default function LiveTrackingScreen() {
         {
           latitude: user.location.latitude,
           longitude: user.location.longitude,
-          latitudeDelta: 0.01, // Zoom in closer
+          latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         },
-        1000 // Animation duration
+        1000
       );
     }
   };
@@ -92,20 +74,11 @@ export default function LiveTrackingScreen() {
     user.userName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (isLoading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={Colors.light.primary} />
-          <Text style={styles.loadingText}>Loading Live Locations...</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   if (error) {
     return (
       <SafeAreaView style={styles.container}>
+        <AppStatusBar />
+        <AppHeader title="Live Tracking" bg="primary" />
         <View style={styles.centered}>
           <Text style={styles.errorText}>Error: {error}</Text>
         </View>
@@ -116,23 +89,29 @@ export default function LiveTrackingScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
-      <AppHeader title="Live Tracking" bg="primary" />
+      <AppHeader
+        title="Live Tracking"
+        bg="primary"
+        rightContent={
+          <TouchableOpacity onPress={showAllUsers} activeOpacity={0.7}>
+            <Fullscreen size={24} color={Colors.dark.text} />
+          </TouchableOpacity>
+        }
+      />
       <View style={styles.mapContainer}>
         <MapView
           ref={mapRef}
           style={styles.map}
-          initialRegion={mapRegion}
-          region={mapRegion}
-          onRegionChangeComplete={setMapRegion}
-          showsUserLocation={false}
-          showsMyLocationButton={false}
+          onMapReady={showAllUsers}
+          zoomControlEnabled
+          provider={PROVIDER_GOOGLE}
         >
-          {allUserLocations.map((user) => (
+          {allUserLocations?.map((user) => (
             <Marker
               key={user.userId}
               coordinate={user.location}
               onPress={() => handleUserSelect(user)}
-              pinColor={getPinColor(user.userId)} // Default color, selection handled by custom marker view
+              pinColor={getPinColor(user.userId)}
               zIndex={selectedUserId === user.userId ? 10 : 1}
             >
               <View
@@ -174,16 +153,24 @@ export default function LiveTrackingScreen() {
           value={searchTerm}
           onChangeText={setSearchTerm}
           leftIcon={<Search size={20} color={Colors.light.subtext} />}
-          containerStyle={styles.searchInputContainer}
           inputContainerStyle={styles.searchInputInnerContainer}
           inputStyle={styles.searchInput}
           size="medium"
+          rightIcon={
+            isLoading ? <ActivityIndicator size="small" color={Colors.light.subtext} /> : null
+          }
         />
         <ScrollView showsVerticalScrollIndicator={false}>
+          {/* {isLoading && (
+            <Text>
+              Loading Users... <ActivityIndicator size="small" color={Colors.light.primary} />
+            </Text>
+          )} */}
           {filteredUserLocations.length > 0 ? (
             filteredUserLocations.map((user) => (
               <TouchableOpacity
                 key={user.userId}
+                activeOpacity={0.7}
                 style={[styles.userItem, selectedUserId === user.userId && styles.selectedUserItem]}
                 onPress={() => handleUserSelect(user)}
               >
@@ -218,10 +205,7 @@ const getPinColor = (userId: string) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.light.background,
-  },
+  container: { flex: 1 },
   centered: {
     flex: 1,
     justifyContent: 'center',
@@ -256,9 +240,6 @@ const styles = StyleSheet.create({
     paddingTop: Layout.spacing.m,
     paddingHorizontal: Layout.spacing.m,
   },
-  searchInputContainer: {
-    marginBottom: Layout.spacing.m,
-  },
   searchInputInnerContainer: {
     backgroundColor: Colors.light.background,
     borderColor: Colors.light.border,
@@ -282,9 +263,6 @@ const styles = StyleSheet.create({
   selectedUserItem: {
     backgroundColor: Colors.light.primaryLight,
     borderColor: Colors.light.primary,
-    borderWidth: 1.5,
-    shadowColor: Colors.light.primary,
-    shadowOpacity: 0.2,
   },
   userColorIndicator: {
     width: 12,
@@ -314,19 +292,19 @@ const styles = StyleSheet.create({
     marginTop: Layout.spacing.xl,
   },
   markerContainer: {
-    width: MARKER_IMAGE_SIZE + 8, // Add padding for border
+    width: MARKER_IMAGE_SIZE + 8,
     height: MARKER_IMAGE_SIZE + 8,
     borderRadius: (MARKER_IMAGE_SIZE + 8) / 2,
     backgroundColor: Colors.light.background,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: Colors.light.primary, // Default border color
+    borderColor: Colors.light.primary,
     overflow: 'hidden',
   },
   selectedMarkerContainer: {
-    borderColor: Colors.light.tint, // Highlight border color
-    borderWidth: 3, // Thicker border for selected
+    borderColor: Colors.light.tint,
+    borderWidth: 3,
     shadowColor: Colors.light.tint,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
@@ -347,7 +325,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   markerFallbackText: {
-    color: Colors.dark.text, // Assuming primary background is light
+    color: Colors.dark.text,
     fontSize: MARKER_IMAGE_SIZE / 2,
     fontFamily: 'Inter-Bold',
   },
@@ -357,7 +335,7 @@ const styles = StyleSheet.create({
     borderRadius: Layout.borderRadius.medium,
     borderColor: Colors.light.border,
     borderWidth: 1,
-    width: width * 0.5, // Adjust width as needed
+    width: width * 0.5,
   },
   calloutTitle: {
     fontFamily: 'Inter-SemiBold',
