@@ -188,8 +188,6 @@ export default function ActivityScreen() {
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
-                multiline
-                numberOfLines={2}
                 error={errors.sContactPerson?.message}
               />
             )}

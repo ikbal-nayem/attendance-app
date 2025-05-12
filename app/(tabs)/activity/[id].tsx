@@ -1,202 +1,201 @@
-import { IActivityHistory } from '@/api/activity.api'; // Assuming a similar interface for activity
+import { IActivityHistory, useActivityHistoryInit } from '@/api/activity.api';
+import Card from '@/components/Card';
 import AppHeader from '@/components/Header';
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
+import { useAuth } from '@/context/AuthContext';
+import { parseResponseDate, parseResponseTime } from '@/utils/date-time';
 import { useLocalSearchParams } from 'expo-router';
 import {
-  AlertTriangle,
-  Briefcase, // Using Briefcase, consider changing if a more specific icon for activity is available
-  CheckCircle,
-  Hash,
+  Activity as ActivityIcon,
+  Building,
+  CalendarDays,
+  FilePenLine,
+  FileText,
+  Info,
   MapPin,
-  Tag,
-  Activity as ActivityIcon, // Changed from User to ActivityIcon for relevance
-  XCircle,
+  Paperclip,
+  UserCircle,
 } from 'lucide-react-native';
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React from 'react';
+import {
+  Linking,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 export default function ActivityDetailScreen() {
-  const params =
-    useLocalSearchParams<
-      Partial<
-        IActivityHistory & { // Changed from IAttendanceHistory
-          entryDate: string;
-          entryTime: string;
-          // exitTime might not be relevant for all activities, but keeping for structural similarity
-          exitTime?: string;
-          status: string; // Generic status
-          location?: string; // Optional location
-          description?: string; // Changed from entryNote to description for broader use
-          activityType?: string; // Changed from entryType
-          activityNo?: string; // Changed from entryNo
-          activityFlag?: string; // Changed from attendanceFlag
-        }
-      >
-    >();
+  const params = useLocalSearchParams<
+    Omit<Partial<IActivityHistory>, 'attachmentFile01'> & { attachmentFile01: string }
+  >();
 
-  let statusText = 'Pending';
-  let statusColor = Colors.light.warning;
-  let StatusIconComponent = AlertTriangle; // Renamed for clarity
+  const attachmentFile01 = params?.attachmentFile01
+    ? (JSON.parse(params?.attachmentFile01 || '[]') as Array<any>)
+    : [];
 
-  // Interpret activityFlag from params (similar to attendanceFlag)
-  // This logic might need to be adjusted based on actual activity statuses
-  if (params.activityFlag === 'C') { // Assuming 'C' for Completed
-    statusText = 'Completed';
-    statusColor = Colors.light.success;
-    StatusIconComponent = CheckCircle;
-  } else if (params.activityFlag === 'I') { // Assuming 'I' for Incomplete or Skipped
-    statusText = 'Incomplete';
-    statusColor = Colors.light.error;
-    StatusIconComponent = XCircle;
-  }
-  // Fallback for a generic status string if activityFlag is not 'C' or 'I'
-  else if (params.status) {
-    if (params.status.toLowerCase() === 'completed') {
-      statusText = 'Completed';
-      statusColor = Colors.light.success;
-      StatusIconComponent = CheckCircle;
-    } else if (params.status.toLowerCase() === 'incomplete' || params.status.toLowerCase() === 'skipped') {
-      statusText = 'Incomplete';
-      statusColor = Colors.light.error;
-      StatusIconComponent = XCircle;
-    } else {
-      statusText = params.status; // Use the status directly
-      // Default to warning if status is unknown but present
-      statusColor = Colors.light.warning;
-      StatusIconComponent = AlertTriangle;
-    }
-  }
+  console.log('Activity Detail Params:', params);
 
+  const { user } = useAuth();
+  const { activityData } = useActivityHistoryInit(user?.companyID!);
 
   const DetailItem = ({
     icon: Icon,
     label,
     value,
+    isPressable = false,
+    onPress,
   }: {
     icon: React.ElementType;
     label: string;
     value?: string | number | null;
+    isPressable?: boolean;
+    onPress?: () => void;
   }) => (
-    <View style={styles.detailItemContainer}>
-      <Icon size={20} color={Colors.light.primary} style={styles.detailIcon} />
-      <View style={styles.detailTextContainer}>
-        <Text style={styles.detailLabel}>{label}</Text>
-        <Text style={styles.detailValue}>{value || 'N/A'}</Text>
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={!isPressable}
+      activeOpacity={isPressable ? 0.7 : 1}
+    >
+      <View style={styles.detailItemContainer}>
+        <Icon size={20} color={Colors.light.primary} style={styles.detailIcon} />
+        <View style={styles.detailTextContainer}>
+          <Text style={styles.detailLabel}>{label}</Text>
+          <Text style={[styles.detailValue, isPressable && styles.pressableValue]}>
+            {value || 'N/A'}
+          </Text>
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
+
+  const activityTypeName = activityData?.activityTypeList?.find(
+    (at) => at.code === params.activityType
+  )?.name;
+  const clientName = activityData?.clientList?.find((c) => c.code === params.client)?.name;
+  const territoryName = activityData?.territoryList?.find((t) => t.code === params.territory)?.name;
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <AppStatusBar />
       <AppHeader title="Activity Details" bg="primary" withBackButton />
       <ScrollView style={styles.container} contentContainerStyle={styles.scrollContentContainer}>
-        <View style={styles.card}>
-          <View style={styles.headerSection}>
-            {/* Using ActivityIcon or Briefcase as a placeholder */}
-            <ActivityIcon size={36} color={Colors.light.primary} />
-            <View style={styles.headerTextContainer}>
-              <Text style={styles.entryType}>{params.activityType || params.title || 'N/A'}</Text>
-              {params.entryDate && (
-                <Text style={styles.entryDateText}>Date: {params.entryDate}</Text>
-              )}
+        <Card variant="outlined">
+          <View style={styles.cardHeader}>
+            <View style={styles.headerLeft}>
+              <ActivityIcon size={20} color={Colors.light.primary} />
+              <View>
+                <Text style={styles.entryTypeText} numberOfLines={1}>
+                  {activityTypeName}
+                </Text>
+                {(params?.activityStartTime || params?.activityStopTime) && (
+                  <Text style={styles.activityTimeText} numberOfLines={1}>
+                    {parseResponseTime(params?.activityStartTime)} -{' '}
+                    {parseResponseTime(params?.activityStopTime)}
+                  </Text>
+                )}
+              </View>
             </View>
-            <View style={[styles.statusBadge, { backgroundColor: `${statusColor}20` }]}>
-              <StatusIconComponent size={16} color={statusColor} />
-              <Text style={[styles.statusText, { color: statusColor }]}>{statusText}</Text>
-            </View>
+            <Text style={styles.activityDateText}>
+              <CalendarDays size={14} color={Colors.light.subtext} />{' '}
+              {parseResponseDate(params?.activityDate).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              })}
+            </Text>
           </View>
 
-          {params.location && <DetailItem
-            icon={MapPin}
-            label="Location"
-            value={params.location}
-          />}
-          {params.activityNo && <DetailItem icon={Hash} label="Activity No." value={params.activityNo} />}
-          {params.title && !params.activityType && <DetailItem icon={Briefcase} label="Title" value={params.title} />}
+          <DetailItem icon={Building} label="Client" value={clientName || params.client} />
+          <DetailItem icon={UserCircle} label="Contact Person" value={params.contactPerson} />
+          <DetailItem icon={MapPin} label="Territory" value={territoryName || params.territory} />
+          <DetailItem icon={Info} label="Activity Details" value={params.activityDetails} />
+          <DetailItem icon={FilePenLine} label="Activity Note" value={params.activityNote} />
 
-
-          {params.entryTime && (
-            <DetailItem icon={Tag} label="Start Time" value={params.entryTime} />
+          {attachmentFile01 && attachmentFile01?.length > 0 && (
+            <View style={styles.attachmentsContainer}>
+              <View style={styles.detailItemContainerNoBorder}>
+                <Paperclip size={20} color={Colors.light.primary} style={styles.detailIcon} />
+                <View style={styles.detailTextContainer}>
+                  <Text style={styles.detailLabel}>Attachments</Text>
+                </View>
+              </View>
+              {attachmentFile01?.map((file: any, index: number) => (
+                <DetailItem
+                  key={index}
+                  icon={FileText}
+                  label={`File ${index + 1}`}
+                  value={
+                    typeof file === 'string'
+                      ? file.split('/').pop()
+                      : file.name || `Attachment ${index + 1}`
+                  }
+                  isPressable={typeof file === 'string'}
+                  onPress={() => {
+                    if (typeof file === 'string') {
+                      Linking.canOpenURL(file).then((supported) => {
+                        if (supported) {
+                          Linking.openURL(file);
+                        } else {
+                          console.log("Don't know how to open URI: " + file);
+                        }
+                      });
+                    }
+                  }}
+                />
+              ))}
+            </View>
           )}
-          {params.exitTime && ( // Kept for structural similarity, might be end time for an activity
-            <DetailItem icon={Tag} label="End Time" value={params.exitTime} />
-          )}
-          {params.description && <DetailItem icon={Tag} label="Description" value={params.description} />}
-          {/* Add other relevant activity details here */}
-          {params.remarks && <DetailItem icon={Tag} label="Remarks" value={params.remarks} />}
-
-
-        </View>
+        </Card>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.light.background,
-  },
-  container: {
-    flex: 1,
-  },
+  safeArea: { flex: 1 },
+  container: { flex: 1 },
   scrollContentContainer: {
     padding: Layout.spacing.m,
   },
-  card: {
-    backgroundColor: Colors.light.card,
-    borderRadius: Layout.borderRadius.large,
-    padding: Layout.spacing.m,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: Layout.borderRadius.medium,
-    elevation: 3,
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: Layout.spacing.m,
   },
-  headerSection: {
+  headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: Layout.spacing.l,
-    paddingBottom: Layout.spacing.m,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.light.border,
-  },
-  headerTextContainer: {
-    marginLeft: Layout.spacing.m,
+    gap: Layout.spacing.s,
     flex: 1,
+    marginRight: Layout.spacing.s,
   },
-  entryType: { // Kept name for style consistency, represents activity type/title
-    fontFamily: 'Inter-Bold',
-    fontSize: 20,
+  entryTypeText: {
+    fontWeight: '600',
+    fontSize: 18,
     color: Colors.light.primary,
-    marginBottom: Layout.spacing.xs / 2,
+    flexShrink: 1,
   },
-  entryDateText: { // Kept name for style consistency
-    fontFamily: 'Inter-Regular',
-    fontSize: 13,
+  activityTimeText: {
+    fontSize: 15,
     color: Colors.light.subtext,
   },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: Layout.spacing.xs,
-    paddingHorizontal: Layout.spacing.s,
-    borderRadius: Layout.borderRadius.large,
-    marginLeft: Layout.spacing.s,
-  },
-  statusText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 12,
-    marginLeft: Layout.spacing.xs / 2,
+  activityDateText: {
+    fontWeight: '500',
+    fontSize: 15,
+    color: Colors.light.subtext,
   },
   detailItemContainer: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingVertical: Layout.spacing.m,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.light.border + '50',
+    paddingVertical: Layout.spacing.s,
+    borderTopWidth: 1,
+    borderTopColor: Colors.light.border + '50',
   },
   detailIcon: {
     marginRight: Layout.spacing.m,
@@ -215,5 +214,17 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter-Regular',
     fontSize: 15,
     color: Colors.light.text,
+  },
+  pressableValue: {
+    color: Colors.light.primary,
+    textDecorationLine: 'underline',
+  },
+  attachmentsContainer: {
+    marginTop: Layout.spacing.m,
+  },
+  detailItemContainerNoBorder: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: Layout.spacing.m,
   },
 });

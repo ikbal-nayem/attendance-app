@@ -11,8 +11,9 @@ export interface IActivityHistory {
   activityStartTime: string;
   activityStopTime: string;
   activityType: string;
-  attachmentFile01: [];
+  attachmentFile01: Array<any>;
   client: string;
+  contactPerson: string;
   entryNo: string;
   territory: string;
 }

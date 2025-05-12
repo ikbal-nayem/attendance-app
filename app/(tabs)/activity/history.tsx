@@ -179,7 +179,7 @@ export default function ActivityHistoryScreen() {
   const handleItemPress = useCallback((item: IActivityHistory) => {
     router.push({
       pathname: '/(tabs)/activity/[id]',
-      params: { id: item?.entryNo!, ...item },
+      params: { id: item?.entryNo, ...item },
     });
   }, []);
 
@@ -340,7 +340,7 @@ export default function ActivityHistoryScreen() {
           mode="date"
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={onDateChange}
-          maximumDate={new Date()} // Can be adjusted based on requirements
+          maximumDate={new Date()}
           minimumDate={showDatePicker === 'end' && startDate ? startDate : undefined}
         />
       )}
@@ -357,7 +357,7 @@ export default function ActivityHistoryScreen() {
         <FlatList
           data={activityHistoryList}
           renderItem={renderItem}
-          keyExtractor={(item, idx) => item?.entryNo + idx}
+          keyExtractor={(item, idx) => item?.entryNo + idx.toString()}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingTop: Layout.spacing.m }}
         />
