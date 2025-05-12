@@ -8,21 +8,21 @@ import { generateUserImage } from '@/utils/generator';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import {
+  Activity,
   ArrowRightCircle,
   Bell,
+  BellDot,
   BellPlus,
+  CalendarClock,
   ChevronsLeft,
   Clock,
   Edit,
-  Layers,
-  ListChecks,
   ListTodo,
   LogOut,
   Map,
   MapPin,
   QrCode,
   ScanSearch,
-  SendHorizontal as SendHorizonal,
 } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
@@ -145,22 +145,27 @@ const menu1 = [
 const menu2 = [
   {
     name: 'Daily Activity',
-    icon: <Layers size={24} color="#8E44AD" />,
+    icon: <Activity size={24} color={Colors.light.accent} />,
     onPress: () => router.push('/(tabs)/activity/history'),
   },
   {
     name: 'Clock In/Out history',
-    icon: <ListChecks size={24} color="#2980B9" />,
+    icon: <CalendarClock size={30} color={Colors.light.secondary} />,
     onPress: () => router.push('/(tabs)/attendance/history'),
   },
   {
+    name: 'Notification History',
+    icon: <BellDot size={24} color={Colors.light.warning} />,
+    onPress: () => router.push('/notifications/history'),
+  },
+  {
     name: 'Geolocation & Territory',
-    icon: <MapPin size={24} color="#16A085" />,
+    icon: <MapPin size={24} color={Colors.light.tint} />,
     onPress: () => router.push('/enquiry/geolocation'),
   },
   {
     name: 'Live Tracking',
-    icon: <Map size={24} color="#E74C3C" />,
+    icon: <Map size={24} color={Colors.light.error} />,
     onPress: () => router.push('/enquiry/live-tracking'),
   },
 ];

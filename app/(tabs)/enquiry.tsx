@@ -3,41 +3,40 @@ import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { router } from 'expo-router';
-import { Layers, ListChecks, Map, MapPin } from 'lucide-react-native';
+import { Activity, BellDot, CalendarClock, Map, MapPin } from 'lucide-react-native';
 import React from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function EnquiryScreen() {
   const enquiryOptions = [
     {
       id: 'activities',
-      title: 'Daily Activities',
-      icon: <Layers size={24} color="#8E44AD" />,
+      title: 'Daily Activities History',
+      icon: <Activity size={24} color={Colors.light.accent} />,
       route: '/(tabs)/activity/history',
     },
     {
       id: 'attendance',
       title: 'Clock-in/Clock-out History',
-      icon: <ListChecks size={24} color="#2980B9" />,
+      icon: <CalendarClock size={30} color={Colors.light.secondary} />,
       route: '/(tabs)/attendance/history',
+    },
+    {
+      id: 'notifications',
+      title: 'Notification History',
+      icon: <BellDot size={24} color={Colors.light.warning} />,
+      route: '/notifications/history',
     },
     {
       id: 'geolocation',
       title: 'Geolocation & Territory History',
-      icon: <MapPin size={24} color="#16A085" />,
+      icon: <MapPin size={24} color={Colors.light.tint} />,
       route: '/enquiry/geolocation',
     },
     {
       id: 'tracking',
       title: 'Live Tracking',
-      icon: <Map size={24} color="#E74C3C" />,
+      icon: <Map size={24} color={Colors.light.error} />,
       route: '/enquiry/live-tracking',
     },
   ];
@@ -45,12 +44,14 @@ export default function EnquiryScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
-      <AppHeader title="Enquiry" withBackButton={false} bg="primary" />
+      <AppHeader
+        title="Enquiry"
+        withBackButton
+        bg="primary"
+        rightContent={<View style={{ width: 24 }} />}
+      />
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={styles.optionsContainer}>
           {enquiryOptions.map((option) => (
             <TouchableOpacity
@@ -74,11 +75,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.background,
   },
   scrollContent: {
-    padding: Layout.spacing.l,
+    padding: Layout.spacing.m,
     paddingBottom: Layout.spacing.xxl,
   },
   optionsContainer: {
-    rowGap: Layout.spacing.l,
+    rowGap: Layout.spacing.m,
   },
   optionButton: {
     flexDirection: 'row',
