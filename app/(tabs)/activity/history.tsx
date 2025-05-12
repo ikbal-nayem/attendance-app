@@ -377,9 +377,7 @@ export default function ActivityHistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   filterIconContainer: {
     padding: Layout.spacing.s,
   },

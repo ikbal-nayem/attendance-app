@@ -4,7 +4,9 @@ import {
   useAttendanceHistoryList,
 } from '@/api/attendance.api';
 import AnimatedRenderView from '@/components/AnimatedRenderView';
+import Button from '@/components/Button';
 import Card from '@/components/Card';
+import Drawer from '@/components/Drawer';
 import { ErrorPreview } from '@/components/ErrorPreview';
 import AppHeader from '@/components/Header';
 import Select from '@/components/Select';
@@ -21,13 +23,19 @@ import {
   ClockArrowDown,
   ClockArrowUp,
   Edit3,
+  FilePenLine,
+  Filter,
+  FilterIcon,
   MapPin,
   MoveHorizontal,
+  X,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import {
   ActivityIndicator,
   FlatList,
+  ScrollView,
   Platform,
   SafeAreaView,
   StyleSheet,
@@ -38,12 +46,17 @@ import {
 
 export default function AttendanceHistoryScreen() {
   const { user } = useAuth();
-  const { attendanceHistoryData } = useAttendanceHistoryInit(user?.companyID!);
+  const { attendanceHistoryData, isLoading: isInitLoading } = useAttendanceHistoryInit(
+    user?.companyID!
+  );
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
-  const [selectedAttendanceType, setSelectedAttendanceType] = useState<string | undefined>(
-    undefined
-  );
+  const [selectedAttendanceType, setSelectedAttendanceType] = useState<string | undefined>();
+  const [isFilterDrawerVisible, setIsFilterDrawerVisible] = useState(false);
+
+  const { control, handleSubmit, reset } = useForm<FilterFormInputs>({
+    defaultValues: { attendanceType: '' },
+  });
 
   const { attendanceHistoryList, isLoading, error } = useAttendanceHistoryList(
     user?.userID!,
@@ -84,6 +97,17 @@ export default function AttendanceHistoryScreen() {
         setEndDate(currentDate);
       }
     }
+  };
+
+  const onFilterSubmit = (data: FilterFormInputs) => {
+    setSelectedAttendanceType(data.attendanceType || undefined);
+    setIsFilterDrawerVisible(false);
+  };
+
+  const clearFilters = () => {
+    reset({ attendanceType: '' });
+    setSelectedAttendanceType(undefined);
+    setIsFilterDrawerVisible(false);
   };
 
   const renderItem = useCallback(({ item, index }: { item: IAttendanceHistory; index: number }) => {
@@ -129,7 +153,7 @@ export default function AttendanceHistoryScreen() {
                   ({item.entryType})
                 </Text>
               </View>
-              <View style={[styles.statusBadge, { backgroundColor: `${statusColor}20` }]}>
+              <View style={[styles.statusBadge, { backgroundColor: `${statusColor}10` }]}>
                 <StatusIcon size={14} color={statusColor} />
                 <Text style={[styles.statusText, { color: statusColor }]}>{statusText}</Text>
               </View>
@@ -137,7 +161,7 @@ export default function AttendanceHistoryScreen() {
 
             {item.attendanceNote && (
               <View style={styles.detailRow}>
-                <Edit3 size={16} color={Colors.light.subtext} />
+                <FilePenLine size={16} color={Colors.light.subtext} />
                 <Text style={styles.detailText} numberOfLines={2}>
                   {item.attendanceNote}
                 </Text>
@@ -169,7 +193,16 @@ export default function AttendanceHistoryScreen() {
         title="Attendance History"
         withBackButton={true}
         bg="primary"
-        rightContent={<View style={{ width: 24 }} />}
+        rightContent={
+          <TouchableOpacity
+            onPress={() => {
+              setIsFilterDrawerVisible(true);
+            }}
+            style={styles.filterIconContainer}
+          >
+            <Filter size={24} color={Colors.dark.text} />
+          </TouchableOpacity>
+        }
       />
 
       <View style={styles.filterContainer}>
@@ -194,16 +227,6 @@ export default function AttendanceHistoryScreen() {
             {endDate ? endDate.toLocaleDateString() : 'End Date'}
           </Text>
         </TouchableOpacity>
-        <Select
-          options={attendanceHistoryData?.entryTypeList || []}
-          keyProp="code"
-          valueProp="name"
-          value={selectedAttendanceType}
-          onChange={(itemValue: string) => setSelectedAttendanceType(itemValue || undefined)}
-          placeholder="Type"
-          containerStyle={styles.selectFilterContainer}
-          selectStyle={styles.selectFilter}
-        />
       </View>
 
       {showDatePicker && (
@@ -217,7 +240,7 @@ export default function AttendanceHistoryScreen() {
         />
       )}
 
-      {isLoading ? (
+      {isLoading || isInitLoading ? (
         <ActivityIndicator color={Colors.light.primary} style={{ flex: 1 }} size="large" />
       ) : attendanceHistoryList?.length === 0 ? (
         <View style={styles.emptyContainer}>
@@ -234,14 +257,87 @@ export default function AttendanceHistoryScreen() {
           contentContainerStyle={{ paddingTop: Layout.spacing.m }}
         />
       )}
+      <Drawer isOpen={isFilterDrawerVisible} onClose={() => setIsFilterDrawerVisible(false)}>
+        <FilterComponent
+          attendanceHistoryData={attendanceHistoryData}
+          onFilterSubmit={handleSubmit(onFilterSubmit)}
+          onClose={() => setIsFilterDrawerVisible(false)}
+          clearFilters={clearFilters}
+          control={control}
+        />
+      </Drawer>
     </SafeAreaView>
   );
 }
 
+interface FilterFormInputs {
+  attendanceType: string;
+}
+
+const FilterComponent = ({
+  control,
+  onFilterSubmit,
+  clearFilters,
+  onClose,
+  attendanceHistoryData,
+}: any) => (
+  <View style={styles.drawerContentContainer}>
+    <ScrollView showsVerticalScrollIndicator={false}>
+      <AnimatedRenderView
+        direction="right"
+        duration={300}
+        delay={100}
+        style={styles.filterDrawerHeader}
+      >
+        <Text style={styles.drawerTitle}>Filter</Text>
+        <X size={20} color={Colors.light.text} onPress={onClose} />
+      </AnimatedRenderView>
+
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Attendance Type</Text>
+        <Controller
+          control={control}
+          name="attendanceType"
+          render={({ field: { onChange, value } }) => (
+            <Select
+              options={attendanceHistoryData?.entryTypeList || []}
+              keyProp="code"
+              valueProp="name"
+              value={value}
+              onChange={(val: string) => onChange(val)}
+              placeholder="Select Attendance Type"
+              size="small"
+              containerStyle={styles.filterSelectContainer}
+            />
+          )}
+        />
+      </View>
+
+      <View style={styles.filterButtonGroup}>
+        <Button size="small" title="Clear Filters" onPress={clearFilters} variant="outline" />
+        <Button
+          size="small"
+          title="Apply Filters"
+          onPress={onFilterSubmit}
+          icon={<FilterIcon color={Colors.light.background} size={14} />}
+          iconPosition="right"
+        />
+      </View>
+      <Button
+        title="Close Drawer"
+        onPress={onClose}
+        variant="ghost"
+        textStyle={{ color: Colors.light.warning }}
+        style={styles.closeButton}
+      />
+    </ScrollView>
+  </View>
+);
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.light.background,
+  container: { flex: 1 },
+  filterIconContainer: {
+    padding: Layout.spacing.s,
   },
   filterContainer: {
     flexDirection: 'row',
@@ -263,10 +359,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: Layout.spacing.s,
-    paddingHorizontal: Layout.spacing.s,
+    paddingHorizontal: Layout.spacing.m,
     backgroundColor: Colors.light.card,
     borderRadius: Layout.borderRadius.medium,
-    marginHorizontal: Layout.spacing.xs,
+    marginHorizontal: Layout.spacing.m,
   },
   dateButtonText: {
     fontFamily: 'Inter-Medium',
@@ -330,7 +426,7 @@ const styles = StyleSheet.create({
   },
   detailRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     marginTop: Layout.spacing.s,
   },
   detailText: {
@@ -340,16 +436,41 @@ const styles = StyleSheet.create({
     marginLeft: Layout.spacing.s,
     flex: 1,
   },
-  selectFilterContainer: {
+  drawerContentContainer: {
     flex: 1,
-    marginHorizontal: Layout.spacing.xs,
-    marginBottom: 0,
+    paddingHorizontal: Layout.spacing.m,
+    paddingBottom: Layout.spacing.xl,
   },
-  selectFilter: {
-    height: Layout.inputHeight - Layout.spacing.m,
-    paddingVertical: 0,
-    paddingHorizontal: Layout.spacing.s,
-    borderRadius: Layout.borderRadius.medium,
-    borderWidth: 0,
+  drawerTitle: {
+    fontFamily: 'Inter-Bold',
+    fontSize: 20,
+    color: Colors.light.text,
+    marginBottom: Layout.spacing.l,
+    textAlign: 'center',
+  },
+  inputGroup: {
+    marginBottom: Layout.spacing.m,
+  },
+  label: {
+    fontFamily: 'Inter-Medium',
+    fontSize: 14,
+    color: Colors.light.text,
+    marginBottom: Layout.spacing.xs,
+  },
+  filterSelectContainer: { marginBottom: 5 },
+  filterDrawerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center', // Added to align items vertically
+    marginBottom: Layout.spacing.m, // Added for some spacing
+  },
+  filterButtonGroup: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: Layout.spacing.l,
+  },
+  closeButton: {
+    marginTop: Layout.spacing.m,
   },
 });
