@@ -76,6 +76,10 @@ export const sendLocationToServer = async (
   deviceId: string,
   address: string
 ) => {
+  if (!latitude || !longitude || !deviceId) {
+    console.error('[BG_TASK] Missing required parameters for location upload');
+    return;
+  }
   const formdata = new FormData();
   formdata.append('sLatitude', latitude?.toString());
   formdata.append('sLongitude', longitude?.toString());

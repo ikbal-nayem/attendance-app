@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   scrollContent: {
-    padding: Layout.spacing.l,
+    padding: Layout.spacing.m,
     paddingBottom: Layout.spacing.xl,
   },
   attendanceCard: {

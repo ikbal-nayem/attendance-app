@@ -6,7 +6,7 @@ import {
 import AnimatedRenderView from '@/components/AnimatedRenderView';
 import Button from '@/components/Button';
 import Card from '@/components/Card';
-import Drawer from '@/components/Drawer'; // Import the new Drawer component
+import Drawer from '@/components/Drawer';
 import { ErrorPreview } from '@/components/ErrorPreview';
 import AppHeader from '@/components/Header';
 import Select from '@/components/Select';
@@ -22,8 +22,8 @@ import {
   CalendarDays,
   FilePenLine,
   Filter,
-  FilterIcon, // Added for activityDetails
-  MapPin, // Added for activityNote
+  FilterIcon,
+  MapPin,
   MoveHorizontal,
   User,
   X,

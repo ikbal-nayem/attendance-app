@@ -15,7 +15,7 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Image, Platform, StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, Image, Platform, StyleSheet, Text } from 'react-native';
 import Animated, { FadeOut } from 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 

@@ -24,8 +24,9 @@ import { makeFormData } from '@/utils/form-actions';
 const activitySchema = z
   .object({
     sActivityType: z.string().min(1, 'Activity type is required'),
-    sClient: z.string(),
-    sTerritory: z.string(),
+    sClient: z.string().min(1, 'Client type is required'),
+    sContactPerson: z.string(),
+    sTerritory: z.string().min(1, 'Territory type is required'),
     sActivityDetails: z.string().min(1, 'Activity details are required'),
     sActivityDate: z.date(),
     sActivityStartTime: z.date(),
@@ -50,6 +51,7 @@ type ActivityFormData = z.infer<typeof activitySchema>;
 const defaultValues: ActivityFormData = {
   sActivityType: '',
   sClient: '',
+  sContactPerson: '',
   sTerritory: '',
   sActivityDetails: '',
   sActivityDate: new Date(),
@@ -163,7 +165,7 @@ export default function ActivityScreen() {
             render={({ field: { onChange, value } }) => (
               <Select
                 label="Client"
-                // required
+                required
                 options={activityData?.clientList || []}
                 value={value}
                 onChange={onChange}
@@ -175,6 +177,24 @@ export default function ActivityScreen() {
             )}
           />
 
+          {/* Contact person */}
+          <Controller
+            control={control}
+            name="sContactPerson"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                label="Contact Person"
+                placeholder="Enter contact person"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                multiline
+                numberOfLines={2}
+                error={errors.sContactPerson?.message}
+              />
+            )}
+          />
+
           {/* Territory Select */}
           <Controller
             control={control}
@@ -182,7 +202,7 @@ export default function ActivityScreen() {
             render={({ field: { onChange, value } }) => (
               <Select
                 label="Territory"
-                // required
+                required
                 options={activityData?.territoryList || []}
                 value={value}
                 onChange={onChange}
@@ -319,7 +339,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.background,
   },
   scrollContent: {
-    padding: Layout.spacing.l,
+    padding: Layout.spacing.m,
     paddingBottom: Layout.spacing.xl,
   },
   formCard: {
