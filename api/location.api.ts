@@ -6,7 +6,7 @@ const LOCATION_UPLOAD_URL = `${API_CONSTANTS.BASE_URL}${API_CONSTANTS.LOACTION.S
 export interface IUserLocationData {
   userId: string;
   userName: string;
-  imageUrl?: string; // Added for user image
+  imageUrl?: string;
   location: {
     latitude: number;
     longitude: number;
@@ -89,6 +89,7 @@ export const sendLocationToServer = async (
     const response = await fetch(LOCATION_UPLOAD_URL, {
       method: 'POST',
       body: formdata,
+      headers: {}
     });
     if (response.ok) {
       console.log('[BG_TASK] Location uploaded successfully:', await response.json());

@@ -252,7 +252,7 @@ export default function AttendanceHistoryScreen() {
         <FlatList
           data={attendanceHistoryList}
           renderItem={renderItem}
-          keyExtractor={(item, idx) => item?.entryNo + idx}
+          keyExtractor={(item, idx) => item?.entryNo + idx.toString()}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingTop: Layout.spacing.m }}
         />

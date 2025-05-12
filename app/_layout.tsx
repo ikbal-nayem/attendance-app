@@ -65,10 +65,7 @@ export default function RootLayout() {
       if (Platform.OS === 'android' || Platform.OS === 'ios') {
         const isRegistered = await isBackgroundLocationTaskRegistered();
         if (!isRegistered) {
-          console.log('Attempting to register background location task...');
           await registerBackgroundLocationTask();
-        } else {
-          console.log('Background location task already registered.');
         }
       }
     };

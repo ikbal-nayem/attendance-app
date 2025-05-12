@@ -132,7 +132,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setLocationHistory(updatedHistory);
     }
 
-    // Set up periodic location tracking (every 10 minutes)
+    // Set up periodic location tracking (every 5 minutes)
     const interval = setInterval(async () => {
       const location = await getCurrentLocation();
       if (location) {
@@ -143,7 +143,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const address = await getAddressFromCoordinates(location.latitude, location.longitude);
         sendLocationToServer(location.latitude, location.longitude, deviceId, address);
       }
-    }, 10 * 60 * 1000); // 10 minutes in milliseconds
+    }, 5 * 60 * 1000); // 5 minutes in milliseconds
 
     setLocationTrackingInterval(interval);
     setIsTracking(true);

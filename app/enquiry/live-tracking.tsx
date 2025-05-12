@@ -10,11 +10,15 @@ import {
   ActivityIndicator,
   Dimensions,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
@@ -147,7 +151,10 @@ export default function LiveTrackingScreen() {
         </MapView>
       </View>
 
-      <View style={styles.userListContainer}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.userListContainer}
+      >
         <Input
           placeholder="Search User..."
           value={searchTerm}
@@ -160,36 +167,39 @@ export default function LiveTrackingScreen() {
             isLoading ? <ActivityIndicator size="small" color={Colors.light.subtext} /> : null
           }
         />
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {/* {isLoading && (
-            <Text>
-              Loading Users... <ActivityIndicator size="small" color={Colors.light.primary} />
-            </Text>
-          )} */}
-          {filteredUserLocations.length > 0 ? (
-            filteredUserLocations.map((user) => (
-              <TouchableOpacity
-                key={user.userId}
-                activeOpacity={0.7}
-                style={[styles.userItem, selectedUserId === user.userId && styles.selectedUserItem]}
-                onPress={() => handleUserSelect(user)}
-              >
-                <View
-                  style={[styles.userColorIndicator, { backgroundColor: getPinColor(user.userId) }]}
-                />
-                <View style={styles.userInfo}>
-                  <Text style={styles.userName}>{user.userName}</Text>
-                  <Text style={styles.userTimestamp}>
-                    Last seen: {formatTimestamp(user.location.timestamp)}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))
-          ) : (
-            <Text style={styles.noUsersText}>No users found.</Text>
-          )}
-        </ScrollView>
-      </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {filteredUserLocations.length > 0 ? (
+              filteredUserLocations.map((user) => (
+                <TouchableOpacity
+                  key={user.userId}
+                  activeOpacity={0.7}
+                  style={[
+                    styles.userItem,
+                    selectedUserId === user.userId && styles.selectedUserItem,
+                  ]}
+                  onPress={() => handleUserSelect(user)}
+                >
+                  <View
+                    style={[
+                      styles.userColorIndicator,
+                      { backgroundColor: getPinColor(user.userId) },
+                    ]}
+                  />
+                  <View style={styles.userInfo}>
+                    <Text style={styles.userName}>{user.userName}</Text>
+                    <Text style={styles.userTimestamp}>
+                      Last seen: {formatTimestamp(user.location.timestamp)}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <Text style={styles.noUsersText}>No users found.</Text>
+            )}
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
