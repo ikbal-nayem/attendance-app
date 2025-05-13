@@ -69,6 +69,8 @@ export default function AttendanceHistoryScreen() {
   );
   const [showDatePicker, setShowDatePicker] = useState<'start' | 'end' | null>(null);
 
+  console.log(attendanceHistoryList)
+
   useEffect(() => {
     if (attendanceHistoryData) {
       setStartDate(parseResponseDate(attendanceHistoryData.fromDate));

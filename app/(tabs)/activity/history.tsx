@@ -169,6 +169,8 @@ export default function ActivityHistoryScreen() {
   );
   const [showDatePicker, setShowDatePicker] = useState<'start' | 'end' | null>(null);
 
+  console.log(activityHistoryList)
+
   useEffect(() => {
     if (activityData?.fromDate && activityData?.toDate) {
       setStartDate(parseResponseDate(activityData.fromDate));

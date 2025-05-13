@@ -82,11 +82,11 @@ export default function RootLayout() {
         exiting={isAppReady ? FadeOut.duration(500) : undefined}
       >
         <Image
-          source={require('../assets/images/logo.png')}
+          source={require('../assets/images/splash-screen.png')}
           style={styles.splashLogo}
           resizeMode="contain"
         />
-        <Text style={styles.splashText}>Supervisor/Manager Activity Tracking</Text>
+        <Text style={styles.splashText}>Supervisor Activity Tracking</Text>
         <ActivityIndicator
           size="large"
           color={Colors.light.primary}

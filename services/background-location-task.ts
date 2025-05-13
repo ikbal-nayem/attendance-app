@@ -21,7 +21,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
 
       const deviceId = await localData.get(USER_DEVICE_ID);
       const address = await getAddressFromCoordinates(latitude, longitude);
-      
+
       await sendLocationToServer(latitude, longitude, deviceId, address, latestLocation.timestamp);
     }
   }
@@ -36,7 +36,7 @@ export async function registerBackgroundLocationTask() {
       if (backgroundStatus === 'granted') {
         await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
           accuracy: Location.Accuracy.High,
-          timeInterval: 60000, // 10 minutes
+          timeInterval: 10 * 60 * 1000, // 10 minutes
           activityType: Location.ActivityType.AutomotiveNavigation,
           distanceInterval: 100, // 100 meters
           showsBackgroundLocationIndicator: true,
