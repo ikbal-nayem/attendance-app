@@ -71,7 +71,7 @@ export default function RootLayout() {
     };
 
     if (isAppReady) {
-      setTimeout(() => setupBackgroundLocation(), 2000);
+      setTimeout(() => setupBackgroundLocation(), 20 * 1000);
     }
   }, [isAppReady]);
 

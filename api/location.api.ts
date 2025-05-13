@@ -37,19 +37,31 @@ const mockUserLocations: IUserLocationData[] = [
     userId: '2',
     userName: 'Mujahid',
     imageUrl: 'https://i.pravatar.cc/150?u=jane.smith', // Placeholder image
-    location: { latitude: 23.769999068691877, longitude: 90.4107950519981, timestamp: Date.now() - 1000 * 60 * 2 }, // 2 mins ago
+    location: {
+      latitude: 23.769999068691877,
+      longitude: 90.4107950519981,
+      timestamp: Date.now() - 1000 * 60 * 2,
+    }, // 2 mins ago
   },
   {
     userId: '3',
     userName: 'Alice Johnson',
     imageUrl: 'https://i.pravatar.cc/150?u=alice.johnson', // Placeholder image
-    location: { latitude: 23.75905247216991, longitude: 90.3897508684784, timestamp: Date.now() - 1000 * 60 * 10 }, // 10 mins ago
+    location: {
+      latitude: 23.75905247216991,
+      longitude: 90.3897508684784,
+      timestamp: Date.now() - 1000 * 60 * 10,
+    }, // 10 mins ago
   },
   {
     userId: '4',
     userName: 'Bob Williams',
     // No image for this user to test fallback
-    location: { latitude: 23.78111639688084, longitude: 90.39946244398558, timestamp: Date.now() - 1000 * 60 * 1 }, // 1 min ago
+    location: {
+      latitude: 23.78111639688084,
+      longitude: 90.39946244398558,
+      timestamp: Date.now() - 1000 * 60 * 1,
+    }, // 1 min ago
   },
 ];
 
@@ -74,7 +86,8 @@ export const sendLocationToServer = async (
   latitude: number,
   longitude: number,
   deviceId: string,
-  address: string
+  address: string,
+  timestamp: number
 ) => {
   if (!latitude || !longitude || !deviceId) {
     console.error('[BG_TASK] Missing required parameters for location upload');
@@ -85,18 +98,23 @@ export const sendLocationToServer = async (
   formdata.append('sLongitude', longitude?.toString());
   formdata.append('sDeviceID', deviceId);
   formdata.append('sLocation', address);
+  formdata.append('sTimestamp', timestamp?.toString());
   try {
-    const response = await fetch(LOCATION_UPLOAD_URL, {
-      method: 'POST',
-      body: formdata,
-      headers: {}
-    });
-    if (response.ok) {
-      console.log('[BG_TASK] Location uploaded successfully:', await response.json());
-    } else {
-      console.error('[BG_TASK] Failed to upload location:', response.status, await response.text());
+    const response = await fetchInBackground(LOCATION_UPLOAD_URL, formdata);
+    if (response) {
+      console.log('Location sent:', response);
     }
   } catch (err) {
     console.error('[BG_TASK] Error uploading location:', err);
   }
 };
+
+function fetchInBackground(url: string, formData: FormData) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url);
+    xhr.onload = () => resolve(xhr.responseText);
+    xhr.onerror = () => reject(xhr.statusText);
+    xhr.send(formData);
+  });
+}

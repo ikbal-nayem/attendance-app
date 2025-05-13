@@ -21,10 +21,8 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
 
       const deviceId = await localData.get(USER_DEVICE_ID);
       const address = await getAddressFromCoordinates(latitude, longitude);
-
-      console.log('[BG_TASK] Device ID:', deviceId, 'Address:', address)
-
-      sendLocationToServer(latitude, longitude, deviceId, address);
+      
+      await sendLocationToServer(latitude, longitude, deviceId, address, latestLocation.timestamp);
     }
   }
 });
@@ -37,15 +35,14 @@ export async function registerBackgroundLocationTask() {
       const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
       if (backgroundStatus === 'granted') {
         await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
-          accuracy: Location.Accuracy.Highest,
+          accuracy: Location.Accuracy.High,
           timeInterval: 60000, // 10 minutes
           activityType: Location.ActivityType.AutomotiveNavigation,
           distanceInterval: 100, // 100 meters
           showsBackgroundLocationIndicator: true,
           foregroundService: {
-            notificationTitle: 'Tracking service',
+            notificationTitle: 'IPS SAT',
             notificationBody: 'Background Location tracking service is active',
-            notificationColor: '#FF0000',
           },
         });
         console.log('[BG_TASK] Background location task registered');

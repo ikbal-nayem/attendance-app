@@ -141,7 +141,13 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         // Send location to server
         const deviceId = await localData.get(USER_DEVICE_ID);
         const address = await getAddressFromCoordinates(location.latitude, location.longitude);
-        sendLocationToServer(location.latitude, location.longitude, deviceId, address);
+        sendLocationToServer(
+          location.latitude,
+          location.longitude,
+          deviceId,
+          address,
+          location.timestamp
+        );
       }
     }, 5 * 60 * 1000); // 5 minutes in milliseconds
 

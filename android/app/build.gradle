@@ -86,9 +86,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.ips.smat'
+    namespace 'com.ips.sat'
     defaultConfig {
-        applicationId 'com.ips.smat'
+        applicationId 'com.ips.sat'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

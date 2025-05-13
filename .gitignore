@@ -77,4 +77,4 @@ yarn-error.*
 # @end expo-cli
 
 android/gradle.properties
-android/app/ips-smat.keystore
+android/app/ips-sat.keystore

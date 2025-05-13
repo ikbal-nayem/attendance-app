@@ -1,4 +1,4 @@
-package com.ips.smat
+package com.ips.sat
 
 import android.app.Application
 import android.content.res.Configuration

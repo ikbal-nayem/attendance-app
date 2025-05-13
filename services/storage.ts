@@ -11,7 +11,7 @@ export const localData = {
   get: async (key: string) => {
     try {
       const value = await AsyncStorage.getItem(key);
-      return value ? JSON.parse(value) : null;
+      return value ? JSON.parse(value||'') : null;
     } catch (error) {
       console.error('Error retrieving data', error);
       return null;
