@@ -63,7 +63,6 @@ export default function RegisterScreen() {
 
   const onSubmitHandler = async (data: FormData) => {
     const deviceInfo = getDeviceInfo();
-    const deviceId = await localData.get(USER_DEVICE_ID);
     const reqData = {
       ...data,
       sLatitude: currentLocation?.latitude,
@@ -76,7 +75,7 @@ export default function RegisterScreen() {
       sDeviceModel: deviceInfo.deviceModel,
       sDevicePlatForm: deviceInfo.platform,
       sDeviceVersion: deviceInfo.osVersion,
-      sDeviceID: deviceId,
+      sDeviceID: await localData.get(USER_DEVICE_ID),
     };
     registerRequest(makeFormData(reqData))
       .then((res) => {

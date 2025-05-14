@@ -2,12 +2,14 @@ import Button from '@/components/Button';
 import Card from '@/components/Card';
 import Input from '@/components/Input';
 import Colors from '@/constants/Colors';
+import { USER_DEVICE_ID } from '@/constants/common';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
 import { useLocation } from '@/context/LocationContext';
 import { useToast } from '@/context/ToastContext';
 import AuthLayout from '@/layout/AuthLayout';
 import { getAddressFromCoordinates } from '@/services/location';
+import { localData } from '@/services/storage';
 import { makeFormData } from '@/utils/form-actions';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'expo-router';
@@ -91,7 +93,7 @@ export default function LoginScreen() {
     });
   }, []);
   const { showToast } = useToast();
-  const { login, user, isLoading } = useAuth();
+  const { login, isLoading } = useAuth();
   const { currentLocation } = useLocation();
   const {
     control,
@@ -115,6 +117,7 @@ export default function LoginScreen() {
         currentLocation?.latitude,
         currentLocation?.longitude
       ),
+      sDeviceID: await localData.get(USER_DEVICE_ID),
     };
     login(makeFormData(data))
       .then((res) => {
