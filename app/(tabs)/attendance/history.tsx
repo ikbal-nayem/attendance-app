@@ -22,7 +22,6 @@ import {
   CalendarDays,
   ClockArrowDown,
   ClockArrowUp,
-  Edit3,
   FilePenLine,
   Filter,
   FilterIcon,
@@ -35,9 +34,9 @@ import { Controller, useForm } from 'react-hook-form';
 import {
   ActivityIndicator,
   FlatList,
-  ScrollView,
   Platform,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -69,8 +68,6 @@ export default function AttendanceHistoryScreen() {
   );
   const [showDatePicker, setShowDatePicker] = useState<'start' | 'end' | null>(null);
 
-  console.log(attendanceHistoryList)
-
   useEffect(() => {
     if (attendanceHistoryData) {
       setStartDate(parseResponseDate(attendanceHistoryData.fromDate));
@@ -81,7 +78,7 @@ export default function AttendanceHistoryScreen() {
   const handleItemPress = (item: IAttendanceHistory) => {
     router.push({
       pathname: '/(tabs)/attendance/[id]',
-      params: { id: item?.entryNo, ...item },
+      params: { id: item?.entryNo },
     });
   };
 

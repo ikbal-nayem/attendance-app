@@ -1,9 +1,11 @@
-import { IAttendanceHistory } from '@/api/attendance.api';
+import { useAttendanceDetails } from '@/api/attendance.api';
 import Card from '@/components/Card';
+import { ErrorPreview } from '@/components/ErrorPreview';
 import AppHeader from '@/components/Header';
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
+import { useAuth } from '@/context/AuthContext';
 import { parseDate } from '@/utils/date-time';
 import { isNull } from '@/utils/validation';
 import { useLocalSearchParams } from 'expo-router';
@@ -18,25 +20,37 @@ import {
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function AttendanceDetailScreen() {
-  const params = useLocalSearchParams<Partial<IAttendanceHistory>>();
+  const params = useLocalSearchParams<{ id: string }>();
+  const { user } = useAuth();
+
+  const { attendanceDetails, isLoading, error } = useAttendanceDetails(
+    user?.companyID!,
+    user?.userID!,
+    user?.sessionID!,
+    user?.employeeCode!,
+    params?.id
+  );
+
+  console.log(attendanceDetails);
+  
 
   let statusText = '';
   let statusColor = Colors.light.warning;
   let StatusIcon = AlertTriangle;
 
-  if (params.attendanceFlag === 'I') {
+  if (attendanceDetails?.attendanceFlag === 'I') {
     statusText =
       'In ' +
-      parseDate(params?.entryTime!)?.toLocaleTimeString('en-US', {
+      parseDate(attendanceDetails?.entryTime!)?.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
       });
     statusColor = Colors.light.success;
     StatusIcon = ClockArrowUp;
-  } else if (params.attendanceFlag === 'O') {
+  } else if (attendanceDetails?.attendanceFlag === 'O') {
     statusText =
       'Out ' +
-      parseDate(params?.entryTime!)?.toLocaleTimeString('en-US', {
+      parseDate(attendanceDetails?.entryTime!)?.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
       });
@@ -64,6 +78,22 @@ export default function AttendanceDetailScreen() {
     </View>
   );
 
+  if (error) {
+    return (
+      <ErrorPreview
+        error={error}
+        header={
+          <AppHeader
+            title="Attendance Details"
+            bg="primary"
+            withBackButton
+            rightContent={<View style={{ width: 24 }} />}
+          />
+        }
+      />
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <AppStatusBar />
@@ -74,14 +104,14 @@ export default function AttendanceDetailScreen() {
         rightContent={<View style={{ width: 24 }} />}
       />
       <ScrollView style={styles.container} contentContainerStyle={styles.scrollContentContainer}>
-        <Card variant="outlined">
+        <Card variant="outlined" isLoading={isLoading}>
           <View style={styles.cardHeader}>
             <Briefcase size={36} color={Colors.light.primary} />
             <View style={styles.headerTextContainer}>
-              <Text style={styles.entryType}>{params.entryType || 'N/A'}</Text>
-              {params.entryTime && (
+              <Text style={styles.entryType}>{attendanceDetails?.entryType || 'N/A'}</Text>
+              {attendanceDetails?.entryTime && (
                 <Text style={styles.entryDateText}>
-                  {parseDate(params?.entryTime)?.toLocaleDateString('en-US', {
+                  {parseDate(attendanceDetails?.entryTime)?.toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
                     year: 'numeric',
@@ -98,15 +128,15 @@ export default function AttendanceDetailScreen() {
           <DetailItem
             icon={MapPin}
             label="Location"
-            value={params.entryLocation}
-            hiddenBorder={isNull(params?.attendanceNote)}
+            value={attendanceDetails?.entryLocation}
+            hiddenBorder={isNull(attendanceDetails?.attendanceNote)}
           />
 
-          {params.attendanceNote && (
+          {attendanceDetails?.attendanceNote && (
             <DetailItem
               icon={FilePenLine}
               label="Note"
-              value={params.attendanceNote}
+              value={attendanceDetails?.attendanceNote}
               hiddenBorder
             />
           )}

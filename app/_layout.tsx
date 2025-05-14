@@ -37,6 +37,7 @@ function RootLayoutNav() {
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="notifications/send" options={{ headerShown: false }} />
       <Stack.Screen name="enquiry/live-tracking" options={{ headerShown: false }} />
+      <Stack.Screen name="profile/update" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />
     </Stack>
   );
@@ -82,9 +83,9 @@ export default function RootLayout() {
         exiting={isAppReady ? FadeOut.duration(500) : undefined}
       >
         <Image
-          source={require('../assets/images/splash-screen.png')}
+          source={require('../assets/images/icon.png')}
           style={styles.splashLogo}
-          resizeMode="contain"
+          resizeMode="cover"
         />
         <Text style={styles.splashText}>Supervisor Activity Tracking</Text>
         <ActivityIndicator
@@ -121,7 +122,7 @@ const styles = StyleSheet.create({
   },
   splashLogo: {
     width: 150,
-    height: 100,
+    height: 150,
     marginBottom: Layout.spacing.m,
   },
   splashText: {

@@ -77,7 +77,10 @@ const userCard = (user: IUser) => (
       </View>
 
       <View style={styles.profileActions}>
-        <TouchableOpacity style={styles.updateButton}>
+        <TouchableOpacity
+          style={styles.updateButton}
+          onPress={() => router.push('/profile/update')}
+        >
           <Edit size={16} color={Colors.light.primary} />
           <Text style={styles.updateButtonText}>Update Profile</Text>
         </TouchableOpacity>

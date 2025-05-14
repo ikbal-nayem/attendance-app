@@ -264,19 +264,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.light.background,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: Layout.spacing.l,
-    paddingTop: Layout.spacing.l,
-    paddingBottom: Layout.spacing.m,
-  },
-  entryText: {
-    color: Colors.light.background,
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
   scrollContent: {
     padding: Layout.spacing.m,
     paddingBottom: Layout.spacing.xl,

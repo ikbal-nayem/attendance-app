@@ -10,7 +10,7 @@
     "jsEngine": "hermes",
     "splash": {
       "image": "./assets/images/splash-screen.png",
-      "resizeMode": "contain",
+      "resizeMode": "cover",
       "backgroundColor": "#0096c7"
     },
     "newArchEnabled": true,

@@ -81,7 +81,14 @@ export default function ActivityDetailScreen() {
     return (
       <ErrorPreview
         error={error}
-        header={<AppHeader title="Activity Details" bg="primary" withBackButton />}
+        header={
+          <AppHeader
+            title="Activity Details"
+            bg="primary"
+            withBackButton
+            rightContent={<View style={{ width: 24 }} />}
+          />
+        }
       />
     );
   }

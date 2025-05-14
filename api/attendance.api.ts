@@ -118,3 +118,42 @@ export const useAttendanceHistoryList = (
 
   return { attendanceHistoryList, isLoading, error };
 };
+
+export const useAttendanceDetails = (
+  companyID: string,
+  userID: string,
+  sessionID: string,
+  employeeCode: string,
+  entryNo: string
+) => {
+  const [attendanceDetails, setAttendanceDetails] = useState<IAttendanceHistory>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setError(null);
+    axiosIns
+      .post(
+        API_CONSTANTS.ATTENDANCE.HISTORY_DETAILS,
+        makeFormData({
+          sCompanyID: companyID,
+          sUserID: userID,
+          sSessionID: sessionID,
+          sEmployeeCode: employeeCode,
+          sEntryNo: entryNo,
+        })
+      )
+      .then((response) =>
+        response?.data?.messageCode === '0'
+          ? setAttendanceDetails(response.data?.viewList?.[0])
+          : setError(response.data?.messageDesc)
+      )
+      .catch((err) => {
+        console.log(err);
+        setError(err.message);
+      })
+      .finally(() => setIsLoading(false));
+  }, [companyID, userID, sessionID, employeeCode, entryNo]);
+
+  return { attendanceDetails, isLoading, error };
+};
