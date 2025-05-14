@@ -131,3 +131,42 @@ export const useActivityHistoryList = (
 
   return { activityHistoryList, isLoading, error };
 };
+
+export const useActivityDetails = (
+  companyID: string,
+  userID: string,
+  sessionID: string,
+  employeeCode: string,
+  entryNo: string
+) => {
+  const [activityDetails, setActivityDetails] = useState<IActivityHistory>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setError(null);
+    axiosIns
+      .post(
+        API_CONSTANTS.ACTIVITY.HISTORY_DETAILS,
+        makeFormData({
+          sCompanyID: companyID,
+          sUserID: userID,
+          sSessionID: sessionID,
+          sEmployeeCode: employeeCode,
+          sEntryNo: entryNo,
+        })
+      )
+      .then((response) =>
+        response?.data?.messageCode === '0'
+          ? setActivityDetails(response.data?.viewList?.[0])
+          : setError(response.data?.messageDesc)
+      )
+      .catch((err) => {
+        console.log(err);
+        setError(err.message);
+      })
+      .finally(() => setIsLoading(false));
+  }, [companyID, userID, sessionID, employeeCode, entryNo]);
+
+  return { activityDetails, isLoading, error };
+};

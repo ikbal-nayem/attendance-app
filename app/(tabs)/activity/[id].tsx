@@ -1,5 +1,6 @@
-import { IActivityHistory, useActivityHistoryInit } from '@/api/activity.api';
+import { useActivityDetails, useActivityHistoryInit } from '@/api/activity.api';
 import Card from '@/components/Card';
+import { ErrorPreview } from '@/components/ErrorPreview';
 import AppHeader from '@/components/Header';
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
@@ -12,36 +13,29 @@ import {
   Building,
   CalendarDays,
   FilePenLine,
-  FileText,
   Info,
   MapPin,
-  Paperclip,
   UserCircle,
 } from 'lucide-react-native';
 import React from 'react';
-import {
-  Linking,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function ActivityDetailScreen() {
-  const params = useLocalSearchParams<
-    Omit<Partial<IActivityHistory>, 'attachmentFile01'> & { attachmentFile01: string }
-  >();
-
-  const attachmentFile01 = params?.attachmentFile01
-    ? (JSON.parse(params?.attachmentFile01 || '[]') as Array<any>)
-    : [];
-
-  console.log('Activity Detail Params:', params);
-
+  const params = useLocalSearchParams<{ id: string }>();
   const { user } = useAuth();
-  const { activityData } = useActivityHistoryInit(user?.companyID!);
+
+  const { activityData, isLoading: initLoading } = useActivityHistoryInit(user?.companyID!);
+  const { activityDetails, isLoading, error } = useActivityDetails(
+    user?.companyID!,
+    user?.userID!,
+    user?.sessionID!,
+    user?.employeeCode!,
+    params?.id
+  );
+
+  // const attachmentFile01 = params?.attachmentFile01
+  //   ? (JSON.parse(params?.attachmentFile01 || '[]') as Array<any>)
+  //   : [];
 
   const DetailItem = ({
     icon: Icon,
@@ -74,17 +68,31 @@ export default function ActivityDetailScreen() {
   );
 
   const activityTypeName = activityData?.activityTypeList?.find(
-    (at) => at.code === params.activityType
+    (at) => at.code === activityDetails?.activityType
   )?.name;
-  const clientName = activityData?.clientList?.find((c) => c.code === params.client)?.name;
-  const territoryName = activityData?.territoryList?.find((t) => t.code === params.territory)?.name;
+  const clientName = activityData?.clientList?.find(
+    (c) => c.code === activityDetails?.client
+  )?.name;
+  const territoryName = activityData?.territoryList?.find(
+    (t) => t.code === activityDetails?.territory
+  )?.name;
+
+  if (error) {
+    return (
+      <ErrorPreview
+        error={error}
+        header={<AppHeader title="Activity Details" bg="primary" withBackButton />}
+      />
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <AppStatusBar />
       <AppHeader title="Activity Details" bg="primary" withBackButton />
+
       <ScrollView style={styles.container} contentContainerStyle={styles.scrollContentContainer}>
-        <Card variant="outlined">
+        <Card variant="outlined" isLoading={initLoading || isLoading}>
           <View style={styles.cardHeader}>
             <View style={styles.headerLeft}>
               <ActivityIcon size={20} color={Colors.light.primary} />
@@ -92,17 +100,17 @@ export default function ActivityDetailScreen() {
                 <Text style={styles.entryTypeText} numberOfLines={1}>
                   {activityTypeName}
                 </Text>
-                {(params?.activityStartTime || params?.activityStopTime) && (
+                {(activityDetails?.activityStartTime || activityDetails?.activityStopTime) && (
                   <Text style={styles.activityTimeText} numberOfLines={1}>
-                    {parseResponseTime(params?.activityStartTime)} -{' '}
-                    {parseResponseTime(params?.activityStopTime)}
+                    {parseResponseTime(activityDetails?.activityStartTime)} -{' '}
+                    {parseResponseTime(activityDetails?.activityStopTime)}
                   </Text>
                 )}
               </View>
             </View>
             <Text style={styles.activityDateText}>
               <CalendarDays size={14} color={Colors.light.subtext} />{' '}
-              {parseResponseDate(params?.activityDate).toLocaleDateString('en-US', {
+              {parseResponseDate(activityDetails?.activityDate).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'short',
                 day: 'numeric',
@@ -110,13 +118,33 @@ export default function ActivityDetailScreen() {
             </Text>
           </View>
 
-          <DetailItem icon={Building} label="Client" value={clientName || params.client} />
-          <DetailItem icon={UserCircle} label="Contact Person" value={params.contactPerson} />
-          <DetailItem icon={MapPin} label="Territory" value={territoryName || params.territory} />
-          <DetailItem icon={Info} label="Activity Details" value={params.activityDetails} />
-          <DetailItem icon={FilePenLine} label="Activity Note" value={params.activityNote} />
+          <DetailItem
+            icon={Building}
+            label="Client"
+            value={clientName || activityDetails?.client}
+          />
+          <DetailItem
+            icon={UserCircle}
+            label="Contact Person"
+            value={activityDetails?.contactPerson}
+          />
+          <DetailItem
+            icon={MapPin}
+            label="Territory"
+            value={territoryName || activityDetails?.territory}
+          />
+          <DetailItem
+            icon={Info}
+            label="Activity Details"
+            value={activityDetails?.activityDetails}
+          />
+          <DetailItem
+            icon={FilePenLine}
+            label="Activity Note"
+            value={activityDetails?.activityNote}
+          />
 
-          {attachmentFile01 && attachmentFile01?.length > 0 && (
+          {/* {attachmentFile01 && attachmentFile01?.length > 0 && (
             <View style={styles.attachmentsContainer}>
               <View style={styles.detailItemContainerNoBorder}>
                 <Paperclip size={20} color={Colors.light.primary} style={styles.detailIcon} />
@@ -149,7 +177,7 @@ export default function ActivityDetailScreen() {
                 />
               ))}
             </View>
-          )}
+          )} */}
         </Card>
       </ScrollView>
     </SafeAreaView>

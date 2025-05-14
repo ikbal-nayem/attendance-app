@@ -19,6 +19,7 @@ export const API_CONSTANTS = {
     SUBMIT: '/ActivityEntryService/activityEntry',
     HISTORY_INIT: '/EnquiryActivityService/firstLoad',
     HISTORY_LIST: '/EnquiryActivityService/activityEnquiry',
+    HISTORY_DETAILS: '/EnquiryActivityService/activityDataView',
   },
   NOTIFICATION: {
     INIT: '/PushNotificationService/firstLoad',

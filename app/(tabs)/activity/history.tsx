@@ -169,8 +169,6 @@ export default function ActivityHistoryScreen() {
   );
   const [showDatePicker, setShowDatePicker] = useState<'start' | 'end' | null>(null);
 
-  console.log(activityHistoryList)
-
   useEffect(() => {
     if (activityData?.fromDate && activityData?.toDate) {
       setStartDate(parseResponseDate(activityData.fromDate));
@@ -181,7 +179,7 @@ export default function ActivityHistoryScreen() {
   const handleItemPress = useCallback((item: IActivityHistory) => {
     router.push({
       pathname: '/(tabs)/activity/[id]',
-      params: { id: item?.entryNo, ...item },
+      params: { id: item?.entryNo },
     });
   }, []);
 

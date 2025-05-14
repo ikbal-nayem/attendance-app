@@ -1,15 +1,18 @@
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
-import { StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ServerCrash } from 'lucide-react-native';
+import { ReactElement } from 'react';
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import AppStatusBar from './StatusBar';
 
-export const ErrorPreview = ({ error }: { error: string }) => {
+export const ErrorPreview = ({ error, header }: { error: string; header?: ReactElement }) => {
   return (
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
+      {header}
 
       <View style={styles.errorContainer}>
+        <ServerCrash size={Layout.spacing.xxl} color={Colors.light.error} />
         <Text style={styles.errorMessage}>{error || 'Something went wrong!'}</Text>
       </View>
     </SafeAreaView>
@@ -32,5 +35,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.light.subtext,
     textAlign: 'center',
+    marginTop: Layout.spacing.m,
   },
 });
