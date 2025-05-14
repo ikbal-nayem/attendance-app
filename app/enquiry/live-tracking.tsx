@@ -1,9 +1,14 @@
-import { IUserLocationData, useFetchUserLiveLocations } from '@/api/location.api';
+import {
+  IUserLocationData,
+  useFetchUserLiveLocations,
+  useLiveLocationData,
+} from '@/api/location.api';
 import AppHeader from '@/components/Header';
 import Input from '@/components/Input';
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
+import { useAuth } from '@/context/AuthContext';
 import { Fullscreen, Search } from 'lucide-react-native';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -29,9 +34,13 @@ const MARKER_IMAGE_SIZE = 30;
 
 export default function LiveTrackingScreen() {
   const { userLocations: allUserLocations, isLoading, error } = useFetchUserLiveLocations();
+  const { user } = useAuth();
+  const { locationData } = useLiveLocationData(user?.companyID!);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const mapRef = useRef<MapView>(null);
+
+  console.log(locationData)
 
   useEffect(() => {
     if (!isLoading) {

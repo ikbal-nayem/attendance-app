@@ -52,7 +52,6 @@ export const useAttendanceData = (companyId: string, employeeCode: string) => {
 export const submitAttendance = async (data: FormData) => {
   try {
     const req = await axiosIns.post(API_CONSTANTS.ATTENDANCE.SUBMIT, data);
-    console.log(req.data);
     if (req.data?.messageCode === '0') {
       return { success: true, data: req.data };
     }

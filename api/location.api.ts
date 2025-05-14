@@ -1,5 +1,7 @@
 import { API_CONSTANTS } from '@/constants/api';
+import { makeFormData } from '@/utils/form-actions';
 import { useEffect, useState } from 'react';
+import { axiosIns } from './config';
 
 const LOCATION_UPLOAD_URL = `${API_CONSTANTS.BASE_URL}${API_CONSTANTS.LOACTION.SEND_LOCATION}`;
 
@@ -80,6 +82,58 @@ export const useFetchUserLiveLocations = () => {
   }, []);
 
   return { userLocations, isLoading, error };
+};
+
+export const useLiveLocationData = (companyId: string) => {
+  const [locationData, setLLData] = useState();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    axiosIns
+      .post(API_CONSTANTS.LOACTION.INIT, makeFormData({ sCompanyID: companyId }))
+      .then((response) => setLLData(response.data))
+      .catch((err) => {
+        console.log(err);
+        setError(err.message);
+      })
+      .finally(() => setIsLoading(false));
+  }, [companyId]);
+
+  return { locationData, isLoading, error };
+};
+
+export const useLiveUserLocation = async (
+  sUserID: string,
+  sSessionID: string,
+  sCompanyID: string,
+  sEmployeeCode: string,
+  sProcessDate: string
+) => {
+  const [locationList, setLocationList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const formData = makeFormData({
+      sUserID,
+      sSessionID,
+      sCompanyID,
+      sEmployeeCode,
+      sProcessDate,
+    });
+
+    axiosIns
+      .post(API_CONSTANTS.LOACTION.LIVE_TRACKING, formData)
+      .then((response) => setLocationList(response?.data?.detailsList || []))
+      .catch((err) => {
+        console.log(err);
+        setError(err.message);
+      })
+      .finally(() => setIsLoading(false));
+  }, [sUserID, sSessionID, sCompanyID, sEmployeeCode, sProcessDate]);
+
+  return { locationList, isLoading, error };
 };
 
 export const sendLocationToServer = async (

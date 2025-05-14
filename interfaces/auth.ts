@@ -7,6 +7,7 @@ interface IUser {
   employeeCode: string;
   mobileNo: string;
   sessionID: string;
+  staffID: string;
   todayCheckIn: string;
   userID: string;
   userName: string;

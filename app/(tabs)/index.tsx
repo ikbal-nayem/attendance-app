@@ -72,7 +72,7 @@ const userCard = (user: IUser) => (
       <View style={styles.profileDetails}>
         <Text style={styles.userRole}>{user.designation}</Text>
         <Text style={styles.userDepartment}>{user.department}</Text>
-        <Text style={styles.userId}>Code: {user.employeeCode}</Text>
+        <Text style={styles.userId}>Code: {user.staffID}</Text>
         <Text style={styles.detailText}>{user.companyName}</Text>
       </View>
 

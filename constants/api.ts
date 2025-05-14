@@ -32,6 +32,8 @@ export const API_CONSTANTS = {
     HISTORY_DETAILS: '/EnquiryNotificationService/pushNotificationData',
   },
   LOACTION: {
+    INIT: '/LiveTrackingService/firstLoad',
+    LIVE_TRACKING: '/LiveTrackingService/liveTracking',
     SEND_LOCATION: '/StaffTrackingService/staffTracking',
   }
 };

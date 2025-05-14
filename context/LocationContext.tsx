@@ -23,6 +23,7 @@ type LocationContextType = {
   locationErrorMsg: string | null;
   isTracking: boolean;
   locationHistory: LocationData[];
+  getCurrentLocation: () => Promise<LocationData | null>;
   startTracking: () => Promise<void>;
   stopTracking: () => void;
   requestLocationPermission: () => Promise<boolean>;
@@ -34,6 +35,7 @@ const defaultContext: LocationContextType = {
   locationErrorMsg: null,
   isTracking: false,
   locationHistory: [],
+  getCurrentLocation: async () => null,
   startTracking: async () => {},
   stopTracking: () => {},
   requestLocationPermission: async () => false,
@@ -169,6 +171,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     locationErrorMsg,
     isTracking,
     locationHistory,
+    getCurrentLocation,
     startTracking,
     stopTracking,
     requestLocationPermission,

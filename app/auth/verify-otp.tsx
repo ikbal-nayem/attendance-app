@@ -7,11 +7,11 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import AuthLayout from '@/layout/AuthLayout';
 import { isNull } from '@/utils/validation';
-import { zodResolver } from '@hookform/resolvers/zod'; // Import zodResolver
+import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
 import { MailCheck } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form'; // Import react-hook-form
+import { Controller, useForm } from 'react-hook-form';
 import {
   Keyboard,
   StyleSheet,

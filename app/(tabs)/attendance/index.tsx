@@ -39,7 +39,7 @@ type AttendanceFormData = z.infer<typeof attendanceSchema>;
 
 export default function AttendanceScreen() {
   const { user } = useAuth();
-  const { currentLocation, requestLocationPermission } = useLocation();
+  const { currentLocation, getCurrentLocation, requestLocationPermission } = useLocation();
 
   const [address, setAddress] = useState('Fetching location...');
   const { attendanceData, isLoading: isLoadingAttendanceData } = useAttendanceData(
@@ -78,11 +78,12 @@ export default function AttendanceScreen() {
   useEffect(() => {
     const initialize = async () => {
       await requestLocationPermission();
-      if (currentLocation) {
+      const latLong = await getCurrentLocation();
+      if (latLong) {
         try {
           const locationAddress = await getAddressFromCoordinates(
-            currentLocation.latitude,
-            currentLocation.longitude
+            latLong.latitude,
+            latLong.longitude
           );
           setAddress(locationAddress);
         } catch (error) {
@@ -94,7 +95,7 @@ export default function AttendanceScreen() {
       }
     };
     initialize();
-  }, [currentLocation, requestLocationPermission]);
+  }, [getCurrentLocation, requestLocationPermission]);
 
   const onSubmit = async (data: AttendanceFormData) => {
     if (!currentLocation) {
@@ -126,7 +127,7 @@ export default function AttendanceScreen() {
           setEntryNo((prev) => prev + 1);
           reset(defaultValuesRef.current);
         } else {
-          Alert.alert('Error', res.message || 'Failed to submit check-in');
+          showToast({ type: 'error', message: res.message || 'Failed to submit check-in' });
         }
       })
       .catch((err) => {
@@ -143,8 +144,6 @@ export default function AttendanceScreen() {
       <AppStatusBar />
       <AppHeader
         title="Attendance"
-        withBackButton={false}
-        bg="primary"
         // leftContent={<Text style={styles.entryText}>Entry {Math.floor(entryNo / 2 + 1)}</Text>}
         rightContent={
           <TouchableOpacity onPress={() => router.push('/(tabs)/attendance/history')}>
