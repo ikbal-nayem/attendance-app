@@ -19,15 +19,8 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  UIManager,
   View,
 } from 'react-native';
-
-if (Platform.OS === 'android') {
-  if (UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-  }
-}
 
 export const formatNotificationDateTime = (date: Date): string => {
   const now = new Date();
@@ -91,7 +84,7 @@ export default function AllNotificationsScreen() {
   }, [notificationHistoryData]);
 
   const handleNotificationPress = (item: INotification) => {
-    router.push({ pathname: '/notifications/[id]', params: { id: item?.referenceNo, ...item } });
+    router.push({ pathname: '/notifications/[id]', params: { id: item?.referenceNo } });
   };
 
   const onDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
@@ -109,13 +102,15 @@ export default function AllNotificationsScreen() {
     }
   };
 
-  // const clearFilters = () => {
-  //   setStartDate(parseResponseDate(notificationHistoryData?.fromDate));
-  //   setEndDate(parseResponseDate(notificationHistoryData?.toDate));
-  // };
-
   if (error) {
-    return <ErrorPreview error={error} />;
+    return (
+      <ErrorPreview
+        error={error}
+        header={
+          <AppHeader title="Notification History" rightContent={<View style={{ width: 24 }} />} />
+        }
+      />
+    );
   }
 
   return (
@@ -124,7 +119,6 @@ export default function AllNotificationsScreen() {
       <AppHeader
         title="Notification History"
         withBackButton={true}
-        bg="primary"
         rightContent={<View style={{ width: 24 }} />}
       />
 
@@ -150,12 +144,6 @@ export default function AllNotificationsScreen() {
             {endDate ? endDate.toLocaleDateString() : 'End Date'}
           </Text>
         </TouchableOpacity>
-        {/* {(startDate || endDate) && (
-          <Pressable style={styles.clearFilterButton} onPress={clearFilters}>
-            <Filter size={18} color={Colors.light.error} />
-            <Text style={styles.clearFilterText}>Clear</Text>
-          </Pressable>
-        )} */}
       </View>
 
       {showDatePicker && (

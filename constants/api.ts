@@ -28,8 +28,8 @@ export const API_CONSTANTS = {
     LIST: '/ViewNotificationService/pushNotificationData',
     MARK_AS_READ: '/ViewNotificationService/pushNotificationRead',
     HISTORY_INIT: '/EnquiryNotificationService/firstLoad',
-    HISTORY_DATA_PROCESS: '/EnquiryNotificationService/pushNotificationEnquiry',
-    HISTORY_LIST: '/EnquiryNotificationService/pushNotificationData',
+    HISTORY_LIST: '/EnquiryNotificationService/pushNotificationEnquiry',
+    HISTORY_DETAILS: '/EnquiryNotificationService/pushNotificationData',
   },
   LOACTION: {
     SEND_LOCATION: '/StaffTrackingService/staffTracking',

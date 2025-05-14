@@ -133,7 +133,7 @@ export const useNotificationHistoryList = (
     if (!sFromDate || !sToDate) return;
     axiosIns
       .post(
-        API_CONSTANTS.NOTIFICATION.HISTORY_DATA_PROCESS,
+        API_CONSTANTS.NOTIFICATION.HISTORY_LIST,
         makeFormData({
           sCompanyID: companyId,
           sUserID: userId,
@@ -149,24 +149,10 @@ export const useNotificationHistoryList = (
             type: 'error',
             message: response.data?.messageDesc,
           });
+          setError(response.data?.messageDesc);
           return;
         }
-        const req = await axiosIns.post(
-          API_CONSTANTS.NOTIFICATION.HISTORY_LIST,
-          makeFormData({
-            sCompanyID: companyId,
-            sUserID: userId,
-            sSessionID: sessionId,
-          })
-        );
-        if (req.data?.messageCode === '1') {
-          showToast({
-            type: 'error',
-            message: req.data?.messageDesc,
-          });
-          return;
-        }
-        setNotificationHistory(req.data || []);
+        setNotificationHistory(response.data || []);
       })
       .catch((err) => {
         console.log(err);
@@ -176,4 +162,41 @@ export const useNotificationHistoryList = (
   }, [companyId, userId, sessionId, employeeCode, sFromDate, sToDate]);
 
   return { notificationHistoryList, isLoading, error };
+};
+
+export const useNotificationDetails = (
+  companyID: string,
+  userID: string,
+  sessionID: string,
+  referenceNo: string
+) => {
+  const [notificationDetails, setNotificationDetails] = useState<INotification>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setError(null);
+    axiosIns
+      .post(
+        API_CONSTANTS.NOTIFICATION.HISTORY_DETAILS,
+        makeFormData({
+          sCompanyID: companyID,
+          sUserID: userID,
+          sSessionID: sessionID,
+          sReferenceNo: referenceNo,
+        })
+      )
+      .then((response) =>
+        response?.data?.messageCode === '0'
+          ? setNotificationDetails(response.data?.viewList?.[0])
+          : setError(response.data?.messageDesc)
+      )
+      .catch((err) => {
+        console.log(err);
+        setError(err.message);
+      })
+      .finally(() => setIsLoading(false));
+  }, [companyID, userID, sessionID, referenceNo]);
+
+  return { notificationDetails, isLoading, error };
 };

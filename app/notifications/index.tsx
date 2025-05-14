@@ -2,18 +2,15 @@ import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { router } from 'expo-router';
 import { History } from 'lucide-react-native';
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  LayoutAnimation,
-  Platform,
   Pressable,
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  UIManager,
   View,
 } from 'react-native';
 
@@ -24,12 +21,6 @@ import AppStatusBar from '@/components/StatusBar';
 import { useAuth } from '@/context/AuthContext';
 import { makeFormData } from '@/utils/form-actions';
 
-if (Platform.OS === 'android') {
-  if (UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-  }
-}
-
 export default function NotificationsScreen() {
   const { user } = useAuth();
   const { notificationList, isLoading } = useNotificationUnread(
@@ -38,10 +29,6 @@ export default function NotificationsScreen() {
     user?.companyID!,
     user?.employeeCode!
   );
-
-  useEffect(() => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-  }, [notificationList]);
 
   const handleNotificationPress = (item: INotification) => {
     markAsRead(

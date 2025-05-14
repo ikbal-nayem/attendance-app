@@ -1,14 +1,14 @@
+import { useNotificationDetails } from '@/api/notification.api';
 import Card from '@/components/Card';
 import AppHeader from '@/components/Header';
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
+import { useAuth } from '@/context/AuthContext';
 import { parseDate } from '@/utils/date-time';
-import { isNull } from '@/utils/validation';
-import { UnknownOutputParams, useLocalSearchParams } from 'expo-router';
-import { Download, Paperclip } from 'lucide-react-native';
+import { useLocalSearchParams } from 'expo-router';
 import React from 'react';
-import { Linking, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 interface Attachment {
   uri: string;
@@ -16,7 +16,15 @@ interface Attachment {
 }
 
 export default function NotificationDetailScreen() {
-  const notification = useLocalSearchParams<UnknownOutputParams & INotification>();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { user } = useAuth();
+
+  const { notificationDetails, isLoading } = useNotificationDetails(
+    user?.companyID!,
+    user?.userID!,
+    user?.sessionID!,
+    id
+  );
 
   const handleAttachmentPress = async (attachment: Attachment) => {
     try {
@@ -31,49 +39,35 @@ export default function NotificationDetailScreen() {
     }
   };
 
-  if (isNull(notification)) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <AppHeader title="Notification Not Found" />
-        <View style={styles.centered}>
-          <Text style={styles.errorText}>The requested notification could not be found.</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
       <AppHeader
-        title={notification.messageFrom}
-        withBackButton={true}
-        bg="primary"
+        title={notificationDetails?.messageFrom || 'Notification Details'}
         rightContent={<View style={{ width: 24 }} />}
       />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Card>
-          <Text style={styles.title}>{notification.messageTitle}</Text>
+        <Card variant="outlined" isLoading={isLoading}>
+          <Text style={styles.title}>{notificationDetails?.messageTitle}</Text>
           <Text style={styles.date}>
-            {parseDate(notification?.messageDate || notification?.referenceDate)?.toLocaleString(
-              'en-US',
-              {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              }
-            )}
+            {parseDate(
+              notificationDetails?.messageDate! || notificationDetails?.referenceDate!
+            )?.toLocaleString('en-US', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
           </Text>
           <View style={styles.separator} />
-          <Text style={styles.message}>{notification.messageDetails}</Text>
+          <Text style={styles.message}>{notificationDetails?.messageDetails}</Text>
 
-          {notification.attachments && notification.attachments.length > 0 && (
+          {/* {notificationDetails?.attachments && notificationDetails?.attachments.length > 0 && (
             <View style={styles.attachmentsContainer}>
               <Text style={styles.attachmentsTitle}>Attachments:</Text>
-              {notification.attachmentFile01.map((att, index) => (
+              {notificationDetails?.attachmentFile01.map((att, index) => (
                 <Pressable
                   key={index}
                   style={styles.attachmentItem}
@@ -87,7 +81,7 @@ export default function NotificationDetailScreen() {
                 </Pressable>
               ))}
             </View>
-          )}
+          )} */}
         </Card>
       </ScrollView>
     </SafeAreaView>

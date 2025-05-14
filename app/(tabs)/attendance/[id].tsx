@@ -31,7 +31,7 @@ export default function AttendanceDetailScreen() {
     params?.id
   );
 
-  console.log(attendanceDetails);
+  console.log(attendanceDetails, isLoading);
   
 
   let statusText = '';
