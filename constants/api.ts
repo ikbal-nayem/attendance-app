@@ -35,5 +35,9 @@ export const API_CONSTANTS = {
     INIT: '/LiveTrackingService/firstLoad',
     LIVE_TRACKING: '/LiveTrackingService/liveTracking',
     SEND_LOCATION: '/StaffTrackingService/staffTracking',
-  }
+  },
+  TERRITORY: {
+    INIT: '/EnquiryTerritoryHistoryService/firstLoad',
+    HISTORY_LIST: '/EnquiryTerritoryHistoryService/territoryHistory',
+  },
 };

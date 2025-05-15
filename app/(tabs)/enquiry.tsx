@@ -28,10 +28,10 @@ export default function EnquiryScreen() {
       route: '/notifications/history',
     },
     {
-      id: 'geolocation',
-      title: 'Geolocation & Territory History',
+      id: 'territory',
+      title: 'Territory History',
       icon: <MapPin size={24} color={Colors.light.tint} />,
-      route: '/enquiry/geolocation',
+      route: '/enquiry/territory',
     },
     {
       id: 'tracking',
@@ -44,12 +44,7 @@ export default function EnquiryScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
-      <AppHeader
-        title="Enquiry"
-        withBackButton
-        bg="primary"
-        rightContent={<View style={{ width: 24 }} />}
-      />
+      <AppHeader title="Enquiry" rightContent={<View style={{ width: 24 }} />} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={styles.optionsContainer}>

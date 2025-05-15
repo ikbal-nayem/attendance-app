@@ -162,9 +162,9 @@ const menu2 = [
     onPress: () => router.push('/notifications/history'),
   },
   {
-    name: 'Geolocation & Territory',
+    name: 'Territory History',
     icon: <MapPin size={24} color={Colors.light.tint} />,
-    onPress: () => router.push('/enquiry/geolocation'),
+    onPress: () => router.push('/enquiry/territory'),
   },
   {
     name: 'Live Tracking',

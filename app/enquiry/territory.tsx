@@ -1,8 +1,4 @@
-import {
-  IActivityHistory,
-  useActivityHistoryInit,
-  useActivityHistoryList,
-} from '@/api/activity.api';
+import { ITerritotyHistory, useTerritoryHistoryList, useTerritoryInit } from '@/api/territory.api';
 import AnimatedRenderView from '@/components/AnimatedRenderView';
 import Button from '@/components/Button';
 import Card from '@/components/Card';
@@ -17,11 +13,9 @@ import { useAuth } from '@/context/AuthContext';
 import { parseResponseDate, parseResponseTime } from '@/utils/date-time';
 import { commonStyles } from '@/utils/styles';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { router } from 'expo-router';
 import {
-  Activity as ActivityIcon,
   CalendarDays,
-  FilePenLine,
+  Clock9,
   Filter,
   FilterIcon,
   MapPin,
@@ -44,12 +38,17 @@ import {
 } from 'react-native';
 
 interface FilterFormInputs {
-  activityType: string;
   client: string;
   territory: string;
 }
 
-const FilterComponent = ({ control, onFilterSubmit, clearFilters, onClose, activityData }: any) => (
+const FilterComponent = ({
+  control,
+  onFilterSubmit,
+  clearFilters,
+  onClose,
+  territoryData,
+}: any) => (
   <View style={styles.drawerContentContainer}>
     <ScrollView showsVerticalScrollIndicator={false}>
       <AnimatedRenderView
@@ -62,65 +61,39 @@ const FilterComponent = ({ control, onFilterSubmit, clearFilters, onClose, activ
         <X size={20} color={Colors.light.text} onPress={onClose} />
       </AnimatedRenderView>
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Activity Type</Text>
-        <Controller
-          control={control}
-          name="activityType"
-          render={({ field: { onChange, value } }) => (
-            <Select
-              options={activityData?.activityTypeList || []}
-              keyProp="code"
-              valueProp="name"
-              value={value}
-              onChange={(val: string) => onChange(val)}
-              placeholder="Select Activity Type"
-              size="small"
-              containerStyle={styles.filterSelectContainer}
-            />
-          )}
-        />
-      </View>
+      <Controller
+        control={control}
+        name="client"
+        render={({ field: { onChange, value } }) => (
+          <Select
+            label="Supervisor/Manager"
+            options={territoryData?.clientList || []}
+            keyProp="code"
+            valueProp="name"
+            value={value}
+            onChange={(val: string) => onChange(val)}
+            placeholder="Select Supervisor/Manager"
+            size="small"
+          />
+        )}
+      />
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Client</Text>
-        <Controller
-          control={control}
-          name="client"
-          render={({ field: { onChange, value } }) => (
-            <Select
-              options={activityData?.clientList || []}
-              keyProp="code"
-              valueProp="name"
-              value={value}
-              onChange={(val: string) => onChange(val)}
-              placeholder="Select Client"
-              size="small"
-              containerStyle={styles.filterSelectContainer}
-            />
-          )}
-        />
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Territory</Text>
-        <Controller
-          control={control}
-          name="territory"
-          render={({ field: { onChange, value } }) => (
-            <Select
-              options={activityData?.territoryList || []}
-              keyProp="code"
-              valueProp="name"
-              value={value}
-              onChange={(val: string) => onChange(val)}
-              placeholder="Select Territory"
-              size="small"
-              containerStyle={styles.filterSelectContainer}
-            />
-          )}
-        />
-      </View>
+      <Controller
+        control={control}
+        name="territory"
+        render={({ field: { onChange, value } }) => (
+          <Select
+            label="Territory"
+            options={territoryData?.territoryList || []}
+            keyProp="code"
+            valueProp="name"
+            value={value}
+            onChange={(val: string) => onChange(val)}
+            placeholder="Select Territory"
+            size="small"
+          />
+        )}
+      />
 
       <View style={styles.filterButtonGroup}>
         <Button size="small" title="Clear Filters" onPress={clearFilters} variant="outline" />
@@ -145,44 +118,35 @@ const FilterComponent = ({ control, onFilterSubmit, clearFilters, onClose, activ
 
 export default function ActivityHistoryScreen() {
   const { user } = useAuth();
-  const { activityData, isLoading: isInitLoading } = useActivityHistoryInit(user?.companyID!);
+  const { territoryData, isLoading: isInitLoading } = useTerritoryInit(user?.companyID!);
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [isFilterDrawerVisible, setIsFilterDrawerVisible] = useState(false);
-  const [selectedActivityType, setSelectedActivityType] = useState<string | undefined>();
   const [selectedClient, setSelectedClient] = useState<string | undefined>();
   const [selectedTerritory, setSelectedTerritory] = useState<string | undefined>();
 
   const { control, handleSubmit, reset } = useForm<FilterFormInputs>({
-    defaultValues: { activityType: '', client: '', territory: '' },
+    defaultValues: { client: '', territory: '' },
   });
 
-  const { activityHistoryList, isLoading, error } = useActivityHistoryList(
+  const { territoryHistoryList, isLoading, error } = useTerritoryHistoryList(
     user?.userID!,
     user?.sessionID!,
     user?.companyID,
     user?.employeeCode,
     startDate,
     endDate,
-    selectedActivityType,
     selectedClient,
     selectedTerritory
   );
   const [showDatePicker, setShowDatePicker] = useState<'start' | 'end' | null>(null);
 
   useEffect(() => {
-    if (activityData?.fromDate && activityData?.toDate) {
-      setStartDate(parseResponseDate(activityData.fromDate));
-      setEndDate(parseResponseDate(activityData.toDate));
+    if (territoryData?.fromDate && territoryData?.toDate) {
+      setStartDate(parseResponseDate(territoryData.fromDate));
+      setEndDate(parseResponseDate(territoryData.toDate));
     }
-  }, [activityData]);
-
-  const handleItemPress = useCallback((item: IActivityHistory) => {
-    router.push({
-      pathname: '/(tabs)/activity/[id]',
-      params: { id: item?.entryNo },
-    });
-  }, []);
+  }, [territoryData]);
 
   const onDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     const currentDate = selectedDate || (showDatePicker === 'start' ? startDate : endDate);
@@ -200,94 +164,72 @@ export default function ActivityHistoryScreen() {
   };
 
   const onFilterSubmit = (data: FilterFormInputs) => {
-    setSelectedActivityType(data.activityType || undefined);
     setSelectedClient(data.client || undefined);
     setSelectedTerritory(data.territory || undefined);
     setIsFilterDrawerVisible(false);
   };
 
   const clearFilters = () => {
-    reset({ activityType: '', client: '', territory: '' });
-    setSelectedActivityType(undefined);
+    reset({ client: '', territory: '' });
     setSelectedClient(undefined);
     setSelectedTerritory(undefined);
     setIsFilterDrawerVisible(false);
   };
 
   const renderItem = useCallback(
-    ({ item, index }: { item: IActivityHistory; index: number }) => {
+    ({ item, index }: { item: ITerritotyHistory; index: number }) => {
       return (
-        <TouchableOpacity onPress={() => handleItemPress(item)} activeOpacity={0.8}>
-          <AnimatedRenderView index={index}>
-            <Card variant="outlined" style={styles.itemContainer}>
-              <View style={styles.cardHeader}>
-                <View style={styles.headerLeft}>
-                  <ActivityIcon size={18} color={Colors.light.primary} />
-                  <View>
-                    <Text style={styles.entryTypeText} numberOfLines={1}>
-                      {
-                        activityData?.activityTypeList?.find((a) => a.code === item.activityType)
-                          ?.name
-                      }
-                    </Text>
-                    {(item.activityStartTime || item.activityStopTime) && (
-                      <Text style={styles.activityTimeText} numberOfLines={1}>
-                        {parseResponseTime(item.activityStartTime)} -{' '}
-                        {parseResponseTime(item.activityStopTime)}
-                      </Text>
-                    )}
-                  </View>
-                </View>
+        <AnimatedRenderView key={index} index={index}>
+          <Card variant="outlined" style={styles.itemContainer}>
+            <View style={styles.cardHeader}>
+              <View style={styles.container}>
+                <Text style={styles.entryTypeText} numberOfLines={1}>
+                  {item?.territory}
+                </Text>
+                {(item.inTime || item.outTime) && (
+                  <Text style={styles.territoryTimeText} numberOfLines={1}>
+                    {parseResponseTime(item.inTime)} - {parseResponseTime(item.outTime)}
+                  </Text>
+                )}
+              </View>
+              <View>
                 <View style={commonStyles.flexRowAlignCenter}>
                   <CalendarDays size={14} color={Colors.light.subtext} />
-                  <Text style={styles.activityDateText}>
-                    {parseResponseDate(item?.activityDate).toLocaleDateString('en-US', {
+                  <Text style={styles.territoryDateText}>
+                    {parseResponseDate(item?.accessDate).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'short',
                       day: 'numeric',
                     })}
                   </Text>
                 </View>
+                <View style={[commonStyles.flexRowAlignCenter, { justifyContent: 'flex-end' }]}>
+                  <Clock9 size={13} color={Colors.light.subtext} />
+                  <Text style={styles.timeDuration}>{item?.timeDuration}</Text>
+                </View>
               </View>
+            </View>
 
-              {/* Client */}
-              {item?.client && (
-                <View style={styles.detailRow}>
-                  <User size={16} color={Colors.light.success} />
-                  <Text style={styles.detailValue} numberOfLines={2}>
-                    {activityData?.clientList?.find((c) => c.code === item.client)?.name}
-                  </Text>
-                </View>
-              )}
+            {/* Employee */}
+            <View style={[commonStyles.flexRowAlignCenter, styles.detailRow]}>
+              <User size={16} color={Colors.light.secondary} />
+              <Text style={styles.detailValue}>
+                {item?.employeeName} ({item?.employeeCode})
+              </Text>
+            </View>
 
-              {/* Territory */}
-              {item.territory && (
-                <View style={styles.detailRow}>
-                  <MapPin size={16} color={Colors.light.warning} />
-                  <Text style={styles.detailValue} numberOfLines={1}>
-                    {activityData?.territoryList?.find((t) => t.code === item.territory)?.name}
-                  </Text>
-                </View>
-              )}
-
-              {/* Activity Details */}
-              {item.activityDetails && (
-                <View style={styles.detailRow}>
-                  <FilePenLine size={16} color={Colors.light.subtext} />
-                  <Text
-                    style={[styles.detailValue, { color: Colors.light.subtext }]}
-                    numberOfLines={2}
-                  >
-                    {item.activityDetails}
-                  </Text>
-                </View>
-              )}
-            </Card>
-          </AnimatedRenderView>
-        </TouchableOpacity>
+            {/* Location */}
+            {item.location && (
+              <View style={[commonStyles.flexRowAlignCenter, styles.detailRow]}>
+                <MapPin size={16} color={Colors.light.warning} />
+                <Text style={styles.detailValue}>{item?.location}</Text>
+              </View>
+            )}
+          </Card>
+        </AnimatedRenderView>
       );
     },
-    [handleItemPress, activityData]
+    [territoryData]
   );
 
   if (error) {
@@ -298,9 +240,7 @@ export default function ActivityHistoryScreen() {
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
       <AppHeader
-        title="Activity History"
-        withBackButton={true}
-        bg="primary"
+        title="Territory History"
         rightContent={
           <TouchableOpacity
             onPress={() => {
@@ -350,7 +290,7 @@ export default function ActivityHistoryScreen() {
 
       {isLoading || isInitLoading ? (
         <ActivityIndicator color={Colors.light.primary} style={{ flex: 1 }} size="large" />
-      ) : activityHistoryList?.length === 0 ? (
+      ) : territoryHistoryList?.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyMessage}>
             No activity records found for the selected period.
@@ -358,9 +298,9 @@ export default function ActivityHistoryScreen() {
         </View>
       ) : (
         <FlatList
-          data={activityHistoryList}
+          data={territoryHistoryList}
           renderItem={renderItem}
-          keyExtractor={(item, idx) => item?.entryNo + idx.toString()}
+          keyExtractor={(item, idx) => idx.toString()}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingTop: Layout.spacing.m }}
         />
@@ -368,7 +308,7 @@ export default function ActivityHistoryScreen() {
 
       <Drawer isOpen={isFilterDrawerVisible} onClose={() => setIsFilterDrawerVisible(false)}>
         <FilterComponent
-          activityData={activityData}
+          territoryData={territoryData}
           onFilterSubmit={handleSubmit(onFilterSubmit)}
           onClose={() => setIsFilterDrawerVisible(false)}
           clearFilters={clearFilters}
@@ -408,7 +348,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  filterSelectContainer: { marginBottom: 5 },
   dateButton: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -448,40 +387,28 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: Layout.spacing.s,
   },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Layout.spacing.s,
-    flex: 1,
-    marginRight: Layout.spacing.s,
-  },
   entryTypeText: {
     fontWeight: '600',
     fontSize: 17,
     color: Colors.light.primary,
     flexShrink: 1,
   },
-  activityTimeText: {
+  territoryTimeText: {
     fontSize: 13,
     fontWeight: '500',
     color: Colors.light.subtext,
   },
-  activityDateText: {
+  territoryDateText: {
     fontWeight: '500',
     fontSize: 15,
     color: Colors.light.subtext,
   },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: Layout.spacing.s,
-    gap: Layout.spacing.s,
+  timeDuration: {
+    fontSize: 13,
+    color: Colors.light.subtext,
   },
-  detailText: {
-    fontFamily: 'Inter-Regular',
-    fontSize: 14,
-    color: Colors.light.text,
-    flex: 1,
+  detailRow: {
+    marginTop: Layout.spacing.s,
   },
   drawerContentContainer: {
     flex: 1,
@@ -495,21 +422,11 @@ const styles = StyleSheet.create({
     marginBottom: Layout.spacing.l,
     textAlign: 'center',
   },
-  inputGroup: {
-    marginBottom: Layout.spacing.m,
-  },
-  label: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 14,
-    color: Colors.light.subtext,
-    marginBottom: Layout.spacing.xs,
-  },
   closeButton: {
     marginTop: Layout.spacing.s,
     marginBottom: Layout.spacing.m,
   },
   detailValue: {
-    fontFamily: 'Inter-Regular',
     fontSize: 14,
     color: Colors.light.text,
     flex: 1,

@@ -33,9 +33,9 @@ const MAP_HEIGHT_PERCENTAGE = 0.6;
 const MARKER_IMAGE_SIZE = 30;
 
 export default function LiveTrackingScreen() {
-  const { userLocations: allUserLocations, isLoading, error } = useFetchUserLiveLocations();
   const { user } = useAuth();
   const { locationData } = useLiveLocationData(user?.companyID!);
+  const { userLocations: allUserLocations, isLoading, error } = useFetchUserLiveLocations();
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const mapRef = useRef<MapView>(null);
