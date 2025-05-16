@@ -3,6 +3,7 @@ import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
+import { useNotifications } from '@/context/NotificationContext';
 import { getDuration, parseDate } from '@/utils/date-time';
 import { generateUserImage } from '@/utils/generator';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -45,7 +46,7 @@ const popoverContent = (handleLogout: () => void) => (
   </TouchableOpacity>
 );
 
-const header = (user: IUser, handleLogout: () => void) => (
+const header = (user: IUser, handleLogout: () => void, unreadCount: number) => (
   <LinearGradient colors={['#0096c7', '#00b4d8']} style={styles.header}>
     <View style={styles.userInfo}>
       <Popover content={popoverContent(handleLogout)}>
@@ -60,8 +61,15 @@ const header = (user: IUser, handleLogout: () => void) => (
         <Text style={styles.userName}>{user.userName}</Text>
       </View>
     </View>
-    <TouchableOpacity style={styles.iconButton} onPress={() => router.push('/notifications')}>
-      <Bell size={26} color={Colors.light.text} />
+    <TouchableOpacity
+      activeOpacity={0.7}
+      style={styles.iconButton}
+      onPress={() => router.push('/notifications')}
+    >
+      <View style={[styles.notificationCount, { display: unreadCount > 0 ? 'flex' : 'none' }]}>
+        <Text style={{ color: 'white', fontSize: 11 }}>{unreadCount}</Text>
+      </View>
+      <Bell size={26} color={Colors.light.card} />
     </TouchableOpacity>
   </LinearGradient>
 );
@@ -175,6 +183,7 @@ const menu2 = [
 
 export default function DashboardScreen() {
   const { user, logout } = useAuth();
+  const { unreadCount } = useNotifications();
   const [fadeAnim] = useState(new Animated.Value(0));
   const params = useLocalSearchParams<{ screen?: string }>();
 
@@ -221,7 +230,7 @@ export default function DashboardScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
-      {header(user, handleLogout)}
+      {header(user, handleLogout, unreadCount)}
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <Animated.View style={{ opacity: fadeAnim }}>
@@ -302,6 +311,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Inter-SemiBold',
     color: Colors.dark.text,
+  },
+  notificationCount: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: Colors.light.error,
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    zIndex: 1,
   },
   userId: {
     fontSize: 14,

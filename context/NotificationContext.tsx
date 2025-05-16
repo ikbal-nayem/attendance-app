@@ -1,82 +1,55 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { axiosIns } from '@/api/config';
+import { API_CONSTANTS } from '@/constants/api';
+import { makeFormData } from '@/utils/form-actions';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-
-export type Notification = {
-  id: string;
-  title: string;
-  message: string;
-  date: Date;
-  read: boolean;
-  sender?: string;
-  type?: 'info' | 'success' | 'warning' | 'error';
-  media?: string[];
-};
+import { useAuth } from './AuthContext';
 
 type NotificationContextType = {
-  notifications: Notification[];
+  notifications: INotification[];
   unreadCount: number;
-  sendNotification: (
-    to: string[],
-    subject: string,
-    message: string,
-    media?: string[]
-  ) => Promise<boolean>;
 };
 
 const defaultContext: NotificationContextType = {
   notifications: [],
   unreadCount: 0,
-  sendNotification: async () => false,
 };
 
 const NotificationContext = createContext<NotificationContextType>(defaultContext);
 
-// Sample notifications data
-
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<Array<INotification>>([]);
+  const { user } = useAuth();
 
   useEffect(() => {
-    const loadNotifications = async () => {
-      try {
-        const storedNotifications = await AsyncStorage.getItem('notifications');
-        if (storedNotifications) {
-          // Parse stored notifications and convert date strings back to Date objects
-          const parsed = JSON.parse(storedNotifications);
-          const notificationsWithDateObjects = parsed.map((n: any) => ({
-            ...n,
-            date: new Date(n.date),
-          }));
-          setNotifications(notificationsWithDateObjects);
-        }
-      } catch (error) {
-        console.error('Error loading notifications:', error);
-      }
+    const getNotifications = async () => {
+      axiosIns
+        .post(
+          API_CONSTANTS.NOTIFICATION.LIST,
+          makeFormData({
+            sUserID: user?.userID,
+            sSessionID: user?.sessionID,
+            sCompanyID: user?.companyID,
+            sEmployeeCode: user?.employeeCode,
+          })
+        )
+        .then((response) => setNotifications(response.data || []))
+        .catch((err) => console.log(err));
     };
+    // getNotifications();
+    const interval = setInterval(getNotifications, 60 * 1000);
 
-    loadNotifications();
-  }, []);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [user]);
 
-  const sendNotification = async (
-    to: string[],
-    subject: string,
-    message: string,
-    media?: string[]
-  ): Promise<boolean> => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+  const unreadCount = notifications?.length;
 
-    return true;
-  };
-
-  const unreadCount = notifications.filter((notification) => !notification.read).length;
-
-  const value = {
-    notifications,
-    unreadCount,
-    sendNotification,
-  };
-
-  return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;
+  return (
+    <NotificationContext.Provider value={{ notifications, unreadCount }}>
+      {children}
+    </NotificationContext.Provider>
+  );
 };
 
 export const useNotifications = () => useContext(NotificationContext);
