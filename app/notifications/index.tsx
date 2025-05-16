@@ -14,21 +14,17 @@ import {
   View,
 } from 'react-native';
 
-import { markAsRead, useNotificationUnread } from '@/api/notification.api';
+import { markAsRead } from '@/api/notification.api';
 import AppHeader from '@/components/Header';
 import NotificationCard from '@/components/NotificationCard';
 import AppStatusBar from '@/components/StatusBar';
 import { useAuth } from '@/context/AuthContext';
+import { useNotifications } from '@/context/NotificationContext';
 import { makeFormData } from '@/utils/form-actions';
 
 export default function NotificationsScreen() {
   const { user } = useAuth();
-  const { notificationList, isLoading } = useNotificationUnread(
-    user?.userID!,
-    user?.sessionID!,
-    user?.companyID!,
-    user?.employeeCode!
-  );
+  const { notifications: notificationList, isLoading } = useNotifications();
 
   const handleNotificationPress = (item: INotification) => {
     markAsRead(

@@ -47,37 +47,37 @@ export const sendNotification = async (data: FormData) => {
   }
 };
 
-export const useNotificationUnread = (
-  userId: string,
-  sessionId: string,
-  companyId: string,
-  employeeCode: string
-) => {
-  const [notificationList, setNotificationList] = useState<INotification[]>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+// export const useNotificationUnread = (
+//   userId: string,
+//   sessionId: string,
+//   companyId: string,
+//   employeeCode: string
+// ) => {
+//   const [notificationList, setNotificationList] = useState<INotification[]>();
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    axiosIns
-      .post(
-        API_CONSTANTS.NOTIFICATION.LIST,
-        makeFormData({
-          sUserID: userId,
-          sSessionID: sessionId,
-          sCompanyID: companyId,
-          sEmployeeCode: employeeCode,
-        })
-      )
-      .then((response) => setNotificationList(response.data || []))
-      .catch((err) => {
-        console.log(err);
-        setError(err.message);
-      })
-      .finally(() => setIsLoading(false));
-  }, [companyId]);
+//   useEffect(() => {
+//     axiosIns
+//       .post(
+//         API_CONSTANTS.NOTIFICATION.LIST,
+//         makeFormData({
+//           sUserID: userId,
+//           sSessionID: sessionId,
+//           sCompanyID: companyId,
+//           sEmployeeCode: employeeCode,
+//         })
+//       )
+//       .then((response) => setNotificationList(response.data || []))
+//       .catch((err) => {
+//         console.log(err);
+//         setError(err.message);
+//       })
+//       .finally(() => setIsLoading(false));
+//   }, [companyId]);
 
-  return { notificationList, isLoading, error };
-};
+//   return { notificationList, isLoading, error };
+// };
 
 export const markAsRead = async (data: FormData) => {
   try {

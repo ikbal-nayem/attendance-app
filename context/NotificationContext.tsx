@@ -7,16 +7,19 @@ import { useAuth } from './AuthContext';
 type NotificationContextType = {
   notifications: INotification[];
   unreadCount: number;
+  isLoading: boolean;
 };
 
 const defaultContext: NotificationContextType = {
   notifications: [],
   unreadCount: 0,
+  isLoading: true,
 };
 
 const NotificationContext = createContext<NotificationContextType>(defaultContext);
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState<Array<INotification>>([]);
   const { user } = useAuth();
 
@@ -33,7 +36,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           })
         )
         .then((response) => setNotifications(response.data || []))
-        .catch((err) => console.log(err));
+        .catch((err) => console.log(err))
+        .finally(() => setIsLoading(false));
     };
     // getNotifications();
     const interval = setInterval(getNotifications, 60 * 1000);
@@ -46,7 +50,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const unreadCount = notifications?.length;
 
   return (
-    <NotificationContext.Provider value={{ notifications, unreadCount }}>
+    <NotificationContext.Provider value={{ notifications, unreadCount, isLoading }}>
       {children}
     </NotificationContext.Provider>
   );
