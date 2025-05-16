@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.light.inputBorder,
-    borderRadius: Layout.borderRadius.xl, // Match Input component
+    borderRadius: Layout.borderRadius.xxl,
     backgroundColor: Colors.light.inputBackground,
   },
   selectContainerSmall: {

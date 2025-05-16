@@ -4,10 +4,16 @@ import AppHeader from '@/components/Header';
 import Input from '@/components/Input'; // Assuming Input component path
 import SingleImagePicker from '@/components/SingleImagePicker'; // Assuming SingleImagePicker component path
 import AppStatusBar from '@/components/StatusBar';
+import Colors from '@/constants/Colors';
+import { USER_DEVICE_ID } from '@/constants/common';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
+import { localData } from '@/services/storage';
+import { makeFormData } from '@/utils/form-actions';
 import { generateUserImage } from '@/utils/generator';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Save } from 'lucide-react-native';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -15,31 +21,58 @@ import { z } from 'zod';
 
 // Define the Zod schema for validation
 const profileSchema = z.object({
-  mobile: z.string().min(10, 'Mobile number must be at least 10 digits'),
-  email: z.string().email('Invalid email address'),
-  photo: z.string().optional(), // Assuming photo is stored as a URI string
+  sMobileNo: z
+    .string()
+    .min(10, 'Mobile number must be at least 10 digits')
+    .max(13, 'Mobile number must be at most 13 digits'),
+  sEmail: z.string().email('Invalid email address'),
+  sPhoto: z.string().optional(), // Assuming photo is stored as a URI string
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
 const ProfileUpdateScreen = () => {
-  const { user } = useAuth();
+  const { user, updateProfile, isLoading } = useAuth();
+  const { showToast } = useToast();
 
   const {
     control,
     handleSubmit,
     formState: { errors },
+    setError,
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      mobile: user?.mobileNo || '',
-      email: user?.emailAddress || '',
-      photo: generateUserImage(user?.userID!, user?.sessionID!, user?.companyID!),
+      sMobileNo: user?.mobileNo || '',
+      sEmail: user?.emailAddress || '',
+      sPhoto: generateUserImage(user?.userID!, user?.sessionID!, user?.companyID!),
     },
   });
 
-  const onSubmit = (data: ProfileFormValues) => {
-    console.log('Profile data submitted:', data);
+  const onSubmit = async (data: IObject) => {
+    data = {
+      ...data,
+      sUserID: user?.userID,
+      sCompanyID: user?.companyID,
+      sSessionID: user?.sessionID,
+      sEmployeeCode: user?.employeeCode,
+      sDeviceID: await localData.get(USER_DEVICE_ID),
+    };
+    updateProfile(makeFormData(data))
+      .then((res) => {
+        if (res instanceof Object && res?.success == true) {
+          showToast({
+            type: 'success',
+            message: res?.message || 'Profile updated successfully',
+          });
+        }
+      })
+      .catch((err) => {
+        setError('root', {
+          type: 'manual',
+          message: err || 'Failed to update profile',
+        });
+      });
   };
 
   return (
@@ -52,12 +85,12 @@ const ProfileUpdateScreen = () => {
           <View style={styles.photoSection}>
             <Controller
               control={control}
-              name="photo"
+              name="sPhoto"
               render={({ field: { onChange, value } }) => (
                 <SingleImagePicker photoUri={value} setPhotoUri={onChange} />
               )}
             />
-            {errors.photo && <Text style={styles.errorText}>{errors.photo.message}</Text>}
+            {errors.sPhoto && <Text style={styles.errorText}>{errors.sPhoto?.message}</Text>}
           </View>
 
           <Input label="Name" readOnly value={user?.userName} />
@@ -66,15 +99,16 @@ const ProfileUpdateScreen = () => {
           {/* Editable fields */}
           <Controller
             control={control}
-            name="mobile"
+            name="sMobileNo"
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label="Mobile"
                 placeholder="Enter mobile number"
+                readOnly={isLoading}
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
-                error={errors.mobile?.message}
+                error={errors.sMobileNo?.message}
                 keyboardType="phone-pad"
               />
             )}
@@ -82,21 +116,32 @@ const ProfileUpdateScreen = () => {
 
           <Controller
             control={control}
-            name="email"
+            name="sEmail"
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
                 label="Email"
                 placeholder="Enter email address"
+                readOnly={isLoading}
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
-                error={errors.email?.message}
+                error={errors.sEmail?.message}
                 keyboardType="email-address"
               />
             )}
           />
 
-          <Button title="Update Profile" onPress={handleSubmit(onSubmit)} />
+          {errors.root && <Text style={styles.errorText}>{errors.root?.message}</Text>}
+
+          {/* Submit button */}
+          <Button
+            title="Save"
+            icon={<Save color={Colors.dark.text} />}
+            iconPosition='right'
+            disabled={isLoading}
+            loading={isLoading}
+            onPress={handleSubmit(onSubmit)}
+          />
         </Card>
       </ScrollView>
     </SafeAreaView>

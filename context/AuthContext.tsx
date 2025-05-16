@@ -17,6 +17,7 @@ type AuthContextType = {
   logout: () => Promise<void>;
   registerRequest: (userData: FormData) => Promise<boolean | string>;
   verifyOtp: (otp: string) => Promise<{ success: boolean; message: string }>;
+  updateProfile: (userData: FormData) => Promise<string | IObject>;
   tempUserData: FormData | null;
   setTempUserData: (data: any) => void;
 };
@@ -29,6 +30,7 @@ const defaultContext: AuthContextType = {
   logout: async () => {},
   registerRequest: async () => false,
   verifyOtp: async () => ({ success: false, message: '' }),
+  updateProfile: async () => '',
   tempUserData: null,
   setTempUserData: () => {},
 };
@@ -119,7 +121,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const response = await axiosIns.post(API_CONSTANTS.AUTH.REGISTER_REQUEST, userData);
-      console.log(response);
       if (response.data?.messageCode === '0') {
         userData.append('requestNo', response.data?.requestNo);
         setTempUserData(userData);
@@ -155,6 +156,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateProfile = (userData: FormData): Promise<{ success: boolean; message: string }> => {
+    setIsLoading(true);
+    return new Promise((resolve, reject) => {
+      axiosIns
+        .post(API_CONSTANTS.AUTH.UPDATE_PROFILE, userData)
+        .then(async (response: AxiosResponse<IResponse & IUser>) => {
+          if (response.data?.messageCode === '0') {
+            console.log(response.data);
+            // await localData.set('user', response.data);
+            // setUser(response.data);
+            resolve({ success: true, message: response.data.messageDesc });
+          }
+          reject(response.data?.messageDesc);
+        })
+        .catch((error) => {
+          console.error(error);
+          reject('An error occurred during login. Please try again.');
+        })
+        .finally(() => setIsLoading(false));
+    });
+  };
+
   const value = {
     user,
     isAuthenticated: !!user,
@@ -163,6 +186,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     logout,
     registerRequest,
     verifyOtp,
+    updateProfile,
     tempUserData,
     setTempUserData,
   };

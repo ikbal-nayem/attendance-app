@@ -22,6 +22,7 @@ export default {
     medium: 8,
     large: 16,
     xl: 24,
+    xxl: 32,
   },
   inputHeight: 52,
   buttonHeight: 52,

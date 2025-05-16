@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: 1,
     borderColor: Colors.light.primary,
-    borderRadius: Layout.borderRadius.medium,
+    borderRadius: Layout.borderRadius.xxl,
     backgroundColor: `${Colors.light.primary}1A`,
     height: Layout.inputHeight,
     marginBottom: Layout.spacing.s,

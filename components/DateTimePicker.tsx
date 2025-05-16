@@ -1,18 +1,17 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Platform,
-  StyleProp,
-  ViewStyle,
-  TextStyle,
-} from 'react-native';
-import { Calendar, Clock } from 'lucide-react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Calendar, Clock } from 'lucide-react-native';
+import React, { useState } from 'react';
+import {
+  Platform,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ViewStyle,
+} from 'react-native';
 
 type CustomDateTimePickerProps = {
   label?: string;
@@ -39,16 +38,18 @@ const CustomDateTimePicker: React.FC<CustomDateTimePickerProps> = ({
   helper,
   containerStyle,
   pickerStyle,
-  formatDate = date => date.toLocaleDateString(),
-  formatTime = date => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  formatDate = (date) => date.toLocaleDateString(),
+  formatTime = (date) => date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   minDate,
   maxDate,
   disabled = false,
 }) => {
   const [show, setShow] = useState(false);
   const [tempDate, setTempDate] = useState(value);
-  const [currentMode, setCurrentMode] = useState<'date' | 'time'>(mode === 'datetime' ? 'date' : mode);
-  
+  const [currentMode, setCurrentMode] = useState<'date' | 'time'>(
+    mode === 'datetime' ? 'date' : mode
+  );
+
   const hasError = !!error;
 
   const showPicker = () => {
@@ -59,10 +60,10 @@ const CustomDateTimePicker: React.FC<CustomDateTimePickerProps> = ({
 
   const handleChange = (event: any, selectedDate?: Date) => {
     const currentDate = selectedDate || value;
-    
+
     if (Platform.OS === 'android') {
       setShow(false);
-      
+
       if (selectedDate) {
         if (mode === 'datetime' && currentMode === 'date') {
           // On Android, after selecting the date, show the time picker
@@ -121,7 +122,7 @@ const CustomDateTimePicker: React.FC<CustomDateTimePickerProps> = ({
   return (
     <View style={[styles.container, containerStyle]}>
       {label && <Text style={styles.label}>{label}</Text>}
-      
+
       <TouchableOpacity
         style={[
           styles.pickerContainer,
@@ -132,21 +133,16 @@ const CustomDateTimePicker: React.FC<CustomDateTimePickerProps> = ({
         onPress={showPicker}
         disabled={disabled}
       >
-        <Text
-          style={[styles.pickerText, disabled && styles.pickerTextDisabled]}
-          numberOfLines={1}
-        >
+        <Text style={[styles.pickerText, disabled && styles.pickerTextDisabled]} numberOfLines={1}>
           {getDisplayText()}
         </Text>
         {getIcon()}
       </TouchableOpacity>
-      
+
       {(error || helper) && (
-        <Text style={[styles.helperText, hasError && styles.errorText]}>
-          {error || helper}
-        </Text>
+        <Text style={[styles.helperText, hasError && styles.errorText]}>{error || helper}</Text>
       )}
-      
+
       {show && (
         <>
           {Platform.OS === 'ios' && (
@@ -168,7 +164,7 @@ const CustomDateTimePicker: React.FC<CustomDateTimePickerProps> = ({
               </View>
             </View>
           )}
-          
+
           <DateTimePicker
             value={Platform.OS === 'ios' ? tempDate : value}
             mode={currentMode}
@@ -199,7 +195,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderWidth: 1,
     borderColor: Colors.light.inputBorder,
-    borderRadius: Layout.borderRadius.xl, // Match Input component
+    borderRadius: Layout.borderRadius.xxl,
     backgroundColor: Colors.light.inputBackground,
     height: Layout.inputHeight,
     paddingHorizontal: Layout.spacing.m,
