@@ -6,16 +6,12 @@ import { LocationProvider } from '@/context/LocationContext';
 import { NotificationProvider } from '@/context/NotificationContext';
 import { ToastProvider } from '@/context/ToastContext';
 import { useFrameworkReady } from '@/hooks/useFrameworkReady';
-import {
-  isBackgroundLocationTaskRegistered,
-  registerBackgroundLocationTask,
-} from '@/services/background-location-task';
 import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from '@expo-google-fonts/inter';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Platform, StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, Text } from 'react-native';
 import Animated, { FadeOut } from 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -60,21 +56,6 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded]);
-
-  useEffect(() => {
-    const setupBackgroundLocation = async () => {
-      if (Platform.OS === 'android' || Platform.OS === 'ios') {
-        const isRegistered = await isBackgroundLocationTaskRegistered();
-        if (!isRegistered) {
-          await registerBackgroundLocationTask();
-        }
-      }
-    };
-
-    if (isAppReady) {
-      setTimeout(() => setupBackgroundLocation(), 20 * 1000);
-    }
-  }, [isAppReady]);
 
   if (!isAppReady) {
     return (

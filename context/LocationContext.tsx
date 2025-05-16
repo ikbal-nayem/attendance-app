@@ -1,11 +1,16 @@
 import { sendLocationToServer } from '@/api/location.api';
 import { USER_DEVICE_ID } from '@/constants/common';
+import {
+  isBackgroundLocationTaskRegistered,
+  registerBackgroundLocationTask,
+} from '@/services/background-location-task';
 import { getAddressFromCoordinates } from '@/services/location';
 import { localData } from '@/services/storage';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
+import { useToast } from './ToastContext';
 
 export type LocationData = {
   latitude: number;
@@ -52,6 +57,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [locationTrackingInterval, setLocationTrackingInterval] = useState<NodeJS.Timeout | null>(
     null
   );
+  const { showToast } = useToast();
 
   useEffect(() => {
     const checkPermission = async () => {
@@ -68,6 +74,20 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         clearInterval(locationTrackingInterval);
       }
     };
+  }, []);
+
+  useEffect(() => {
+    const setupBackgroundLocation = async () => {
+      if (Platform.OS === 'android' || Platform.OS === 'ios') {
+        const isRegistered = await isBackgroundLocationTaskRegistered();
+        if (!isRegistered) {
+          const success = await registerBackgroundLocationTask();
+          success && showToast({ type: 'info', message: 'Background tracking service activated' });
+        }
+      }
+    };
+
+    setTimeout(setupBackgroundLocation, 20 * 1000);
   }, []);
 
   const requestLocationPermission = async (): Promise<boolean> => {

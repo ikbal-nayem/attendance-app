@@ -46,6 +46,7 @@ export async function registerBackgroundLocationTask() {
           },
         });
         console.log('[BG_TASK] Background location task registered');
+        return true;
       } else {
         console.error('[BG_TASK] Background location permission not granted');
       }

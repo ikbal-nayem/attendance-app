@@ -3,6 +3,7 @@ export const API_CONSTANTS = {
   AUTH: {
     SIGN_IN: '/SignInService/signInProcess',
     LOG_OUT: '/SignOutService/signOutProcess',
+    UPDATE_PROFILE: '/SignInService/profileUpdate',
     REGISTER_REQUEST: '/RegistrationService/registrationRequest',
     REGISTER_SUBMIT: '/RegistrationService/registrationSubmit',
   },
