@@ -43,25 +43,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [tempUserData, setTempUserData] = useState<FormData | null>(null);
   const { showToast } = useToast();
 
-  useEffect(() => {
-    // Check if user is already logged in
-    const checkLoginStatus = async () => {
-      try {
-        const userJson = await localData.get('user');
-        if (userJson) {
-          // console.log('User found: ', userJson);
-          setUser(userJson);
-          router.replace('/(tabs)');
-        }
-      } catch (error) {
-        console.error('Error retrieving user data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   // Check if user is already logged in
+  //   const checkLoginStatus = async () => {
+  //     try {
+  //       const userJson = await localData.get('user');
+  //       if (userJson) {
+  //         // console.log('User found: ', userJson);
+  //         setUser(userJson);
+  //         router.replace('/(tabs)');
+  //       }
+  //     } catch (error) {
+  //       console.error('Error retrieving user data:', error);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
 
-    checkLoginStatus();
-  }, []);
+  //   checkLoginStatus();
+  // }, []);
 
   useEffect(() => {
     const getDeviceId = async () => {
@@ -165,7 +165,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (response.data?.messageCode === '0') {
             console.log(response.data);
             // await localData.set('user', response.data);
-            // setUser(response.data);
+            setUser(response.data);
             resolve({ success: true, message: response.data.messageDesc });
           }
           reject(response.data?.messageDesc);
