@@ -31,12 +31,6 @@
           <string>com.ips.sat</string>
         </array>
       </dict>
-      <dict>
-        <key>CFBundleURLSchemes</key>
-        <array>
-          <string>exp+ips-sat</string>
-        </array>
-      </dict>
     </array>
     <key>CFBundleVersion</key>
     <string>1.0.0</string>
