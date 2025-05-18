@@ -194,7 +194,7 @@ export default function ActivityHistoryScreen() {
               </View>
               <View>
                 <View style={commonStyles.flexRowAlignCenter}>
-                  <CalendarDays size={14} color={Colors.light.subtext} />
+                  <CalendarDays size={13} color={Colors.light.subtext} />
                   <Text style={styles.territoryDateText}>
                     {parseResponseDate(item?.accessDate).toLocaleDateString('en-US', {
                       year: 'numeric',
@@ -204,7 +204,7 @@ export default function ActivityHistoryScreen() {
                   </Text>
                 </View>
                 <View style={[commonStyles.flexRowAlignCenter, { justifyContent: 'flex-end' }]}>
-                  <Clock9 size={13} color={Colors.light.subtext} />
+                  <Clock9 size={12} color={Colors.light.subtext} />
                   <Text style={styles.timeDuration}>{item?.timeDuration}</Text>
                 </View>
               </View>
