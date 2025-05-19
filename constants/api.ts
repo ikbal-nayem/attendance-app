@@ -1,5 +1,5 @@
 export const API_CONSTANTS = {
-  BASE_URL: 'http://86.96.193.135/srvsat/webapi',
+  BASE_URL: 'http://195.229.199.67:59082/srvsat/webapi',
   AUTH: {
     SIGN_IN: '/SignInService/signInProcess',
     LOG_OUT: '/SignOutService/signOutProcess',
