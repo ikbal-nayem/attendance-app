@@ -8,7 +8,7 @@ import { getAddressFromCoordinates } from '@/services/location';
 import { localData } from '@/services/storage';
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 import { useToast } from './ToastContext';
 
@@ -90,7 +90,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setTimeout(setupBackgroundLocation, 20 * 1000);
   }, []);
 
-  const requestLocationPermission = async (): Promise<boolean> => {
+  const requestLocationPermission = useCallback(async (): Promise<boolean> => {
     try {
       const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
 
@@ -116,9 +116,9 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setLocationPermission(false);
       return false;
     }
-  };
+  }, []);
 
-  const getCurrentLocation = async (): Promise<LocationData | null> => {
+  const getCurrentLocation = useCallback(async (): Promise<LocationData | null> => {
     try {
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
@@ -140,7 +140,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       console.error('Error getting current location:', error);
       return null;
     }
-  };
+  }, []);
 
   const startTracking = async (): Promise<void> => {
     if (!locationPermission) {
@@ -171,7 +171,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           location.timestamp
         );
       }
-    }, 5 * 60 * 1000); // 5 minutes in milliseconds
+    }, 10 * 60 * 1000); // 10 minutes in milliseconds
 
     setLocationTrackingInterval(interval);
     setIsTracking(true);
