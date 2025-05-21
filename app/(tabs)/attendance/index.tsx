@@ -76,6 +76,7 @@ export default function AttendanceScreen() {
   }, [attendanceData, setValue]);
 
   useEffect(() => {
+    console.log('Fetching location...')
     const initialize = async () => {
       await requestLocationPermission();
       const latLong = await getCurrentLocation();

@@ -2,6 +2,7 @@ import { API_CONSTANTS } from '@/constants/api';
 import { makeFormData } from '@/utils/form-actions';
 import { useEffect, useState } from 'react';
 import { axiosIns } from './config';
+import { generateRequestDate } from '@/utils/date-time';
 
 const LOCATION_UPLOAD_URL = `${API_CONSTANTS.BASE_URL}${API_CONSTANTS.LOACTION.SEND_LOCATION}`;
 
@@ -152,7 +153,7 @@ export const sendLocationToServer = async (
   formdata.append('sLongitude', longitude?.toString());
   formdata.append('sDeviceID', deviceId);
   formdata.append('sLocation', address);
-  formdata.append('sTimestamp', timestamp?.toString());
+  formdata.append('sTimestamp', generateRequestDate(new Date(timestamp)));
   try {
     const response = await fetchInBackground(LOCATION_UPLOAD_URL, formdata);
     if (response) {

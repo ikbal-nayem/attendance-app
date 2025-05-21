@@ -171,7 +171,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           location.timestamp
         );
       }
-    }, 10 * 60 * 1000); // 10 minutes in milliseconds
+    }, 2 * 60 * 1000); // 2 minutes in milliseconds
 
     setLocationTrackingInterval(interval);
     setIsTracking(true);
