@@ -27,6 +27,15 @@ export interface IAttendanceHistory {
   entryTime: string;
 }
 
+export interface IAttendanceHistoryDetails {
+  checkInOutFlag: string;
+  checkInOutLocation: string;
+  checkInOutNote: string;
+  checkInOutTime: string;
+  checkInOutType: string;
+  attachmentBase64File01: string;
+}
+
 export const useAttendanceData = (companyId: string, employeeCode: string) => {
   const [attendanceData, setAttendanceData] = useState<AttendanceData>();
   const [isLoading, setIsLoading] = useState(true);
@@ -125,7 +134,7 @@ export const useAttendanceDetails = (
   employeeCode: string,
   entryNo: string
 ) => {
-  const [attendanceDetails, setAttendanceDetails] = useState<IAttendanceHistory>();
+  const [attendanceDetails, setAttendanceDetails] = useState<IAttendanceHistoryDetails>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

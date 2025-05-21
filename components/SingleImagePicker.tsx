@@ -24,10 +24,11 @@ const imagePickerOptions: picker.ImagePickerOptions = {
 
 type ImagePickerProps = {
   photoUri: string | undefined | null;
-  setPhotoUri: (uri: string | undefined) => void;
+  setPhotoUri?: (uri: string | undefined) => void;
   source?: 'camera' | 'gallery' | 'both';
   previewContainerStyle?: StyleProp<ViewStyle>;
   placeholder?: React.ReactNode;
+  readOnly?: boolean;
 };
 
 const SingleImagePicker = ({
@@ -36,6 +37,7 @@ const SingleImagePicker = ({
   source = 'both',
   previewContainerStyle,
   placeholder,
+  readOnly,
 }: ImagePickerProps) => {
   const handlePickImage = async () => {
     let resultAsset: picker.ImagePickerAsset | undefined;
@@ -49,7 +51,7 @@ const SingleImagePicker = ({
     }
 
     if (resultAsset?.uri) {
-      setPhotoUri(resultAsset.uri);
+      setPhotoUri?.(resultAsset.uri);
     }
   };
 
@@ -111,14 +113,11 @@ const SingleImagePicker = ({
   );
 
   return (
-    <Animated.View
-      entering={FadeInDown.duration(500).delay(200)}
-      style={styles.container}
-    >
+    <Animated.View entering={FadeInDown.duration(500).delay(200)} style={styles.container}>
       <TouchableOpacity
         activeOpacity={0.7}
         style={[styles.photoButton, previewContainerStyle]}
-        onPress={handlePickImage}
+        onPress={!readOnly ? handlePickImage : undefined}
       >
         {photoUri ? (
           <Image source={{ uri: photoUri }} style={styles.photoPreview} />

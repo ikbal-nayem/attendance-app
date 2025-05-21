@@ -2,6 +2,7 @@ import { useAttendanceDetails } from '@/api/attendance.api';
 import Card from '@/components/Card';
 import { ErrorPreview } from '@/components/ErrorPreview';
 import AppHeader from '@/components/Header';
+import SingleImagePicker from '@/components/SingleImagePicker';
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
@@ -31,26 +32,23 @@ export default function AttendanceDetailScreen() {
     params?.id
   );
 
-  console.log(attendanceDetails, isLoading);
-  
-
   let statusText = '';
   let statusColor = Colors.light.warning;
   let StatusIcon = AlertTriangle;
 
-  if (attendanceDetails?.attendanceFlag === 'I') {
+  if (attendanceDetails?.checkInOutFlag === 'I') {
     statusText =
       'In ' +
-      parseDate(attendanceDetails?.entryTime!)?.toLocaleTimeString('en-US', {
+      parseDate(attendanceDetails?.checkInOutTime!)?.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
       });
     statusColor = Colors.light.success;
     StatusIcon = ClockArrowUp;
-  } else if (attendanceDetails?.attendanceFlag === 'O') {
+  } else if (attendanceDetails?.checkInOutFlag === 'O') {
     statusText =
       'Out ' +
-      parseDate(attendanceDetails?.entryTime!)?.toLocaleTimeString('en-US', {
+      parseDate(attendanceDetails?.checkInOutTime!)?.toLocaleTimeString('en-US', {
         hour: '2-digit',
         minute: '2-digit',
       });
@@ -108,10 +106,10 @@ export default function AttendanceDetailScreen() {
           <View style={styles.cardHeader}>
             <Briefcase size={36} color={Colors.light.primary} />
             <View style={styles.headerTextContainer}>
-              <Text style={styles.entryType}>{attendanceDetails?.entryType || 'N/A'}</Text>
-              {attendanceDetails?.entryTime && (
+              <Text style={styles.entryType}>{attendanceDetails?.checkInOutType || 'N/A'}</Text>
+              {attendanceDetails?.checkInOutTime && (
                 <Text style={styles.entryDateText}>
-                  {parseDate(attendanceDetails?.entryTime)?.toLocaleDateString('en-US', {
+                  {parseDate(attendanceDetails?.checkInOutTime)?.toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
                     year: 'numeric',
@@ -125,18 +123,24 @@ export default function AttendanceDetailScreen() {
             </View>
           </View>
 
+          <SingleImagePicker
+            photoUri={'data:image/png;base64,' + attendanceDetails?.attachmentBase64File01}
+            previewContainerStyle={styles.image}
+            readOnly
+          />
+
           <DetailItem
             icon={MapPin}
             label="Location"
-            value={attendanceDetails?.entryLocation}
-            hiddenBorder={isNull(attendanceDetails?.attendanceNote)}
+            value={attendanceDetails?.checkInOutLocation}
+            hiddenBorder={isNull(attendanceDetails?.checkInOutNote)}
           />
 
-          {attendanceDetails?.attendanceNote && (
+          {attendanceDetails?.checkInOutNote && (
             <DetailItem
               icon={FilePenLine}
               label="Note"
-              value={attendanceDetails?.attendanceNote}
+              value={attendanceDetails?.checkInOutNote}
               hiddenBorder
             />
           )}
@@ -217,4 +221,10 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.light.text,
   },
+  image: {
+    width: 250,
+    height: 250,
+    borderRadius: Layout.borderRadius.large,
+    marginBottom: Layout.spacing.m,
+  }
 });
