@@ -1,7 +1,8 @@
 import {
-  IUserLocationData,
-  useFetchUserLiveLocations,
-  useLiveLocationData,
+  getUserLocationList,
+  IEmployeeList,
+  IEmployeeLocation,
+  useEmployeeList,
 } from '@/api/location.api';
 import AppHeader from '@/components/Header';
 import Input from '@/components/Input';
@@ -9,12 +10,12 @@ import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import { Fullscreen, Search } from 'lucide-react-native';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
-  Image,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -26,78 +27,92 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import MapView, { Callout, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 const { width, height } = Dimensions.get('window');
 const MAP_HEIGHT_PERCENTAGE = 0.6;
-const MARKER_IMAGE_SIZE = 30;
+const MARKER_IMAGE_SIZE = 20;
 
 export default function LiveTrackingScreen() {
   const { user } = useAuth();
-  const { locationData } = useLiveLocationData(user?.companyID!);
-  const { userLocations: allUserLocations, isLoading, error } = useFetchUserLiveLocations();
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const { employeeList, isLoading: employeeLoading } = useEmployeeList(user?.companyID!);
+  const [loadingLocation, setLoadingLocation] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<IEmployeeList | null>();
+  const [userLocations, setUserLocations] = useState<IEmployeeLocation[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const { showToast } = useToast();
   const mapRef = useRef<MapView>(null);
 
-  console.log(locationData)
-
   useEffect(() => {
-    if (!isLoading) {
-      showAllUsers();
-    }
-  }, [isLoading]);
+    if (!selectedUser?.code) return;
+    setLoadingLocation(true);
+    getUserLocationList(
+      user?.userID!,
+      user?.sessionID!,
+      user?.companyID!,
+      selectedUser?.code!,
+      employeeList?.processDate
+    )
+      .then((res) => {
+        if (res?.success) {
+          setUserLocations(res?.data);
+          const coordinates = res?.data?.map((location: IEmployeeLocation) => ({
+            latitude: +location?.latitude,
+            longitude: +location?.longitude,
+          }));
+          mapRef.current?.fitToElements({
+            edgePadding: { top: 60, right: 60, bottom: 60, left: 60 },
+            animated: true,
+          });
+        } else showToast({ message: res?.message, type: 'error' });
+      })
+      .finally(() => setLoadingLocation(false));
+  }, [selectedUser?.code]);
 
-  const showAllUsers = useCallback(() => {
+  const showAllCordinates = (locations?: IEmployeeLocation[]) => {
     if (mapRef.current) {
-      const coordinates = allUserLocations?.map((user) => user.location);
-      mapRef.current.fitToCoordinates(coordinates, {
+      const coordinates = (locations || userLocations)?.map((location: IEmployeeLocation) => ({
+        latitude: +location?.latitude,
+        longitude: +location?.longitude,
+      }));
+      mapRef.current?.fitToCoordinates(coordinates, {
         edgePadding: { top: 60, right: 60, bottom: 60, left: 60 },
         animated: true,
       });
     }
-    setSelectedUserId(null);
-  }, [allUserLocations]);
-
-  const handleUserSelect = (user: IUserLocationData) => {
-    setSelectedUserId(user.userId);
-    if (mapRef.current) {
-      mapRef.current.animateToRegion(
-        {
-          latitude: user.location.latitude,
-          longitude: user.location.longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        },
-        1000
-      );
-    }
   };
 
-  const formatTimestamp = (timestamp: number) => {
-    const date = new Date(timestamp);
-    return date.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
+  const handleUserSelect = (selected: IEmployeeList) => {
+    if (!selected?.code) return;
+
+    setLoadingLocation(true);
+    setSelectedUser(selected);
+    getUserLocationList(
+      user?.userID!,
+      user?.sessionID!,
+      user?.companyID!,
+      selected?.code!,
+      employeeList?.processDate
+    )
+      .then((res) => {
+        if (res?.success) {
+          setUserLocations(res?.data);
+          const coordinates = res?.data?.map((location: IEmployeeLocation) => ({
+            latitude: +location?.latitude,
+            longitude: +location?.longitude,
+          }));
+          mapRef.current?.fitToCoordinates(coordinates, {
+            // edgePadding: { top: 60, right: 60, bottom: 60, left: 60 },
+            animated: true,
+          });
+        } else showToast({ message: res?.message, type: 'error' });
+      })
+      .finally(() => setLoadingLocation(false));
   };
 
-  const filteredUserLocations = allUserLocations.filter((user) =>
-    user.userName.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUserLocations = employeeList?.employeeList?.filter((user) =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  if (error) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <AppStatusBar />
-        <AppHeader title="Live Tracking" bg="primary" />
-        <View style={styles.centered}>
-          <Text style={styles.errorText}>Error: {error}</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -106,56 +121,36 @@ export default function LiveTrackingScreen() {
         title="Live Tracking"
         bg="primary"
         rightContent={
-          <TouchableOpacity onPress={showAllUsers} activeOpacity={0.7}>
-            <Fullscreen size={24} color={Colors.dark.text} />
-          </TouchableOpacity>
+          userLocations?.length && (
+            <TouchableOpacity onPress={() => showAllCordinates()} activeOpacity={0.7}>
+              <Fullscreen size={24} color={Colors.dark.text} />
+            </TouchableOpacity>
+          )
         }
       />
       <View style={styles.mapContainer}>
         <MapView
           ref={mapRef}
           style={styles.map}
-          onMapReady={showAllUsers}
+          // onMapReady={showAllUsers}
+          initialRegion={{
+            latitude: 25.117450242458936,
+            longitude: 55.29359965284598,
+            latitudeDelta: 0.4,
+            longitudeDelta: 0.4,
+          }}
           zoomControlEnabled
           provider={PROVIDER_GOOGLE}
         >
-          {allUserLocations?.map((user) => (
+          {userLocations?.map((user) => (
             <Marker
-              key={user.userId}
-              coordinate={user.location}
-              onPress={() => handleUserSelect(user)}
-              pinColor={getPinColor(user.userId)}
-              zIndex={selectedUserId === user.userId ? 10 : 1}
-            >
-              <View
-                style={[
-                  styles.markerContainer,
-                  selectedUserId === user.userId && styles.selectedMarkerContainer,
-                ]}
-              >
-                {user.imageUrl ? (
-                  <Image
-                    source={{ uri: user.imageUrl }}
-                    style={styles.markerImage}
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <View style={styles.markerFallback}>
-                    <Text style={styles.markerFallbackText}>
-                      {user.userName?.charAt(0).toUpperCase()}
-                    </Text>
-                  </View>
-                )}
-              </View>
-              <Callout tooltip>
-                <View style={styles.calloutContainer}>
-                  <Text style={styles.calloutTitle}>{user.userName}</Text>
-                  <Text style={styles.calloutDescription}>
-                    Last seen: {formatTimestamp(user.location.timestamp)}
-                  </Text>
-                </View>
-              </Callout>
-            </Marker>
+              key={user.serialNo}
+              coordinate={{ latitude: +user?.latitude, longitude: +user?.longitude }}
+              title={selectedUser?.name}
+              // onPress={() => handleUserSelect(user)}
+              // pinColor={getPinColor(user.userId)}
+              // zIndex={selectedUser?.code === user.userId ? 10 : 1}
+            />
           ))}
         </MapView>
       </View>
@@ -173,34 +168,43 @@ export default function LiveTrackingScreen() {
           inputStyle={styles.searchInput}
           size="medium"
           rightIcon={
-            isLoading ? <ActivityIndicator size="small" color={Colors.light.subtext} /> : null
+            employeeLoading ? <ActivityIndicator size="small" color={Colors.light.subtext} /> : null
           }
         />
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView showsVerticalScrollIndicator={false}>
+            {employeeLoading ? (
+              <View style={styles.centered}>
+                <ActivityIndicator size="large" color={Colors.light.primary} />
+                <Text style={styles.loadingText}>Loading users...</Text>
+              </View>
+            ) : null}
             {filteredUserLocations.length > 0 ? (
-              filteredUserLocations.map((user) => (
+              filteredUserLocations.map((user, idx) => (
                 <TouchableOpacity
-                  key={user.userId}
+                  key={user?.code}
                   activeOpacity={0.7}
                   style={[
                     styles.userItem,
-                    selectedUserId === user.userId && styles.selectedUserItem,
+                    selectedUser?.code === user?.code && styles.selectedUserItem,
                   ]}
                   onPress={() => handleUserSelect(user)}
                 >
                   <View
                     style={[
                       styles.userColorIndicator,
-                      { backgroundColor: getPinColor(user.userId) },
+                      { backgroundColor: getPinColor((idx + 1).toString()) },
                     ]}
                   />
                   <View style={styles.userInfo}>
-                    <Text style={styles.userName}>{user.userName}</Text>
-                    <Text style={styles.userTimestamp}>
+                    <Text style={styles.userName}>{user.name}</Text>
+                    {/* <Text style={styles.userTimestamp}>
                       Last seen: {formatTimestamp(user.location.timestamp)}
-                    </Text>
+                    </Text> */}
                   </View>
+                  {loadingLocation && selectedUser?.code === user?.code && (
+                    <ActivityIndicator size="small" color={Colors.light.primary} />
+                  )}
                 </TouchableOpacity>
               ))
             ) : (
