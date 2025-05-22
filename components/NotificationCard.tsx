@@ -2,7 +2,7 @@ import Colors from '@/constants/Colors';
 import Layout from '@/constants/Layout';
 import { parseDate } from '@/utils/date-time';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import AnimatedRenderView from './AnimatedRenderView'; // Added import
+import AnimatedRenderView from './AnimatedRenderView';
 
 const formatNotificationDate = (dateString?: string): string => {
   if (!dateString) return '';
@@ -26,7 +26,6 @@ const formatNotificationDate = (dateString?: string): string => {
     const dateOptions: Intl.DateTimeFormatOptions = {
       day: 'numeric',
       month: 'short',
-      // year: 'numeric',
     };
     const datePartString = date.toLocaleDateString('en-US', dateOptions);
     return `${datePartString} | ${timeString}`;
@@ -37,7 +36,7 @@ interface NotificationCardProps {
   item: INotification;
   onPress: (item: INotification) => void;
   isUnread?: boolean;
-  index?: number; // Added index for staggered animation
+  index?: number;
 }
 
 export default function NotificationCard({
@@ -49,9 +48,8 @@ export default function NotificationCard({
   isUnread = isUnread ? isUnread : item?.messageStatus === 'Unread';
   return (
     <AnimatedRenderView
-      index={index} // Pass index to AnimatedRenderView
+      index={index}
       style={[styles.notificationItem, isUnread && styles.unreadNotification]}
-      // entering prop is now handled by AnimatedRenderView
     >
       <TouchableOpacity
         activeOpacity={0.8}
@@ -81,20 +79,15 @@ export default function NotificationCard({
 
 const styles = StyleSheet.create({
   notificationItem: {
-    borderRadius: Layout.borderRadius.medium,
+    borderRadius: Layout.borderRadius.large,
     marginBottom: Layout.spacing.m,
     marginHorizontal: Layout.spacing.m,
     backgroundColor: Colors.light.card,
-    shadowColor: Colors.light.subtext,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
   },
   unreadNotification: {
     borderLeftWidth: 4,
-    borderLeftColor: Colors.light.primary,
-    backgroundColor: `${Colors.light.primary}1A`,
+    borderLeftColor: Colors.light.warning,
+    backgroundColor: `${Colors.light.warning}10`,
   },
   notificationTouchable: {
     padding: Layout.spacing.m,

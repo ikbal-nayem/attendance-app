@@ -1,3 +1,4 @@
+import AnimatedRenderView from '@/components/AnimatedRenderView';
 import Popover from '@/components/Popover';
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
@@ -18,6 +19,7 @@ import {
   ChevronsLeft,
   Clock,
   Edit,
+  Factory,
   FileSearch,
   ListTodo,
   LogOut,
@@ -138,6 +140,13 @@ const menu1 = [
     },
   },
   {
+    name: 'Site Visit',
+    icon: <Factory size={24} color={Colors.dark.secondaryDark} />,
+    onPress: () => {
+      router.push('/(tabs)/activity/site-visit');
+    },
+  },
+  {
     name: 'Notification',
     icon: <BellPlus size={24} color={Colors.light.warning} />,
     onPress: () => {
@@ -233,38 +242,38 @@ export default function DashboardScreen() {
       {header(user, handleLogout, unreadCount)}
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        <Animated.View style={{ opacity: fadeAnim }}>
-          {userCard(user)}
+        {/* <Animated.View style={{ opacity: fadeAnim }}> */}
+        {userCard(user)}
 
-          {/* Punch Info */}
-          <View style={styles.punchInfoCard}>
-            <View style={styles.punchHeader}>
-              <ArrowRightCircle size={20} color={Colors.light.success} />
-              <Text style={styles.punchHeaderText}>Check In at</Text>
-            </View>
-            <Text style={styles.punchTime}>
-              {lastCheckinTime} | <Text style={styles.punchDate}>{lastCheckinDate}</Text>
-            </Text>
-            <Text style={styles.todaysTime}>
-              Duration: <CheckinDuration checkInTime={checkIn} />
-            </Text>
+        {/* Punch Info */}
+        <View style={styles.punchInfoCard}>
+          <View style={styles.punchHeader}>
+            <ArrowRightCircle size={20} color={Colors.light.success} />
+            <Text style={styles.punchHeaderText}>Check In at</Text>
           </View>
+          <Text style={styles.punchTime}>
+            {lastCheckinTime} | <Text style={styles.punchDate}>{lastCheckinDate}</Text>
+          </Text>
+          <Text style={styles.todaysTime}>
+            Duration: <CheckinDuration checkInTime={checkIn} />
+          </Text>
+        </View>
 
-          <View style={styles.enquiryContainer}>
-            {(params.screen === 'enquiry' ? menu2 : menu1).map((item, index) => (
-              <TouchableOpacity style={styles.enquiryCard} onPress={item.onPress} key={item.name}>
-                <View style={styles.enquiryIconContainer}>{item.icon}</View>
-                <Text style={styles.enquiryTitle}>{item?.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {params.screen === 'enquiry' && (
-            <TouchableOpacity onPress={() => router.setParams({ screen: 'home' })}>
-              <ChevronsLeft style={{ alignSelf: 'center' }} color={Colors.light.primary} />
+        <View style={styles.enquiryContainer}>
+          {(params.screen === 'enquiry' ? menu2 : menu1).map((item, index) => (
+            <TouchableOpacity style={styles.enquiryCard} onPress={item.onPress} key={item.name}>
+              <View style={styles.enquiryIconContainer}>{item.icon}</View>
+              <Text style={styles.enquiryTitle}>{item?.name}</Text>
             </TouchableOpacity>
-          )}
-        </Animated.View>
+          ))}
+        </View>
+
+        {params.screen === 'enquiry' && (
+          <TouchableOpacity onPress={() => router.setParams({ screen: 'home' })}>
+            <ChevronsLeft style={{ alignSelf: 'center' }} color={Colors.light.primary} />
+          </TouchableOpacity>
+        )}
+        {/* </Animated.View> */}
       </ScrollView>
     </SafeAreaView>
   );

@@ -32,6 +32,8 @@ function RootLayoutNav() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="notifications/send" options={{ headerShown: false }} />
+      <Stack.Screen name="notifications/history" options={{ headerShown: false }} />
+      <Stack.Screen name="notifications/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="enquiry/live-tracking" options={{ headerShown: false }} />
       <Stack.Screen name="profile/update" options={{ headerShown: false }} />
       <Stack.Screen name="+not-found" />

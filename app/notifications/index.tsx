@@ -61,7 +61,7 @@ export default function NotificationsScreen() {
         <ActivityIndicator color={Colors.light.primary} style={{ flex: 1 }} size="large" />
       ) : notificationList?.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyMessage}>No new notifications</Text>
+          <Text style={styles.emptyMessage}>No Notifications Found!</Text>
           <TouchableOpacity
             activeOpacity={0.7}
             style={styles.historyTextButton}
@@ -83,7 +83,7 @@ export default function NotificationsScreen() {
         />
       )}
 
-      {!isLoading && notificationList?.length !== 0 && (
+      {/* {!isLoading && notificationList?.length !== 0 && (
         <View style={styles.footerButtonsContainer}>
           <Pressable
             style={[styles.footerButton, styles.markAllReadButton]}
@@ -91,11 +91,11 @@ export default function NotificationsScreen() {
           >
             <Text style={[styles.footerButtonText, styles.markAllReadText]}>Mark all as read</Text>
           </Pressable>
-          {/* <TouchableOpacity style={[styles.footerButton, styles.clearButton]} onPress={clearAll}>
+          <TouchableOpacity style={[styles.footerButton, styles.clearButton]} onPress={clearAll}>
             <Text style={[styles.footerButtonText, styles.clearButtonText]}>Clear All</Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
         </View>
-      )}
+      )} */}
     </SafeAreaView>
   );
 }
@@ -108,38 +108,38 @@ const styles = StyleSheet.create({
   listContent: {
     marginTop: Layout.spacing.m,
   },
-  footerButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: Layout.spacing.m,
-    borderTopWidth: 1,
-    borderTopColor: Colors.light.border,
-    backgroundColor: Colors.light.background,
-  },
-  footerButton: {
-    paddingVertical: Layout.spacing.m,
-    paddingHorizontal: Layout.spacing.l,
-    borderRadius: Layout.borderRadius.medium,
-    alignItems: 'center',
-    flex: 1,
-    marginHorizontal: Layout.spacing.xs,
-  },
-  footerButtonText: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 15,
-  },
-  markAllReadButton: {
-    backgroundColor: `${Colors.light.primary}20`,
-  },
-  markAllReadText: {
-    color: Colors.light.primary,
-  },
-  clearButton: {
-    backgroundColor: `${Colors.light.error}20`,
-  },
-  clearButtonText: {
-    color: Colors.light.error,
-  },
+  // footerButtonsContainer: {
+  //   flexDirection: 'row',
+  //   justifyContent: 'space-around',
+  //   padding: Layout.spacing.m,
+  //   borderTopWidth: 1,
+  //   borderTopColor: Colors.light.border,
+  //   backgroundColor: Colors.light.background,
+  // },
+  // footerButton: {
+  //   paddingVertical: Layout.spacing.m,
+  //   paddingHorizontal: Layout.spacing.l,
+  //   borderRadius: Layout.borderRadius.medium,
+  //   alignItems: 'center',
+  //   flex: 1,
+  //   marginHorizontal: Layout.spacing.xs,
+  // },
+  // footerButtonText: {
+  //   fontFamily: 'Inter-Medium',
+  //   fontSize: 15,
+  // },
+  // markAllReadButton: {
+  //   backgroundColor: `${Colors.light.primary}20`,
+  // },
+  // markAllReadText: {
+  //   color: Colors.light.primary,
+  // },
+  // clearButton: {
+  //   backgroundColor: `${Colors.light.error}20`,
+  // },
+  // clearButtonText: {
+  //   color: Colors.light.error,
+  // },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
