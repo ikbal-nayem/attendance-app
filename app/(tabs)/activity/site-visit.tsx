@@ -1,3 +1,4 @@
+import { checkSiteVisitStatus, useSiteVisitData } from '@/api/activity.api';
 import { submitAttendance, useAttendanceData } from '@/api/attendance.api';
 import Button from '@/components/Button';
 import Card from '@/components/Card';
@@ -14,25 +15,17 @@ import { useToast } from '@/context/ToastContext';
 import { getAddressFromCoordinates } from '@/services/location';
 import { makeFormData } from '@/utils/form-actions';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { router } from 'expo-router';
-import { ClockArrowDown, ClockArrowUp, FileText, History, MapPin } from 'lucide-react-native';
+import { ClockArrowDown, ClockArrowUp, FileText, Info, MapPin } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import {
-  Alert,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Alert, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { z } from 'zod';
 
 const siteVisitSchema = z.object({
-  sEntryNote: z.string().optional(),
-  sEntryType: z.string().min(1, 'Entry type is required'),
   sPhoto: z.string().min(1, 'Face photo is required'),
+  sTerritory: z.string().min(1, 'Territory is required'),
+  sPurpose: z.string().optional(),
+  sStatus: z.string().optional(),
 });
 
 type SiteVisitFormData = z.infer<typeof siteVisitSchema>;
@@ -40,17 +33,15 @@ type SiteVisitFormData = z.infer<typeof siteVisitSchema>;
 export default function SiteVisitScreen() {
   const { user } = useAuth();
   const { currentLocation, getCurrentLocation, requestLocationPermission } = useLocation();
-
   const [address, setAddress] = useState('Fetching location...');
-  const { attendanceData, isLoading: isLoadingAttendanceData } = useAttendanceData(
+  const { siteVisitData, isLoading } = useSiteVisitData(
     user?.companyID || '',
     user?.employeeCode || ''
   );
-  const [entryNo, setEntryNo] = useState(+(attendanceData?.noOfEntry || '0'));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const defaultValuesRef = useRef({
-    sEntryNote: '',
-    sEntryType: '',
+    sTerritory: '',
+    sPurpose: '',
     sPhoto: '',
   });
 
@@ -66,14 +57,6 @@ export default function SiteVisitScreen() {
     resolver: zodResolver(siteVisitSchema),
     defaultValues: defaultValuesRef.current,
   });
-
-  useEffect(() => {
-    if (attendanceData?.entryTypeList?.[1]?.code) {
-      setValue('sEntryType', attendanceData.entryTypeList[1].code);
-      defaultValuesRef.current.sEntryType = attendanceData.entryTypeList[1].code;
-    }
-    setEntryNo(+(attendanceData?.noOfEntry || '0'));
-  }, [attendanceData, setValue]);
 
   useEffect(() => {
     const initialize = async () => {
@@ -97,6 +80,12 @@ export default function SiteVisitScreen() {
     initialize();
   }, [getCurrentLocation, requestLocationPermission]);
 
+  const onTerritoryChange = (value: string) => {
+    checkSiteVisitStatus(user?.companyID!, user?.employeeCode!, value).then((resp) => {
+      setValue('sStatus', resp.entryStatus);
+    });
+  };
+
   const onSubmit = async (data: SiteVisitFormData) => {
     if (!currentLocation) {
       Alert.alert(
@@ -115,7 +104,7 @@ export default function SiteVisitScreen() {
       sSessionID: user?.sessionID,
       sCompanyID: user?.companyID,
       sEmployeeCode: user?.employeeCode,
-      sEntryTime: attendanceData?.entryTime,
+      sEntryTime: siteVisitData?.entryTime,
     };
     submitAttendance(makeFormData(reqData))
       .then((res) => {
@@ -124,7 +113,7 @@ export default function SiteVisitScreen() {
             type: 'success',
             message: `Check-in successfully`,
           });
-          setEntryNo((prev) => prev + 1);
+          // setEntryNo((prev) => prev + 1);
           reset(defaultValuesRef.current);
         } else {
           showToast({ type: 'error', message: res.message || 'Failed to submit check-in' });
@@ -137,20 +126,12 @@ export default function SiteVisitScreen() {
       .finally(() => setIsSubmitting(false));
   };
 
-  let isCheckIn = entryNo % 2 === 1;
+  // let isCheckIn = entryNo % 2 === 1;
 
   return (
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
-      <AppHeader
-        title="Attendance"
-        // leftContent={<Text style={styles.entryText}>Entry {Math.floor(entryNo / 2 + 1)}</Text>}
-        rightContent={
-          <TouchableOpacity onPress={() => router.push('/(tabs)/attendance/history')}>
-            <History color={Colors.light.background} />
-          </TouchableOpacity>
-        }
-      />
+      <AppHeader title="Site Visit" rightContent={<View style={{ width: 24 }} />} />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -164,9 +145,7 @@ export default function SiteVisitScreen() {
             <View style={styles.locationInputContainer}>
               <MapPin size={20} color={Colors.light.subtext} style={styles.locationIcon} />
               <Text style={styles.locationText}>
-                {isLoadingAttendanceData
-                  ? 'Loading location...'
-                  : address || 'Location not available'}
+                {isLoading ? 'Loading location...' : address || 'Location not available'}
               </Text>
             </View>
           </View>
@@ -193,51 +172,69 @@ export default function SiteVisitScreen() {
             />
           </View>
 
-          {/* Note Input */}
+          {/* Territory */}
           <Controller
             control={control}
-            name="sEntryNote"
+            name="sTerritory"
+            render={({ field: { onChange, value } }) => (
+              <Select
+                label="Territory"
+                required
+                options={siteVisitData?.territoryList ?? []}
+                keyProp="code"
+                valueProp="name"
+                value={value}
+                onChange={(value) => {
+                  onChange(value);
+                  onTerritoryChange(value);
+                }}
+                error={errors.sTerritory?.message}
+                placeholder="Select entry type"
+                disabled={isLoading}
+              />
+            )}
+          />
+
+          {/* Status */}
+          <Controller
+            control={control}
+            name="sStatus"
+            disabled
+            render={({ field: { value } }) => (
+              <Input
+                label="Status"
+                placeholder="Territory Status"
+                value={value}
+                readOnly
+              />
+            )}
+          />
+
+          {/* Purpose */}
+          <Controller
+            control={control}
+            name="sPurpose"
             render={({ field: { onChange, onBlur, value } }) => (
               <Input
-                label="Note"
-                placeholder="Add a note (optional)"
+                label="Purpose of Visit"
+                placeholder="Purpose of Visit (optional)"
                 value={value}
                 onChangeText={onChange}
                 onBlur={onBlur}
                 multiline
                 numberOfLines={3}
                 leftIcon={<FileText size={20} color={Colors.light.subtext} />}
-                error={errors.sEntryNote?.message}
-              />
-            )}
-          />
-
-          {/* Status Select */}
-          <Controller
-            control={control}
-            name="sEntryType"
-            render={({ field: { onChange, value } }) => (
-              <Select
-                label="Entry Type"
-                required
-                options={attendanceData?.entryTypeList ?? []}
-                keyProp="code"
-                valueProp="name"
-                value={value}
-                onChange={onChange}
-                error={errors.sEntryType?.message}
-                placeholder="Select entry type"
-                disabled={isLoadingAttendanceData}
+                error={errors.sPurpose?.message}
               />
             )}
           />
 
           {/* Submit Button */}
-          <Button
+          {/* <Button
             title={isCheckIn ? 'Check Out' : 'Check In'}
             onPress={handleSubmit(onSubmit)}
             loading={isSubmitting}
-            disabled={isSubmitting || isLoadingAttendanceData}
+            disabled={isSubmitting || isLoading}
             fullWidth
             style={[
               styles.actionButton,
@@ -251,7 +248,7 @@ export default function SiteVisitScreen() {
               )
             }
             iconPosition="right"
-          />
+          /> */}
         </Card>
       </ScrollView>
     </SafeAreaView>

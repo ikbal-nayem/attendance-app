@@ -170,3 +170,51 @@ export const useActivityDetails = (
 
   return { activityDetails, isLoading, error };
 };
+
+// Site visit
+
+interface SiteVisitData {
+  entryTime: string;
+  territoryList: { code: string; name: string }[];
+}
+
+export const useSiteVisitData = (companyId: string, employeeCode: string) => {
+  const [siteVisitData, setSiteVisitData] = useState<SiteVisitData>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    axiosIns
+      .post(
+        API_CONSTANTS.SITE_VISIT.INIT,
+        makeFormData({ sCompanyID: companyId, sEmployeeCode: employeeCode })
+      )
+      .then((response) => setSiteVisitData(response.data))
+      .catch((err) => {
+        console.log(err);
+        setError(err.message);
+      })
+      .finally(() => setIsLoading(false));
+  }, [companyId]);
+
+  return { siteVisitData, isLoading, error };
+};
+
+export const checkSiteVisitStatus = async (
+  sCompanyID: string,
+  sEmployeeCode: string,
+  sTerritory: string
+) => {
+  const formData = makeFormData({
+    sCompanyID: sCompanyID,
+    sEmployeeCode: sEmployeeCode,
+    sTerritory: sTerritory,
+  });
+  try {
+    const req = await axiosIns.post(API_CONSTANTS.SITE_VISIT.TERRITORY_STATUS, formData);
+    return req.data;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+};

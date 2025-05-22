@@ -23,6 +23,11 @@ export const API_CONSTANTS = {
     HISTORY_LIST: '/EnquiryActivityService/activityEnquiry',
     HISTORY_DETAILS: '/EnquiryActivityService/activityDataView',
   },
+  SITE_VISIT: {
+    INIT: '/SiteVisitService/firstLoad',
+    TERRITORY_STATUS: '/SiteVisitService/siteVisitStatus',
+    SUBMIT: '/SiteVisitService/siteVisitEntry',
+  },
   NOTIFICATION: {
     INIT: '/PushNotificationService/firstLoad',
     SUBMIT: '/PushNotificationService/pushNotificationEntry',
