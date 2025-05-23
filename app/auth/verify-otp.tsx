@@ -12,14 +12,7 @@ import { router } from 'expo-router';
 import { MailCheck } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import {
-  Keyboard,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { z } from 'zod';
 
@@ -31,9 +24,11 @@ const otpSchema = z.object({
 
 type FormData = z.infer<typeof otpSchema>;
 
+const RESEND_OTP_TIMEOUT = 120;
+
 export default function VerifyOTPScreen() {
   const { verifyOtp, tempUserData, isLoading } = useAuth();
-  const [remainingTime, setRemainingTime] = useState(120);
+  const [remainingTime, setRemainingTime] = useState(RESEND_OTP_TIMEOUT);
   const [canResend, setCanResend] = useState(false);
   const [apiError, setApiError] = useState('');
   const { showToast } = useToast();
@@ -71,15 +66,13 @@ export default function VerifyOTPScreen() {
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs
-      .toString()
-      .padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   const handleResendOtp = () => {
     if (!canResend) return;
 
-    setRemainingTime(60);
+    setRemainingTime(RESEND_OTP_TIMEOUT);
     setCanResend(false);
     setApiError(''); // Clear API error on resend
     setValue('otp', ''); // Clear OTP input on resend
@@ -102,14 +95,13 @@ export default function VerifyOTPScreen() {
   const onSubmit = async (data: FormData) => {
     Keyboard.dismiss();
     setApiError('');
+    console.log(data)
     const res = await verifyOtp(data.otp);
 
     if (res?.success === true) {
       showToast({
         type: 'success',
-        message: !isNull(res?.message)
-          ? res?.message
-          : 'Registration successful',
+        message: !isNull(res?.message) ? res?.message : 'Registration successful',
       });
       router.replace('/auth/login');
     } else {
@@ -142,9 +134,7 @@ export default function VerifyOTPScreen() {
                   style={styles.hiddenInput}
                   value={value}
                   onChangeText={(text) => {
-                    const sanitizedText = text
-                      .replace(/[^0-9]/g, '')
-                      .substring(0, OTP_LENGTH);
+                    const sanitizedText = text.replace(/[^0-9]/g, '').substring(0, OTP_LENGTH);
                     onChange(sanitizedText);
                   }}
                   keyboardType="number-pad"
@@ -161,16 +151,13 @@ export default function VerifyOTPScreen() {
                         key={index}
                         style={[
                           styles.otpBox,
-                          // Highlight based on current input length or focus state if needed
-                          value.length === index && styles.otpBoxActive, // Use value from Controller
+                          value.length === index && styles.otpBoxActive,
                           (!!errors.otp || !!apiError) && styles.otpBoxError,
                         ]}
                         onPress={() => inputRef.current?.focus()}
                         activeOpacity={1}
                       >
-                        <Text style={styles.otpBoxText}>
-                          {value[index] || ''}
-                        </Text>
+                        <Text style={styles.otpBoxText}>{value[index] || ''}</Text>
                       </TouchableOpacity>
                     ))}
                 </View>
@@ -179,9 +166,7 @@ export default function VerifyOTPScreen() {
           />
 
           {(errors.otp || apiError) && (
-            <Text style={styles.errorText}>
-              {errors.otp?.message || apiError}
-            </Text>
+            <Text style={styles.errorText}>{errors.otp?.message || apiError}</Text>
           )}
 
           <Animated.View
@@ -196,26 +181,17 @@ export default function VerifyOTPScreen() {
             <TouchableOpacity
               onPress={handleResendOtp}
               disabled={!canResend}
-              style={[
-                styles.resendButton,
-                !canResend && styles.resendButtonDisabled,
-              ]}
+              style={[styles.resendButton, !canResend && styles.resendButtonDisabled]}
             >
               <Text
-                style={[
-                  styles.resendButtonText,
-                  !canResend && styles.resendButtonTextDisabled,
-                ]}
+                style={[styles.resendButtonText, !canResend && styles.resendButtonTextDisabled]}
               >
                 Resend OTP
               </Text>
             </TouchableOpacity>
           </Animated.View>
 
-          <Animated.View
-            entering={FadeInDown.duration(500).delay(300)}
-            style={styles.button}
-          >
+          <Animated.View entering={FadeInDown.duration(500).delay(300)}>
             <Button
               title="Verify"
               onPress={handleSubmit(onSubmit)}
@@ -226,18 +202,6 @@ export default function VerifyOTPScreen() {
               // disabled={otpValue.length !== OTP_LENGTH}
             />
           </Animated.View>
-
-          {/* <Animated.View
-            entering={FadeInDown.duration(500).delay(400)}
-          >
-            <Button
-              title="Go Back"
-              size="small"
-              onPress={navigateBack}
-              variant="outline"
-              fullWidth
-            />
-          </Animated.View> */}
         </Card>
       </Animated.View>
     </AuthLayout>
@@ -333,8 +297,5 @@ const styles = StyleSheet.create({
   },
   resendButtonTextDisabled: {
     color: Colors.light.subtext,
-  },
-  button: {
-    marginBottom: Layout.spacing.m,
   },
 });

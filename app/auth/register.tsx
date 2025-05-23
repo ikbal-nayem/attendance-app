@@ -17,7 +17,7 @@ import { getDeviceInfo } from '@/utils/deviceInfo';
 import { makeFormData } from '@/utils/form-actions';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
-import { Briefcase, Mail, MoveRight, Phone, User } from 'lucide-react-native';
+import { Briefcase, Mail, Phone, User, UserPlus } from 'lucide-react-native';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native';
@@ -215,7 +215,7 @@ export default function RegisterScreen() {
               <Button
                 title="Register"
                 onPress={handleSubmit(onSubmitHandler)}
-                icon={<MoveRight size={20} color={Colors.light.background} />}
+                icon={<UserPlus size={20} color={Colors.light.background} />}
                 iconPosition="right"
                 loading={isLoading}
                 fullWidth

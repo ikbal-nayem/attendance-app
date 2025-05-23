@@ -21,12 +21,14 @@ function RootLayoutNav() {
   const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated)
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="auth/login" options={{ headerShown: false }} />
-      <Stack.Screen name="auth/register" options={{ headerShown: false }} />
-      <Stack.Screen name="auth/verify-otp" options={{ headerShown: false }} />
-      <Stack.Screen name="+not-found" />
-    </Stack>;
+    return (
+      <Stack initialRouteName="auth/login" screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="auth/login" options={{ headerShown: false }} />
+        <Stack.Screen name="auth/register" options={{ headerShown: false }} />
+        <Stack.Screen name="auth/verify-otp" options={{ headerShown: false }} />
+        <Stack.Screen name="+not-found" />
+      </Stack>
+    );
 
   return (
     <Stack screenOptions={{ headerShown: false }}>

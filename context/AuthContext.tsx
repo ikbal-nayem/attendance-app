@@ -3,8 +3,8 @@ import { API_CONSTANTS } from '@/constants/api';
 import { USER_DEVICE_ID } from '@/constants/common';
 import { localData } from '@/services/storage';
 import { getNewDeviceId } from '@/utils/generator';
+import { isNull } from '@/utils/validation';
 import { AxiosResponse } from 'axios';
-import { router } from 'expo-router';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import { useToast } from './ToastContext';
@@ -180,7 +180,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value = {
     user,
-    isAuthenticated: !!user,
+    isAuthenticated: !isNull(user),
     isLoading,
     login,
     logout,
