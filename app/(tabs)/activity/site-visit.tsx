@@ -1,5 +1,4 @@
-import { checkSiteVisitStatus, useSiteVisitData } from '@/api/activity.api';
-import { submitAttendance, useAttendanceData } from '@/api/attendance.api';
+import { checkSiteVisitStatus, submitSiteVisit, useSiteVisitData } from '@/api/activity.api';
 import Button from '@/components/Button';
 import Card from '@/components/Card';
 import AppHeader from '@/components/Header';
@@ -15,7 +14,7 @@ import { useToast } from '@/context/ToastContext';
 import { getAddressFromCoordinates } from '@/services/location';
 import { makeFormData } from '@/utils/form-actions';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ClockArrowDown, ClockArrowUp, FileText, Info, MapPin } from 'lucide-react-native';
+import { ClockArrowDown, ClockArrowUp, FileText, MapPin } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Alert, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -95,7 +94,7 @@ export default function SiteVisitScreen() {
       );
       return;
     }
-    // setIsSubmitting(true);
+    setIsSubmitting(true);
     const reqData = {
       ...data,
       sLatitude: currentLocation.latitude,
@@ -107,29 +106,18 @@ export default function SiteVisitScreen() {
       sEmployeeCode: user?.employeeCode,
       sEntryTime: siteVisitData?.entryTime,
     };
-    console.log(reqData)
-    return
-    submitAttendance(makeFormData(reqData))
+    submitSiteVisit(makeFormData(reqData))
       .then((res) => {
-        if (res.success) {
-          showToast({
-            type: 'success',
-            message: `Check-in successfully`,
-          });
-          // setEntryNo((prev) => prev + 1);
-          reset(defaultValuesRef.current);
-        } else {
-          showToast({ type: 'error', message: res.message || 'Failed to submit check-in' });
-        }
-      })
-      .catch((err) => {
-        console.error('Error submitting check-in:', err);
-        Alert.alert('Error', 'An unexpected error occurred');
+        if (res?.success) reset(defaultValuesRef.current);
+        showToast({
+          type: res?.success ? 'success' : 'error',
+          message: res?.message,
+        });
       })
       .finally(() => setIsSubmitting(false));
   };
 
-  let isCheckIn = watch('sStatus') !== 'Ready to check In';
+  let isCheckIn = watch('sStatus') === 'Ready to check out';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -204,12 +192,7 @@ export default function SiteVisitScreen() {
             name="sStatus"
             disabled
             render={({ field: { value } }) => (
-              <Input
-                label="Status"
-                placeholder="Territory Status"
-                value={value}
-                readOnly
-              />
+              <Input label="Status" placeholder="Territory Status" value={value} readOnly />
             )}
           />
 
@@ -284,7 +267,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.light.inputBorder,
-    borderRadius: Layout.borderRadius.medium,
+    borderRadius: Layout.borderRadius.large,
     backgroundColor: Colors.light.inputBackground,
     minHeight: Layout.inputHeight,
     paddingHorizontal: Layout.spacing.m,
@@ -304,7 +287,7 @@ const styles = StyleSheet.create({
   photoPreviewContainer: {
     height: 150,
     width: '100%',
-    borderRadius: Layout.borderRadius.medium,
+    borderRadius: Layout.borderRadius.large,
   },
   actionButton: {
     marginTop: Layout.spacing.m,

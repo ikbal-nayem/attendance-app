@@ -2,6 +2,7 @@ import { API_CONSTANTS } from '@/constants/api';
 import { makeFormData } from '@/utils/form-actions';
 import { useEffect, useState } from 'react';
 import { axiosIns } from './config';
+import { Alert } from 'react-native';
 
 export interface IActivityHistory {
   serialNo: string;
@@ -216,5 +217,18 @@ export const checkSiteVisitStatus = async (
   } catch (err) {
     console.error(err);
     throw err;
+  }
+};
+
+export const submitSiteVisit = async (data: FormData) => {
+  try {
+    const req = await axiosIns.post(API_CONSTANTS.SITE_VISIT.SUBMIT, data);
+    if (req.data?.messageCode === '0') {
+      return { success: true, message: req.data?.messageDesc };
+    }
+    return { success: false, message: req.data?.messageDesc };
+  } catch (err) {
+    console.error(err);
+    Alert.alert('Error', JSON.stringify(err));
   }
 };

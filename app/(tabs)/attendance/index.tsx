@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.light.inputBorder,
-    borderRadius: Layout.borderRadius.medium,
+    borderRadius: Layout.borderRadius.large,
     backgroundColor: Colors.light.inputBackground,
     minHeight: Layout.inputHeight,
     paddingHorizontal: Layout.spacing.m,
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
   photoPreviewContainer: {
     height: 150,
     width: '100%',
-    borderRadius: Layout.borderRadius.medium,
+    borderRadius: Layout.borderRadius.large,
   },
   actionButton: {
     marginTop: Layout.spacing.m,
