@@ -79,7 +79,7 @@ const AppHeader = ({
               onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
             >
               <ChevronLeft
-                size={22}
+                size={24}
                 color={bg === 'primary' ? Colors.dark.text : Colors.light.text}
               />
             </TouchableOpacity>

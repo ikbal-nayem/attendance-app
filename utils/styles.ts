@@ -6,5 +6,5 @@ export const commonStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: Layout.spacing.s,
-  }
+  },
 })

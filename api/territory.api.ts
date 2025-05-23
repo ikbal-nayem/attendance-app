@@ -68,11 +68,11 @@ export const useTerritoryHistoryList = (
 
     axiosIns
       .post(API_CONSTANTS.TERRITORY.HISTORY_LIST, formData)
-      .then((response) =>
+      .then((response) => {
         response.data?.messageCode === '0'
           ? setTerritoryHistoryList(response?.data?.detailsList || [])
-          : setError(response?.data?.messageDesc)
-      )
+          : setError(response?.data?.messageDesc);
+      })
       .catch((err) => {
         console.log(err);
         setError(err.message);

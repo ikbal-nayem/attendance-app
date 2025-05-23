@@ -4,10 +4,10 @@ import {
   useActivityHistoryList,
 } from '@/api/activity.api';
 import AnimatedRenderView from '@/components/AnimatedRenderView';
-import Button from '@/components/Button';
 import Card from '@/components/Card';
 import Drawer from '@/components/Drawer';
 import { ErrorPreview } from '@/components/ErrorPreview';
+import { FilterDrawerFooter, FilterDrawerHeader } from '@/components/filter-drawer';
 import AppHeader from '@/components/Header';
 import Select from '@/components/Select';
 import AppStatusBar from '@/components/StatusBar';
@@ -23,11 +23,9 @@ import {
   CalendarDays,
   FilePenLine,
   Filter,
-  FilterIcon,
   MapPin,
   MoveHorizontal,
   User,
-  X,
 } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -52,93 +50,60 @@ interface FilterFormInputs {
 const FilterComponent = ({ control, onFilterSubmit, clearFilters, onClose, activityData }: any) => (
   <View style={styles.drawerContentContainer}>
     <ScrollView showsVerticalScrollIndicator={false}>
-      <AnimatedRenderView
-        direction="right"
-        duration={300}
-        delay={100}
-        style={styles.filterDrawerHeader}
-      >
-        <Text style={styles.drawerTitle}>Filter</Text>
-        <X size={20} color={Colors.light.text} onPress={onClose} />
-      </AnimatedRenderView>
+      <FilterDrawerHeader onClose={onClose}>Activity Filter</FilterDrawerHeader>
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Activity Type</Text>
-        <Controller
-          control={control}
-          name="activityType"
-          render={({ field: { onChange, value } }) => (
-            <Select
-              options={activityData?.activityTypeList || []}
-              keyProp="code"
-              valueProp="name"
-              value={value}
-              onChange={(val: string) => onChange(val)}
-              placeholder="Select Activity Type"
-              size="small"
-              containerStyle={styles.filterSelectContainer}
-            />
-          )}
-        />
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Client</Text>
-        <Controller
-          control={control}
-          name="client"
-          render={({ field: { onChange, value } }) => (
-            <Select
-              options={activityData?.clientList || []}
-              keyProp="code"
-              valueProp="name"
-              value={value}
-              onChange={(val: string) => onChange(val)}
-              placeholder="Select Client"
-              size="small"
-              containerStyle={styles.filterSelectContainer}
-            />
-          )}
-        />
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Territory</Text>
-        <Controller
-          control={control}
-          name="territory"
-          render={({ field: { onChange, value } }) => (
-            <Select
-              options={activityData?.territoryList || []}
-              keyProp="code"
-              valueProp="name"
-              value={value}
-              onChange={(val: string) => onChange(val)}
-              placeholder="Select Territory"
-              size="small"
-              containerStyle={styles.filterSelectContainer}
-            />
-          )}
-        />
-      </View>
-
-      <View style={styles.filterButtonGroup}>
-        <Button size="small" title="Clear Filters" onPress={clearFilters} variant="outline" />
-        <Button
-          size="small"
-          title="Apply Filters"
-          onPress={onFilterSubmit}
-          icon={<FilterIcon color={Colors.light.background} size={14} />}
-          iconPosition="right"
-        />
-      </View>
-      <Button
-        title="Close Drawer"
-        onPress={onClose}
-        variant="ghost"
-        textStyle={{ color: Colors.light.warning }}
-        style={styles.closeButton}
+      <Controller
+        control={control}
+        name="activityType"
+        render={({ field: { onChange, value } }) => (
+          <Select
+            options={activityData?.activityTypeList || []}
+            label="Activity Type"
+            keyProp="code"
+            valueProp="name"
+            value={value}
+            onChange={(val: string) => onChange(val)}
+            placeholder="Select Activity Type"
+            size="small"
+          />
+        )}
       />
+
+      <Controller
+        control={control}
+        name="client"
+        render={({ field: { onChange, value } }) => (
+          <Select
+            options={activityData?.clientList || []}
+            label="Client"
+            keyProp="code"
+            valueProp="name"
+            value={value}
+            onChange={(val: string) => onChange(val)}
+            placeholder="Select Client"
+            size="small"
+          />
+        )}
+      />
+
+      <Controller
+        control={control}
+        name="territory"
+        render={({ field: { onChange, value } }) => (
+          <Select
+            options={activityData?.territoryList || []}
+            label="Territory"
+            keyProp="code"
+            valueProp="name"
+            value={value}
+            onChange={(val: string) => onChange(val)}
+            placeholder="Select Territory"
+            size="small"
+          />
+        )}
+      />
+
+      <FilterDrawerFooter clearFilters={clearFilters} onFilterSubmit={onFilterSubmit} />
     </ScrollView>
   </View>
 );
@@ -200,17 +165,17 @@ export default function ActivityHistoryScreen() {
   };
 
   const onFilterSubmit = (data: FilterFormInputs) => {
-    setSelectedActivityType(data.activityType || undefined);
-    setSelectedClient(data.client || undefined);
-    setSelectedTerritory(data.territory || undefined);
+    setSelectedActivityType(data.activityType || '');
+    setSelectedClient(data.client || '');
+    setSelectedTerritory(data.territory || '');
     setIsFilterDrawerVisible(false);
   };
 
   const clearFilters = () => {
     reset({ activityType: '', client: '', territory: '' });
-    setSelectedActivityType(undefined);
-    setSelectedClient(undefined);
-    setSelectedTerritory(undefined);
+    setSelectedActivityType('');
+    setSelectedClient('');
+    setSelectedTerritory('');
     setIsFilterDrawerVisible(false);
   };
 
@@ -291,7 +256,24 @@ export default function ActivityHistoryScreen() {
   );
 
   if (error) {
-    return <ErrorPreview error={error} />;
+    return (
+      <ErrorPreview
+        header={
+          <AppHeader
+            title="Activity History"
+            rightContent={
+              <TouchableOpacity
+                onPress={() => setIsFilterDrawerVisible(true)}
+                style={styles.filterIconContainer}
+              >
+                <Filter size={24} color={Colors.dark.text} />
+              </TouchableOpacity>
+            }
+          />
+        }
+        error={error}
+      />
+    );
   }
 
   return (
@@ -299,8 +281,6 @@ export default function ActivityHistoryScreen() {
       <AppStatusBar />
       <AppHeader
         title="Activity History"
-        withBackButton={true}
-        bg="primary"
         rightContent={
           <TouchableOpacity
             onPress={() => {
@@ -399,16 +379,6 @@ const styles = StyleSheet.create({
     marginTop: -Layout.borderRadius.large,
     paddingTop: Layout.spacing.l,
   },
-  filterButtonGroup: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  filterDrawerHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  filterSelectContainer: { marginBottom: 5 },
   dateButton: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -487,26 +457,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: Layout.spacing.m,
     paddingBottom: Layout.spacing.xl,
-  },
-  drawerTitle: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 20,
-    color: Colors.light.text,
-    marginBottom: Layout.spacing.l,
-    textAlign: 'center',
-  },
-  inputGroup: {
-    marginBottom: Layout.spacing.m,
-  },
-  label: {
-    fontFamily: 'Inter-Medium',
-    fontSize: 14,
-    color: Colors.light.subtext,
-    marginBottom: Layout.spacing.xs,
-  },
-  closeButton: {
-    marginTop: Layout.spacing.s,
-    marginBottom: Layout.spacing.m,
   },
   detailValue: {
     fontFamily: 'Inter-Regular',

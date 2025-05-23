@@ -1,9 +1,9 @@
 import { ITerritotyHistory, useTerritoryHistoryList, useTerritoryInit } from '@/api/territory.api';
 import AnimatedRenderView from '@/components/AnimatedRenderView';
-import Button from '@/components/Button';
 import Card from '@/components/Card';
 import Drawer from '@/components/Drawer';
 import { ErrorPreview } from '@/components/ErrorPreview';
+import { FilterDrawerFooter, FilterDrawerHeader } from '@/components/filter-drawer';
 import AppHeader from '@/components/Header';
 import Select from '@/components/Select';
 import AppStatusBar from '@/components/StatusBar';
@@ -13,16 +13,7 @@ import { useAuth } from '@/context/AuthContext';
 import { parseResponseDate, parseResponseTime } from '@/utils/date-time';
 import { commonStyles } from '@/utils/styles';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import {
-  CalendarDays,
-  Clock9,
-  Filter,
-  FilterIcon,
-  MapPin,
-  MoveHorizontal,
-  User,
-  X,
-} from 'lucide-react-native';
+import { CalendarDays, Clock9, Filter, MapPin, MoveHorizontal, User } from 'lucide-react-native';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
@@ -51,15 +42,7 @@ const FilterComponent = ({
 }: any) => (
   <View style={styles.drawerContentContainer}>
     <ScrollView showsVerticalScrollIndicator={false}>
-      <AnimatedRenderView
-        direction="right"
-        duration={300}
-        delay={100}
-        style={styles.filterDrawerHeader}
-      >
-        <Text style={styles.drawerTitle}>Filter</Text>
-        <X size={20} color={Colors.light.text} onPress={onClose} />
-      </AnimatedRenderView>
+      <FilterDrawerHeader onClose={onClose}>Territory Filter</FilterDrawerHeader>
 
       <Controller
         control={control}
@@ -95,23 +78,7 @@ const FilterComponent = ({
         )}
       />
 
-      <View style={styles.filterButtonGroup}>
-        <Button size="small" title="Clear Filters" onPress={clearFilters} variant="outline" />
-        <Button
-          size="small"
-          title="Apply Filters"
-          onPress={onFilterSubmit}
-          icon={<FilterIcon color={Colors.light.background} size={14} />}
-          iconPosition="right"
-        />
-      </View>
-      <Button
-        title="Close Drawer"
-        onPress={onClose}
-        variant="ghost"
-        textStyle={{ color: Colors.light.warning }}
-        style={styles.closeButton}
-      />
+      <FilterDrawerFooter clearFilters={clearFilters} onFilterSubmit={onFilterSubmit} />
     </ScrollView>
   </View>
 );
@@ -233,7 +200,24 @@ export default function ActivityHistoryScreen() {
   );
 
   if (error) {
-    return <ErrorPreview error={error} />;
+    return (
+      <ErrorPreview
+        header={
+          <AppHeader
+            title="Territory History"
+            rightContent={
+              <TouchableOpacity
+                onPress={() => setIsFilterDrawerVisible(true)}
+                style={styles.filterIconContainer}
+              >
+                <Filter size={24} color={Colors.dark.text} />
+              </TouchableOpacity>
+            }
+          />
+        }
+        error={error}
+      />
+    );
   }
 
   return (
@@ -339,15 +323,6 @@ const styles = StyleSheet.create({
     marginTop: -Layout.borderRadius.large,
     paddingTop: Layout.spacing.l,
   },
-  filterButtonGroup: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  filterDrawerHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
   dateButton: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -414,17 +389,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: Layout.spacing.m,
     paddingBottom: Layout.spacing.xl,
-  },
-  drawerTitle: {
-    fontFamily: 'Inter-Bold',
-    fontSize: 20,
-    color: Colors.light.text,
-    marginBottom: Layout.spacing.l,
-    textAlign: 'center',
-  },
-  closeButton: {
-    marginTop: Layout.spacing.s,
-    marginBottom: Layout.spacing.m,
   },
   detailValue: {
     fontSize: 14,
