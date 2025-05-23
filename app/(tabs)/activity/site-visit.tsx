@@ -51,6 +51,7 @@ export default function SiteVisitScreen() {
     control,
     handleSubmit,
     setValue,
+    watch,
     reset,
     formState: { errors },
   } = useForm<SiteVisitFormData>({
@@ -94,7 +95,7 @@ export default function SiteVisitScreen() {
       );
       return;
     }
-    setIsSubmitting(true);
+    // setIsSubmitting(true);
     const reqData = {
       ...data,
       sLatitude: currentLocation.latitude,
@@ -106,6 +107,8 @@ export default function SiteVisitScreen() {
       sEmployeeCode: user?.employeeCode,
       sEntryTime: siteVisitData?.entryTime,
     };
+    console.log(reqData)
+    return
     submitAttendance(makeFormData(reqData))
       .then((res) => {
         if (res.success) {
@@ -126,7 +129,7 @@ export default function SiteVisitScreen() {
       .finally(() => setIsSubmitting(false));
   };
 
-  // let isCheckIn = entryNo % 2 === 1;
+  let isCheckIn = watch('sStatus') !== 'Ready to check In';
 
   return (
     <SafeAreaView style={styles.container}>
@@ -230,7 +233,7 @@ export default function SiteVisitScreen() {
           />
 
           {/* Submit Button */}
-          {/* <Button
+          <Button
             title={isCheckIn ? 'Check Out' : 'Check In'}
             onPress={handleSubmit(onSubmit)}
             loading={isSubmitting}
@@ -248,7 +251,7 @@ export default function SiteVisitScreen() {
               )
             }
             iconPosition="right"
-          /> */}
+          />
         </Card>
       </ScrollView>
     </SafeAreaView>

@@ -76,19 +76,19 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
   }, []);
 
-  useEffect(() => {
-    const setupBackgroundLocation = async () => {
-      if (Platform.OS === 'android' || Platform.OS === 'ios') {
-        const isRegistered = await isBackgroundLocationTaskRegistered();
-        if (!isRegistered) {
-          const success = await registerBackgroundLocationTask();
-          success && showToast({ type: 'info', message: 'Background tracking service activated' });
-        }
-      }
-    };
+  // useEffect(() => {
+  //   const setupBackgroundLocation = async () => {
+  //     if (Platform.OS === 'android' || Platform.OS === 'ios') {
+  //       const isRegistered = await isBackgroundLocationTaskRegistered();
+  //       if (!isRegistered) {
+  //         const success = await registerBackgroundLocationTask();
+  //         success && showToast({ type: 'info', message: 'Background tracking service activated' });
+  //       }
+  //     }
+  //   };
 
-    setTimeout(setupBackgroundLocation, 20 * 1000);
-  }, []);
+  //   setTimeout(setupBackgroundLocation, 20 * 1000);
+  // }, []);
 
   const requestLocationPermission = useCallback(async (): Promise<boolean> => {
     try {
