@@ -1,4 +1,3 @@
-import AnimatedRenderView from '@/components/AnimatedRenderView';
 import Popover from '@/components/Popover';
 import AppStatusBar from '@/components/StatusBar';
 import Colors from '@/constants/Colors';
@@ -8,7 +7,7 @@ import { useNotifications } from '@/context/NotificationContext';
 import { getDuration, parseDate } from '@/utils/date-time';
 import { generateUserImage } from '@/utils/generator';
 import { LinearGradient } from 'expo-linear-gradient';
-import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import {
   Activity,
   ArrowRightCircle,
@@ -29,14 +28,13 @@ import {
 } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react';
 import {
-  Animated,
   Image,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 
 const popoverContent = (handleLogout: () => void) => (
@@ -141,7 +139,7 @@ const menu1 = [
   },
   {
     name: 'Site Visit',
-    icon: <Factory size={24} color={Colors.dark.secondaryDark} />,
+    icon: <Factory size={24} color={Colors.dark.accentDark} />,
     onPress: () => {
       router.push('/(tabs)/activity/site-visit');
     },
@@ -193,20 +191,7 @@ const menu2 = [
 export default function DashboardScreen() {
   const { user, logout } = useAuth();
   const { unreadCount } = useNotifications();
-  const [fadeAnim] = useState(new Animated.Value(0));
   const params = useLocalSearchParams<{ screen?: string }>();
-
-  useFocusEffect(
-    React.useCallback(() => {
-      fadeAnim.setValue(0);
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }).start();
-      return () => {};
-    }, [])
-  );
 
   const handleLogout = async () => {
     await logout();
@@ -242,7 +227,6 @@ export default function DashboardScreen() {
       {header(user, handleLogout, unreadCount)}
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* <Animated.View style={{ opacity: fadeAnim }}> */}
         {userCard(user)}
 
         {/* Punch Info */}
@@ -251,17 +235,23 @@ export default function DashboardScreen() {
             <ArrowRightCircle size={20} color={Colors.light.success} />
             <Text style={styles.punchHeaderText}>Check In at</Text>
           </View>
-          <Text style={styles.punchTime}>
-            {lastCheckinTime} | <Text style={styles.punchDate}>{lastCheckinDate}</Text>
-          </Text>
-          <Text style={styles.todaysTime}>
-            Duration: <CheckinDuration checkInTime={checkIn} />
-          </Text>
+          {user?.todayCheckIn ? (
+            <>
+              <Text style={styles.punchTime}>
+                {lastCheckinTime} | <Text style={styles.punchDate}>{lastCheckinDate}</Text>
+              </Text>
+              <Text style={styles.todaysTime}>
+                Duration: <CheckinDuration checkInTime={checkIn} />
+              </Text>
+            </>
+          ) : (
+            <Text style={styles.noCheckinText}>No check in information</Text>
+          )}
         </View>
 
         <View style={styles.enquiryContainer}>
           {(params.screen === 'enquiry' ? menu2 : menu1).map((item, index) => (
-            <TouchableOpacity style={styles.enquiryCard} onPress={item.onPress} key={item.name}>
+            <TouchableOpacity activeOpacity={0.7} style={styles.enquiryCard} onPress={item.onPress} key={item.name}>
               <View style={styles.enquiryIconContainer}>{item.icon}</View>
               <Text style={styles.enquiryTitle}>{item?.name}</Text>
             </TouchableOpacity>
@@ -273,7 +263,6 @@ export default function DashboardScreen() {
             <ChevronsLeft style={{ alignSelf: 'center' }} color={Colors.light.primary} />
           </TouchableOpacity>
         )}
-        {/* </Animated.View> */}
       </ScrollView>
     </SafeAreaView>
   );
@@ -404,6 +393,13 @@ const styles = StyleSheet.create({
     padding: Layout.spacing.xs,
     borderRadius: Layout.borderRadius.small,
     ...Layout.shadow.light,
+  },
+  noCheckinText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    fontStyle: 'italic',
+    color: Colors.light.warning+'70',
+    textAlign: 'center',
   },
   punchInfoCard: {
     backgroundColor: 'white',

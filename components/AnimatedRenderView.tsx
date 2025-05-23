@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleProp, ViewStyle } from 'react-native';
+import { StyleProp, TouchableOpacity, ViewStyle } from 'react-native';
 import Animated, {
   Easing,
   runOnJS,
