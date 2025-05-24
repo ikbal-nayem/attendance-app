@@ -119,8 +119,6 @@ export default function ActivityScreen() {
       <AppStatusBar />
       <AppHeader
         title="Activity"
-        withBackButton={false}
-        bg="primary"
         rightContent={
           <TouchableOpacity onPress={() => router.push('/(tabs)/activity/history')}>
             <History color={Colors.light.background} />
