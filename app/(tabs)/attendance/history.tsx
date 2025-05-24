@@ -6,7 +6,6 @@ import {
 import AnimatedRenderView from '@/components/AnimatedRenderView';
 import Card from '@/components/Card';
 import Drawer from '@/components/Drawer';
-import { ErrorPreview } from '@/components/ErrorPreview';
 import { FilterDrawerFooter, FilterDrawerHeader } from '@/components/filter-drawer';
 import AppHeader from '@/components/Header';
 import Select from '@/components/Select';
@@ -179,27 +178,6 @@ export default function AttendanceHistoryScreen() {
     );
   }, []);
 
-  if (error) {
-    return (
-      <ErrorPreview
-        header={
-          <AppHeader
-            title="Attendance History"
-            rightContent={
-              <TouchableOpacity
-                onPress={() => setIsFilterDrawerVisible(true)}
-                style={styles.filterIconContainer}
-              >
-                <Filter size={24} color={Colors.dark.text} />
-              </TouchableOpacity>
-            }
-          />
-        }
-        error={error}
-      />
-    );
-  }
-
   return (
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
@@ -257,7 +235,7 @@ export default function AttendanceHistoryScreen() {
       ) : attendanceHistoryList?.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyMessage}>
-            No attendance records found for the selected period.
+            {error || 'No attendance records found for the selected period.'}
           </Text>
         </View>
       ) : (

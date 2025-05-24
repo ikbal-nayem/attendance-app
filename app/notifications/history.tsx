@@ -102,17 +102,6 @@ export default function AllNotificationsScreen() {
     }
   };
 
-  if (error) {
-    return (
-      <ErrorPreview
-        error={error}
-        header={
-          <AppHeader title="Notification History" rightContent={<View style={{ width: 24 }} />} />
-        }
-      />
-    );
-  }
-
   return (
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
@@ -161,7 +150,9 @@ export default function AllNotificationsScreen() {
         <ActivityIndicator color={Colors.light.primary} style={{ flex: 1 }} size="large" />
       ) : notificationHistoryList.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyMessage}>No notifications found for the selected period.</Text>
+          <Text style={styles.emptyMessage}>
+            {error ?? 'No notifications found for the selected period.'}
+          </Text>
         </View>
       ) : (
         <FlatList

@@ -2,7 +2,6 @@ import { ITerritotyHistory, useTerritoryHistoryList, useTerritoryInit } from '@/
 import AnimatedRenderView from '@/components/AnimatedRenderView';
 import Card from '@/components/Card';
 import Drawer from '@/components/Drawer';
-import { ErrorPreview } from '@/components/ErrorPreview';
 import { FilterDrawerFooter, FilterDrawerHeader } from '@/components/filter-drawer';
 import AppHeader from '@/components/Header';
 import Select from '@/components/Select';
@@ -199,27 +198,6 @@ export default function ActivityHistoryScreen() {
     [territoryData]
   );
 
-  if (error) {
-    return (
-      <ErrorPreview
-        header={
-          <AppHeader
-            title="Territory History"
-            rightContent={
-              <TouchableOpacity
-                onPress={() => setIsFilterDrawerVisible(true)}
-                style={styles.filterIconContainer}
-              >
-                <Filter size={24} color={Colors.dark.text} />
-              </TouchableOpacity>
-            }
-          />
-        }
-        error={error}
-      />
-    );
-  }
-
   return (
     <SafeAreaView style={styles.container}>
       <AppStatusBar />
@@ -277,7 +255,7 @@ export default function ActivityHistoryScreen() {
       ) : territoryHistoryList?.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyMessage}>
-            No activity records found for the selected period.
+            {error ?? 'No activity records found for the selected period.'}
           </Text>
         </View>
       ) : (

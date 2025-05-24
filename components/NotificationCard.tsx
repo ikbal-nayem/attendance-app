@@ -49,7 +49,7 @@ export default function NotificationCard({
   return (
     <AnimatedRenderView
       index={index}
-      style={[styles.notificationItem, isUnread && styles.unreadNotification]}
+      style={[styles.notificationItem, isUnread ? styles.unreadNotification : styles.readNotification]}
     >
       <TouchableOpacity
         activeOpacity={0.8}
@@ -88,6 +88,10 @@ const styles = StyleSheet.create({
     borderLeftWidth: 4,
     borderLeftColor: Colors.light.warning,
     backgroundColor: `${Colors.light.warning}10`,
+  },
+  readNotification: {
+    borderWidth: 1,
+    borderColor: Colors.light.border,
   },
   notificationTouchable: {
     padding: Layout.spacing.m,
