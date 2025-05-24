@@ -143,16 +143,10 @@ export const useNotificationHistoryList = (
           sToDate: generateRequestDate(sToDate),
         })
       )
-      .then(async (response) => {
-        if (response.data?.messageCode === '1') {
-          showToast({
-            type: 'error',
-            message: response.data?.messageDesc,
-          });
-          setError(response.data?.messageDesc);
-          return;
-        }
-        setNotificationHistory(response.data || []);
+      .then((response) => {
+        response.data?.messageCode === '0'
+          ? setNotificationHistory(response?.data?.detailsList || [])
+          : setError(response?.data?.messageDesc);
       })
       .catch((err) => {
         console.log(err);

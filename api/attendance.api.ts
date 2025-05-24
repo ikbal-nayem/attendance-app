@@ -116,7 +116,11 @@ export const useAttendanceHistoryList = (
 
     axiosIns
       .post(API_CONSTANTS.ATTENDANCE.HISTORY_LIST, formData)
-      .then((response) => setAttendanceHistoryList(response?.data?.detailsList || []))
+      .then((response) => {
+        response.data?.messageCode === '0'
+          ? setAttendanceHistoryList(response?.data?.detailsList || [])
+          : setError(response?.data?.messageDesc);
+      })
       .catch((err) => {
         console.log(err);
         setError(err.message);

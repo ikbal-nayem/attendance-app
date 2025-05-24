@@ -1,8 +1,8 @@
 import { API_CONSTANTS } from '@/constants/api';
 import { makeFormData } from '@/utils/form-actions';
 import { useEffect, useState } from 'react';
-import { axiosIns } from './config';
 import { Alert } from 'react-native';
+import { axiosIns } from './config';
 
 export interface IActivityHistory {
   serialNo: string;
@@ -112,7 +112,11 @@ export const useActivityHistoryList = (
 
     axiosIns
       .post(API_CONSTANTS.ACTIVITY.HISTORY_LIST, formData)
-      .then((response) => setActivityHistoryList(response?.data?.detailsList || []))
+      .then((response) => {
+        response.data?.messageCode === '0'
+          ? setActivityHistoryList(response?.data?.detailsList || [])
+          : setError(response?.data?.messageDesc);
+      })
       .catch((err) => {
         console.log(err);
         setError(err.message);
