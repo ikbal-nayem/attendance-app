@@ -100,13 +100,13 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         return false;
       }
 
-      if (Platform.OS !== 'web') {
-        const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+      // if (Platform.OS !== 'web') {
+      //   const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
 
-        if (backgroundStatus !== 'granted') {
-          setLocationErrorMsg('Permission for background location was denied');
-        }
-      }
+      //   if (backgroundStatus !== 'granted') {
+      //     setLocationErrorMsg('Permission for background location was denied');
+      //   }
+      // }
 
       setLocationPermission(true);
       return true;
