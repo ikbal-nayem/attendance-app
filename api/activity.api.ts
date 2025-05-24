@@ -1,4 +1,5 @@
 import { API_CONSTANTS } from '@/constants/api';
+import { generateRequestDate } from '@/utils/date-time';
 import { makeFormData } from '@/utils/form-actions';
 import { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
@@ -98,16 +99,18 @@ export const useActivityHistoryList = (
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!startDate || !endDate) return;
+
     const formData = makeFormData({
       sUserID: userId,
       sSessionID: sessionId,
       sCompanyID: companyId,
       sEmployeeCode: employeeCode,
-      sFromDate: startDate?.toISOString().split('T')[0],
-      sToDate: endDate?.toISOString().split('T')[0],
-      sActivityType: activityType,
-      sClient: client,
-      sTerritory: territory,
+      sFromDate: generateRequestDate(startDate),
+      sToDate: generateRequestDate(endDate),
+      sActivityType: activityType || '',
+      sClient: client || '',
+      sTerritory: territory || '',
     });
 
     axiosIns

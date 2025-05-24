@@ -1,5 +1,4 @@
 import { API_CONSTANTS } from '@/constants/api';
-import { useToast } from '@/context/ToastContext';
 import { generateRequestDate } from '@/utils/date-time';
 import { makeFormData } from '@/utils/form-actions';
 import { useEffect, useState } from 'react';
@@ -46,38 +45,6 @@ export const sendNotification = async (data: FormData) => {
     throw err;
   }
 };
-
-// export const useNotificationUnread = (
-//   userId: string,
-//   sessionId: string,
-//   companyId: string,
-//   employeeCode: string
-// ) => {
-//   const [notificationList, setNotificationList] = useState<INotification[]>();
-//   const [isLoading, setIsLoading] = useState(true);
-//   const [error, setError] = useState<string | null>(null);
-
-//   useEffect(() => {
-//     axiosIns
-//       .post(
-//         API_CONSTANTS.NOTIFICATION.LIST,
-//         makeFormData({
-//           sUserID: userId,
-//           sSessionID: sessionId,
-//           sCompanyID: companyId,
-//           sEmployeeCode: employeeCode,
-//         })
-//       )
-//       .then((response) => setNotificationList(response.data || []))
-//       .catch((err) => {
-//         console.log(err);
-//         setError(err.message);
-//       })
-//       .finally(() => setIsLoading(false));
-//   }, [companyId]);
-
-//   return { notificationList, isLoading, error };
-// };
 
 export const markAsRead = async (data: FormData) => {
   try {
@@ -127,7 +94,6 @@ export const useNotificationHistoryList = (
   const [notificationHistoryList, setNotificationHistory] = useState<INotification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { showToast } = useToast();
 
   useEffect(() => {
     if (!sFromDate || !sToDate) return;

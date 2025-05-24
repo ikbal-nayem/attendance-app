@@ -1,5 +1,4 @@
 import { useNotificationHistoryInit, useNotificationHistoryList } from '@/api/notification.api';
-import { ErrorPreview } from '@/components/ErrorPreview';
 import AppHeader from '@/components/Header';
 import NotificationCard from '@/components/NotificationCard';
 import AppStatusBar from '@/components/StatusBar';
@@ -81,7 +80,7 @@ export default function AllNotificationsScreen() {
       setStartDate(parseResponseDate(notificationHistoryData.fromDate));
       setEndDate(parseResponseDate(notificationHistoryData.toDate));
     }
-  }, [notificationHistoryData]);
+  }, [notificationHistoryData?.fromDate, notificationHistoryData?.toDate]);
 
   const handleNotificationPress = (item: INotification) => {
     router.push({ pathname: '/notifications/[id]', params: { id: item?.referenceNo } });

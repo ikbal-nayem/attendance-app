@@ -1,7 +1,9 @@
 import { API_CONSTANTS } from '@/constants/api';
 import { makeFormData } from '@/utils/form-actions';
+import { isNull } from '@/utils/validation';
 import { useEffect, useState } from 'react';
 import { axiosIns } from './config';
+import { generateRequestDate } from '@/utils/date-time';
 
 type AttendanceData = {
   entryTime: string;
@@ -104,14 +106,16 @@ export const useAttendanceHistoryList = (
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!startDate || !endDate) return;
+
     const formData = makeFormData({
       sUserID: userId,
       sSessionID: sessionId,
       sCompanyID: companyId,
       sEmployeeCode: employeeCode,
-      sFromDate: startDate?.toISOString().split('T')[0],
-      sToDate: endDate?.toISOString().split('T')[0],
-      sEntryType: entryType,
+      sFromDate: generateRequestDate(startDate),
+      sToDate: generateRequestDate(endDate),
+      sEntryType: entryType || '',
     });
 
     axiosIns

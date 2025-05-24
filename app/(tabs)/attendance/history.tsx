@@ -67,10 +67,10 @@ export default function AttendanceHistoryScreen() {
 
   useEffect(() => {
     if (attendanceHistoryData) {
-      setStartDate(parseResponseDate(attendanceHistoryData.fromDate));
-      setEndDate(parseResponseDate(attendanceHistoryData.toDate));
+      setStartDate(parseResponseDate(attendanceHistoryData?.fromDate));
+      setEndDate(parseResponseDate(attendanceHistoryData?.toDate));
     }
-  }, [attendanceHistoryData]);
+  }, [attendanceHistoryData?.fromDate, attendanceHistoryData?.toDate]);
 
   const handleItemPress = (item: IAttendanceHistory) => {
     router.push({

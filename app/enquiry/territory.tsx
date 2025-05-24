@@ -112,7 +112,7 @@ export default function ActivityHistoryScreen() {
       setStartDate(parseResponseDate(territoryData.fromDate));
       setEndDate(parseResponseDate(territoryData.toDate));
     }
-  }, [territoryData]);
+  }, [territoryData?.fromDate, territoryData?.toDate]);
 
   const onDateChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     const currentDate = selectedDate || (showDatePicker === 'start' ? startDate : endDate);

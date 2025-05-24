@@ -19,11 +19,14 @@ const defaultContext: NotificationContextType = {
 const NotificationContext = createContext<NotificationContextType>(defaultContext);
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [notifications, setNotifications] = useState<Array<INotification>>([]);
   const { user } = useAuth();
 
   useEffect(() => {
+    if (!user) return;
+
+    setIsLoading(true);
     const getNotifications = async () => {
       axiosIns
         .post(
@@ -39,7 +42,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         .catch((err) => console.log(err))
         .finally(() => setIsLoading(false));
     };
-    // getNotifications();
+    getNotifications();
     const interval = setInterval(getNotifications, 60 * 1000);
 
     return () => {

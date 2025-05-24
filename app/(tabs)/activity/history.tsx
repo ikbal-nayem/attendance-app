@@ -139,7 +139,7 @@ export default function ActivityHistoryScreen() {
       setStartDate(parseResponseDate(activityData.fromDate));
       setEndDate(parseResponseDate(activityData.toDate));
     }
-  }, [activityData]);
+  }, [activityData?.fromDate, activityData?.toDate]);
 
   const handleItemPress = useCallback((item: IActivityHistory) => {
     router.push({
