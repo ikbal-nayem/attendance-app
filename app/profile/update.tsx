@@ -104,7 +104,6 @@ const ProfileUpdateScreen = () => {
               <Input
                 label="Mobile"
                 placeholder="Enter mobile number"
-                readOnly={isLoading}
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
@@ -121,7 +120,6 @@ const ProfileUpdateScreen = () => {
               <Input
                 label="Email"
                 placeholder="Enter email address"
-                readOnly={isLoading}
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
@@ -135,7 +133,7 @@ const ProfileUpdateScreen = () => {
 
           {/* Submit button */}
           <Button
-            title="Save"
+            title="Update"
             icon={<Save color={Colors.dark.text} />}
             iconPosition='right'
             disabled={isLoading}

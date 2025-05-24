@@ -165,7 +165,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (response.data?.messageCode === '0') {
             console.log(response.data);
             // await localData.set('user', response.data);
-            setUser(response.data);
+            // setUser(response.data);
             resolve({ success: true, message: response.data.messageDesc });
           }
           reject(response.data?.messageDesc);
