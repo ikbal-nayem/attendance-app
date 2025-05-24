@@ -59,7 +59,7 @@ const header = () => {
   return (
     <Animated.View style={[styles.logoContainer, logoAnimation]}>
       <Image source={require('../../assets/images/logo.png')} style={styles.logoImage} />
-      <Text style={styles.logoText}>Supervisor/Manager Activity Tracking</Text>
+      <Text style={styles.logoText}>Supervisor Activity Tracking</Text>
     </Animated.View>
   );
 };
@@ -147,7 +147,7 @@ export default function LoginScreen() {
       <ScrollView keyboardShouldPersistTaps="handled">
         <Animated.View style={[styles.cardContainer, cardAnimation]}>
           <Card style={styles.card}>
-            <Text style={styles.title}>Welcome Back</Text>
+            {/* <Text style={styles.title}>Welcome Back</Text> */}
             <Text style={styles.subtitle}>Sign in to your account</Text>
 
             <Controller
@@ -241,13 +241,13 @@ const styles = StyleSheet.create({
   card: {
     margin: Layout.spacing.m,
   },
-  title: {
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 24,
-    color: Colors.light.text,
-    marginBottom: Layout.spacing.xs,
-    textAlign: 'center',
-  },
+  // title: {
+  //   fontFamily: 'Inter-SemiBold',
+  //   fontSize: 24,
+  //   color: Colors.light.text,
+  //   marginBottom: Layout.spacing.xs,
+  //   textAlign: 'center',
+  // },
   subtitle: {
     fontFamily: 'Inter-Regular',
     fontSize: 16,

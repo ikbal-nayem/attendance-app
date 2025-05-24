@@ -138,7 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const verifyOtp = async (otp: string): Promise<{ success: boolean; message: string }> => {
     setIsLoading(true);
     try {
-      tempUserData?.append('sInfoOPT', otp);
+      tempUserData?.set('sInfoOPT', otp);
       const response = await axiosIns.post(API_CONSTANTS.AUTH.REGISTER_SUBMIT, tempUserData);
       if (response.data?.messageCode === '0') {
         setTempUserData(null);

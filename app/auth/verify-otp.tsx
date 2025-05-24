@@ -11,7 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
 import { MailCheck } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, set, useForm } from 'react-hook-form';
 import { Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { z } from 'zod';
@@ -95,7 +95,6 @@ export default function VerifyOTPScreen() {
   const onSubmit = async (data: FormData) => {
     Keyboard.dismiss();
     setApiError('');
-    console.log(data)
     const res = await verifyOtp(data.otp);
 
     if (res?.success === true) {
@@ -136,6 +135,7 @@ export default function VerifyOTPScreen() {
                   onChangeText={(text) => {
                     const sanitizedText = text.replace(/[^0-9]/g, '').substring(0, OTP_LENGTH);
                     onChange(sanitizedText);
+                    setApiError('');
                   }}
                   keyboardType="number-pad"
                   maxLength={OTP_LENGTH}
